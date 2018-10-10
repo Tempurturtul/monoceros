@@ -44,7 +44,7 @@ git branch --list
 # Switch to the branch to update
 git checkout my-branch
 # Pull in changes from the master branch (will fail if there are conflicts)
-git pull origin/master
+git pull origin master
 ```
 
 **Commit (save) changes:**
