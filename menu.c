@@ -52,18 +52,22 @@ void dispScores() {
 
 	char *title = ""
 		"RANK  SCORE    NAME      \n";
-	char *scores = ""
-		"1ST   9999999  NAGATE    \n"
+	char *first = ""
+		"1ST   9999999  NAGATE    \n";
+	char *rest = ""
 		"2ND   9999999  NAGATE    \n"
 		"3RD   9999999  NAGATE    \n"
 		"4TH   9999999  NAGATE    \n"
 		"5TH   0742400  HOSHIJIRO \n"
 		"6TH   0239115  IZANA     \n";
 
-	wattron(scoresW, COLOR_PAIR(3));
+	wattron(scoresW, COLOR_PAIR(4));
 	mvwprintw(scoresW, 0, 0, title);
+	wattroff(scoresW, COLOR_PAIR(4));
+	wattron(scoresW, COLOR_PAIR(3));
+	mvwprintw(scoresW, 2, 0, first);
 	wattroff(scoresW, COLOR_PAIR(3));
-	mvwprintw(scoresW, 2, 0, scores);
+	mvwprintw(scoresW, 3, 0, rest);
 	mvwprintw(w, maxY-1, 0, "press (q) to quit");
 
 	wrefresh(w);
@@ -88,30 +92,23 @@ void loadingScreen(int startUnixtime) {
 
 	char *loadingText;
 
-	// Uncomment while-loop and time updates to preview an 8 second loading screen.
+	switch ((currentUnixtime - startUnixtime) % 4) {
+		case 0:
+			loadingText = "loading   ";
+			break;
+		case 1:
+			loadingText = "loading.  ";
+			break;
+		case 2:
+			loadingText = "loading.. ";
+			break;
+		default:
+			loadingText = "loading...";
+			break;
+	}
 
-	// startUnixtime = (int)time(NULL);
-	// while (currentUnixtime - startUnixtime < 8) {
-		switch ((currentUnixtime - startUnixtime) % 4) {
-			case 0:
-				loadingText = "loading   ";
-				break;
-			case 1:
-				loadingText = "loading.  ";
-				break;
-			case 2:
-				loadingText = "loading.. ";
-				break;
-			case 3:
-				loadingText = "loading...";
-				break;
-		}
-
-		mvwprintw(w, maxY/3, maxX/2 - strlen(loadingText)/2, loadingText);
-		wrefresh(w);
-
-	// 	currentUnixtime = (int)time(NULL);
-	// }
+	mvwprintw(w, maxY/3, maxX/2 - strlen(loadingText)/2, loadingText);
+	wrefresh(w);
 
 	delwin(w);
 }
