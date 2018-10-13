@@ -68,15 +68,12 @@ void dispScores() {
 	mvwprintw(scoresW, 2, 0, first);
 	wattroff(scoresW, COLOR_PAIR(3));
 	mvwprintw(scoresW, 3, 0, rest);
-	mvwprintw(w, maxY-1, 0, "press (q) to quit");
 
 	wrefresh(w);
 	wrefresh(scoresW);
 
-	char c = ' ';
-	while (c != 'q') {
-		c = wgetch(w);
-	}
+	// Wait for any input.
+	wgetch(w);
 
 	delwin(scoresW);
 	delwin(w);
