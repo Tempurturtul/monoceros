@@ -40,15 +40,28 @@ void dispScores() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
-	WINDOW *scoresW = newwin(maxY - 2, 15, 2, maxX/2 - 15/2);
+
+	WINDOW *scoresW = newwin(maxY - 2, 25, 2, maxX/2 - 25/2);
+
+	char *title = ""
+		"RANK  SCORE    NAME      \n";
+	char *scores = ""
+		"1ST   9999999  NAGATE    \n"
+		"2ND   9999999  NAGATE    \n"
+		"3RD   9999999  NAGATE    \n"
+		"4TH   9999999  NAGATE    \n"
+		"5TH   0742400  HOSHIJIRO \n"
+		"6TH   0239115  IZANA     \n";
 
 	mvwprintw(w, maxY-1, 0, "press (q) to quit");
-	mvwprintw(scoresW, 0, 0, "  High Scores  \n===============\n\nNAGATE  9999999\nNAGATE  9999999\nNAGATE  9999999\nNAGATE  9999999\nHOSHIJ  0742400\nIZANA   0239115");
+	mvwprintw(scoresW, 0, 0, title);
+	mvwprintw(scoresW, 2, 0, scores);
+
+	wrefresh(w);
+	wrefresh(scoresW);
 
 	char c = ' ';
 	while (c != 'q') {
-		wrefresh(w);
-		wrefresh(scoresW);
 		c = wgetch(w);
 	}
 
