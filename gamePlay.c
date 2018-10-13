@@ -1,6 +1,6 @@
 /*******************************************************************************************
-** Author: Chris Spravka
-** Date:  09 OCT 2018
+** Authors: Chris Spravka, Matthew Feidt
+** Date:  13 OCT 2018
 ** Description: gamePlay implementation file
 
 NOTES
