@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include <string.h>
-#include <time.h>
 
 #include "menu.h"
 
@@ -79,17 +78,15 @@ void dispScores() {
 	delwin(w);
 }
 
-void loadingScreen(int startUnixtime) {
+void loadingScreen(int secondsLoading) {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
 	wattron(w, A_BOLD | A_DIM);
 
-	int currentUnixtime = (int)time(NULL);
-
 	char *loadingText;
 
-	switch ((currentUnixtime - startUnixtime) % 4) {
+	switch (secondsLoading % 4) {
 		case 0:
 			loadingText = "loading   ";
 			break;
