@@ -36,13 +36,6 @@ int mainMenu() {
 	return (input-48);
 }
 
-int centerText(WINDOW* window, const char * text) {
-	int maxX, maxY;
-	getmaxyx(window, maxY, maxX);
-	
-	return (maxX/2 - strlen(text));
-}
-
 void dispScores() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);

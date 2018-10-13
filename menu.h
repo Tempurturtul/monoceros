@@ -13,6 +13,4 @@ int mainMenu();
 void dispScores();
 void loadingScreen();
 
-int centerText(WINDOW* window, const char * text);
-
 #endif

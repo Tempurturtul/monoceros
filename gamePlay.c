@@ -17,7 +17,6 @@ NOTES
 #include <math.h>
 
 #include "gamePlay.h"
-#include "menu.h"
 #include "sprites.h"
 #include "effects.h"
 
@@ -27,23 +26,23 @@ NOTES
 
 
 void playGame() {
+	// Create windows.
 	int maxX, maxY;
 	int titleSize = 3;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *title = newwin(titleSize, maxX, 0, 0);
 	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
 
+	// Capture arrow key input.
 	keypad(action, TRUE);
 
-	const char * gameStr = "playing this awesome game!";
-	int startX = centerText(action, gameStr);
 	int playFlag = 1;
 	int i=0;
 	float time=0, timeLast=0; 	// ugh do you really want this?  it's good to decouple the game updatePlayer
 								// rate from the output refresh rate, but this could get rough fast - but might
 								// help in synchronizing a laggy network connection
 					
-	int inputChar, inputCharWas;
+	int inputChar;
 	
 	// init level / game (eventually get this in it's own function)
 	struct spriteList allSprites;
@@ -72,27 +71,23 @@ void playGame() {
 			playFlag =0;
 		}
 		else if (inputChar == KEY_UP) {
-			inputCharWas = inputChar;
 			//allSprites.spriteArr[0]->yLoc += -1;
 			allSprites.spriteArr[0]->yAcc += -2*(1e6)/REFRESH_RATE;
 			allEffects.effectArr[2]->start = time;
 			allEffects.effectArr[3]->start = time;
 		}
 		else if (inputChar == KEY_LEFT) {
-			inputCharWas = inputChar;
 			//allSprites.spriteArr[0]->xLoc += -10;
 			allSprites.spriteArr[0]->xAcc += -2*(1e6)/REFRESH_RATE;
 			allEffects.effectArr[1]->start = time;
 			}
 		else if (inputChar == KEY_DOWN) {
-			inputCharWas = inputChar;
 			//allSprites.spriteArr[0]->yLoc += 1;
 			allSprites.spriteArr[0]->yAcc += 2*(1e6)/REFRESH_RATE;
 			allEffects.effectArr[4]->start = time;
 			allEffects.effectArr[5]->start = time;
 		}
 		else if (inputChar == KEY_RIGHT) {
-			inputCharWas = inputChar;
 			//allSprites.spriteArr[0]->xLoc += 1;
 			allSprites.spriteArr[0]->xAcc += 2*(1e6)/REFRESH_RATE;
 			allEffects.effectArr[0]->start = time;
@@ -128,11 +123,10 @@ void playGame() {
 			printEffect(action, allEffects.effectArr[i], &allSprites, time);
 		}
 		// i needed this for debugging
-		// mvwprintw(title, 0, 1, "xLoc:%f",allSprites.spriteArr[0]->xLoc);
-		// mvwprintw(title, 1, 1, "xVel:%f",allSprites.spriteArr[0]->xVel);
-		// mvwprintw(title, 2, 1, "xAcc:%f",allSprites.spriteArr[0]->xAcc);
-		// mvwprintw(title, 1, startX, "time: %f", time);
-		mvwprintw(title, 0, 1, "input char was: %c", inputCharWas);
+		mvwprintw(title, 0, 1, "xLoc:%f",allSprites.spriteArr[0]->xLoc);
+		mvwprintw(title, 1, 1, "xVel:%f",allSprites.spriteArr[0]->xVel);
+		mvwprintw(title, 2, 1, "xAcc:%f",allSprites.spriteArr[0]->xAcc);
+		mvwprintw(title, 0, maxX - 15, "time: %f", time);
 		wrefresh(title);
 		wrefresh(action);
 		
@@ -178,7 +172,7 @@ void waitQueue() {
 	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
 
 	const char * gameStr = "waiting for friends!!";
-	int startX = centerText(action, gameStr);
+	int startX = maxX/2 - strlen(gameStr)/2;
 	
 	wclear(title);
 	wclear(action);
