@@ -14,7 +14,7 @@ int mainMenu() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
-	WINDOW *menuW = newwin(maxY - 4, 27, 4, maxX/2 - 27/2);
+	WINDOW *menuW = newwin(maxY - 4, 27, 4, maxX/2 - 1 - 27/2);
 	wattron(menuW, A_BOLD | A_DIM);
 
 	const char *menuStr = ""
@@ -45,7 +45,7 @@ void dispScores() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
-	WINDOW *scoresW = newwin(maxY - 2, 26, 2, maxX/2 - 26/2);
+	WINDOW *scoresW = newwin(maxY - 2, 26, 2, maxX/2 - 1 - 26/2);
 	wattron(w, A_BOLD | A_DIM);
 	wattron(scoresW, A_BOLD | A_DIM);
 
@@ -102,7 +102,7 @@ void loadingScreen(const char *text, int secondsLoading) {
 			break;
 	}
 
-	mvwprintw(w, maxY/3, maxX/2 - strlen(text)/2, loadingText);
+	mvwprintw(w, maxY/2 - 1, maxX/2 - strlen(text)/2 - 1, loadingText);
 	wrefresh(w);
 
 	free(loadingText);
