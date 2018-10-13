@@ -10,6 +10,7 @@ NOTES
 //#include <stdlib.h>
 #include <unistd.h>
 #include <ncurses.h>
+#include <time.h>
 
 #include "menu.h"
 #include "gamePlay.h"
@@ -33,9 +34,12 @@ int main(int argc, char *argv[]) {
 			case 3:
 				dispScores();
 				break;
+			case 5:
+				loadingScreen(0);
+				break;
 		}
 
-		menuChoice = getMenu();
+		menuChoice = mainMenu();
 	}
 
 	endCurses();
