@@ -23,13 +23,13 @@ git status
 **Switch to a new branch:**
 
 ```sh
-git branch my-branch
+git branch -b my-branch
 ```
 
 **Switch to an existing branch:**
 
 ```sh
-git checkout -b my-branch
+git checkout my-branch
 ```
 
 **List branches:**
