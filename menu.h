@@ -11,6 +11,6 @@
 
 int mainMenu();
 void dispScores();
-void loadingScreen();
+void loadingScreen(int startUnixtime);
 
 #endif
