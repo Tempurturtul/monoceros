@@ -33,6 +33,8 @@ void playGame() {
 	WINDOW *title = newwin(titleSize, maxX, 0, 0);
 	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
 
+	keypad(action, TRUE);
+
 	const char * gameStr = "playing this awesome game!";
 	int startX = centerText(action, gameStr);
 	int playFlag = 1;
@@ -41,7 +43,7 @@ void playGame() {
 								// rate from the output refresh rate, but this could get rough fast - but might
 								// help in synchronizing a laggy network connection
 					
-	int inputChar;
+	int inputChar, inputCharWas;
 	
 	// init level / game (eventually get this in it's own function)
 	struct spriteList allSprites;
@@ -70,23 +72,27 @@ void playGame() {
 			playFlag =0;
 		}
 		else if (inputChar == KEY_UP) {
+			inputCharWas = inputChar;
 			//allSprites.spriteArr[0]->yLoc += -1;
 			allSprites.spriteArr[0]->yAcc += -2*(1e6)/REFRESH_RATE;
 			allEffects.effectArr[2]->start = time;
 			allEffects.effectArr[3]->start = time;
 		}
 		else if (inputChar == KEY_LEFT) {
+			inputCharWas = inputChar;
 			//allSprites.spriteArr[0]->xLoc += -10;
 			allSprites.spriteArr[0]->xAcc += -2*(1e6)/REFRESH_RATE;
 			allEffects.effectArr[1]->start = time;
 			}
 		else if (inputChar == KEY_DOWN) {
+			inputCharWas = inputChar;
 			//allSprites.spriteArr[0]->yLoc += 1;
 			allSprites.spriteArr[0]->yAcc += 2*(1e6)/REFRESH_RATE;
 			allEffects.effectArr[4]->start = time;
 			allEffects.effectArr[5]->start = time;
 		}
 		else if (inputChar == KEY_RIGHT) {
+			inputCharWas = inputChar;
 			//allSprites.spriteArr[0]->xLoc += 1;
 			allSprites.spriteArr[0]->xAcc += 2*(1e6)/REFRESH_RATE;
 			allEffects.effectArr[0]->start = time;
@@ -122,10 +128,11 @@ void playGame() {
 			printEffect(action, allEffects.effectArr[i], &allSprites, time);
 		}
 		// i needed this for debugging
-		mvwprintw(title, 0, 1, "xLoc:%f",allSprites.spriteArr[0]->xLoc);
-		mvwprintw(title, 1, 1, "xVel:%f",allSprites.spriteArr[0]->xVel);
-		mvwprintw(title, 2, 1, "xAcc:%f",allSprites.spriteArr[0]->xAcc);
-		mvwprintw(title, 1, startX, "time: %f", time);
+		// mvwprintw(title, 0, 1, "xLoc:%f",allSprites.spriteArr[0]->xLoc);
+		// mvwprintw(title, 1, 1, "xVel:%f",allSprites.spriteArr[0]->xVel);
+		// mvwprintw(title, 2, 1, "xAcc:%f",allSprites.spriteArr[0]->xAcc);
+		// mvwprintw(title, 1, startX, "time: %f", time);
+		mvwprintw(title, 0, 1, "input char was: %c", inputCharWas);
 		wrefresh(title);
 		wrefresh(action);
 		
