@@ -47,9 +47,24 @@ int main(int argc, char *argv[]) {
 void startCurses() {
 	// Initialize curses.
 	initscr(); 
+
+	// Require color support.
+	if (has_colors() == FALSE) {
+		endwin();
+		printf("Terminal must support color.\n");
+		exit(1);
+	}
+
+	// TODO Use raw() or cbreak() to get unbuffered user input?
+
+	// Don't echo user input.
 	noecho(); 
-	curs_set(FALSE);	// get our maximum window dimensions 
-	start_color();		// init colors
+
+	// Hide the cursor.
+	curs_set(0);
+
+	// Initialize colors.
+	start_color();
 	init_pair(1, COLOR_WHITE, COLOR_BLACK);
 	init_pair(2, COLOR_RED, COLOR_BLACK);
 	init_pair(3, COLOR_YELLOW, COLOR_BLACK);
