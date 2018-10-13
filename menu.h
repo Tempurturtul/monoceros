@@ -9,9 +9,10 @@
 #include <stdlib.h>
 #include <ncurses.h>
 
-int getMenu();
+int mainMenu();
 void dispScores();
+void loadingScreen();
+
 int centerText(WINDOW* window, const char * text);
-int needInput(WINDOW * window, char * chInput_in);
 
 #endif
