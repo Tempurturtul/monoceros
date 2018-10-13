@@ -171,7 +171,7 @@ void waitQueue() {
 
 	// Timeout after 6 seconds.
 	while (now - start < 6) {
-		loadingScreen(now - start);
+		loadingScreen("waiting for players", now - start);
 
 		sleep(0.5);
 		now = (int)time(NULL);
