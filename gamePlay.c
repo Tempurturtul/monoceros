@@ -17,6 +17,7 @@ NOTES
 #include <math.h>
 
 #include "gamePlay.h"
+#include "menu.h"
 #include "sprites.h"
 #include "effects.h"
 
@@ -165,24 +166,12 @@ void updatePhysics(struct spriteList *local, float dt) {
 }
 
 void waitQueue() {
-	int maxX, maxY;
-	int titleSize = 3;
-	getmaxyx(stdscr, maxY, maxX);
-	WINDOW *title = newwin(titleSize, maxX, 0, 0);
-	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
+	int start = (int)time(NULL);
+	int now = start;
 
-	const char * gameStr = "waiting for friends!!";
-	int startX = maxX/2 - strlen(gameStr)/2;
-	
-	wclear(title);
-	wclear(action);
-	//mvwprintw(title, 0, titleX, gameTitle);
-	mvwprintw(action, 5,startX, gameStr);
-	wrefresh(title);
-	wrefresh(action);	
-	sleep(3);
-
-	delwin(title);
-	delwin(action);
+	// Timeout after 6 seconds.
+	while (now - start < 6) {
+		loadingScreen(start);
+		now = (int)time(NULL);
+	}
 }
-

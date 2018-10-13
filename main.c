@@ -34,9 +34,6 @@ int main(int argc, char *argv[]) {
 			case 3:
 				dispScores();
 				break;
-			case 5:
-				loadingScreen(0);
-				break;
 		}
 
 		menuChoice = mainMenu();
