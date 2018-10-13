@@ -7,47 +7,33 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include <string.h>
+
 #include "menu.h"
 
+int getMenu() {
+	int maxX, maxY;
+	getmaxyx(stdscr, maxY, maxX);
+	WINDOW *menu = newwin(maxY, maxX, 0, 0);
 
-int getMenu(WINDOW *title, WINDOW *action) {
-	char chInput=' ';
-	const char * gameTitle = "<insert>AWESOME GAME TITLE";
-	const char * selectionStr = "Press number for selection:\n(1) single player\n(2) dual player\n(3) view high score\n(4) exit";
-	int titleX = centerText(title, gameTitle);
-	keypad(action, TRUE);
-//	keypad(title, TRUE);
+	char chInput = ' ';
+	const char *selectionStr = "Press number for selection:\n(1) single player\n(2) dual player\n(3) view high score\n(4) exit";
+	keypad(menu, TRUE);
 
+	wclear(menu);
 
-	//	wclear(stdscr);
-	wclear(title);
-	wclear(action);
+	mvwprintw(menu, 0, 0, selectionStr);
 
-	mvwprintw(title, 0, titleX, gameTitle);
-	mvwprintw(action, 0,0, selectionStr);
+	wrefresh(menu);
 	
-
-//	mvwaddstr(title, 0, centerText(gameTitle), gameTitle);
-//	mvwaddstr(action, 0,0, selections);
-
-	wrefresh(title);
-	wrefresh(action);
-	
-	while (needInput(action, &chInput)) {
-		
-		//	wclear(stdscr);
-		//	wclear(title);
-		//	wclear(action);
-		mvwprintw(title, 0, titleX, gameTitle);
-		mvwprintw(action, 0,0, selectionStr);
-		wrefresh(title);
-		wrefresh(action);
-
+	while (needInput(menu, &chInput)) {
+		mvwprintw(menu, 0, 0, selectionStr);
+		wrefresh(menu);
 	}
-	
+
+	delwin(menu);
+
 	// 48 is the ascii value for 0
 	return (chInput-48);
-	
 }
 
 int centerText(WINDOW* window, const char * text) {
@@ -56,7 +42,6 @@ int centerText(WINDOW* window, const char * text) {
 	
 	return (maxX/2 - strlen(text));
 }
-
 
 int needInput(WINDOW * window, char * chInput_in) {
 	*chInput_in = wgetch(window);
@@ -71,18 +56,18 @@ int needInput(WINDOW * window, char * chInput_in) {
 	return 1;
 }
 
+void dispScores() {
+	int maxX, maxY;
+	getmaxyx(stdscr, maxY, maxX);
+	WINDOW *scores = newwin(maxY, maxX, 0, 0);
 
-
-
-void dispScores(WINDOW * title, WINDOW * action) {
 	const char * gameStr = "showing those high scores!";
-	int startX = centerText(action, gameStr);
-	
-	wclear(title);
-	wclear(action);
-	//mvwprintw(title, 0, titleX, gameTitle);
-	mvwprintw(action, 5,startX, gameStr);
-	wrefresh(title);
-	wrefresh(action);	
-	sleep(3);	
+	int startX = centerText(scores, gameStr);
+
+	wclear(scores);
+	mvwprintw(scores, 5,startX, gameStr);
+	wrefresh(scores);
+	sleep(3);
+
+	delwin(scores);
 }

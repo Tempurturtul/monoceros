@@ -17,7 +17,7 @@
 
 void updatePhysics(struct spriteList *local, float dt);
 
-void playGame(WINDOW*, WINDOW*);
-void waitQueue(WINDOW*, WINDOW*);
+void playGame();
+void waitQueue();
 
 #endif

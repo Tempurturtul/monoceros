@@ -26,7 +26,13 @@ NOTES
 #define REFRESH_RATE 50000
 
 
-void playGame(WINDOW * title, WINDOW * action) {
+void playGame() {
+	int maxX, maxY;
+	int titleSize = 3;
+	getmaxyx(stdscr, maxY, maxX);
+	WINDOW *title = newwin(titleSize, maxX, 0, 0);
+	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
+
 	const char * gameStr = "playing this awesome game!";
 	int startX = centerText(action, gameStr);
 	int playFlag = 1;
@@ -136,7 +142,9 @@ void playGame(WINDOW * title, WINDOW * action) {
 	// clean up - do a better job of this!
 	freeSpriteList(&allSprites);
 	freeEffectList(&allEffects);
-	
+
+	delwin(title);
+	delwin(action);
 }
 
 void updatePhysics(struct spriteList *local, float dt) {
@@ -155,9 +163,13 @@ void updatePhysics(struct spriteList *local, float dt) {
 		}
 }
 
+void waitQueue() {
+	int maxX, maxY;
+	int titleSize = 3;
+	getmaxyx(stdscr, maxY, maxX);
+	WINDOW *title = newwin(titleSize, maxX, 0, 0);
+	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
 
-
-void waitQueue(WINDOW * title, WINDOW * action) {
 	const char * gameStr = "waiting for friends!!";
 	int startX = centerText(action, gameStr);
 	
@@ -167,6 +179,9 @@ void waitQueue(WINDOW * title, WINDOW * action) {
 	mvwprintw(action, 5,startX, gameStr);
 	wrefresh(title);
 	wrefresh(action);	
-	sleep(3);	
+	sleep(3);
+
+	delwin(title);
+	delwin(action);
 }
 
