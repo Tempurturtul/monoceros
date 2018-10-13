@@ -11,6 +11,6 @@
 
 int mainMenu();
 void dispScores();
-void loadingScreen(int secondsLoading);
+void loadingScreen(const char *text, int secondsLoading);
 
 #endif

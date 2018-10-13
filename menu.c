@@ -78,31 +78,33 @@ void dispScores() {
 	delwin(w);
 }
 
-void loadingScreen(int secondsLoading) {
+void loadingScreen(const char *text, int secondsLoading) {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
 	wattron(w, A_BOLD | A_DIM);
 
-	char *loadingText;
+	char *loadingText = malloc(sizeof(char) * (strlen(text) + 4));
+	strcpy(loadingText, text);
 
 	switch (secondsLoading % 4) {
 		case 0:
-			loadingText = "loading   ";
+			strcat(loadingText, "   ");
 			break;
 		case 1:
-			loadingText = "loading.  ";
+			strcat(loadingText, ".  ");
 			break;
 		case 2:
-			loadingText = "loading.. ";
+			strcat(loadingText, ".. ");
 			break;
 		default:
-			loadingText = "loading...";
+			strcat(loadingText, "...");
 			break;
 	}
 
-	mvwprintw(w, maxY/3, maxX/2 - strlen(loadingText)/2, loadingText);
+	mvwprintw(w, maxY/3, maxX/2 - strlen(text)/2, loadingText);
 	wrefresh(w);
 
+	free(loadingText);
 	delwin(w);
 }
