@@ -16,8 +16,14 @@ int mainMenu() {
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
 	WINDOW *menuW = newwin(maxY - 4, 27, 4, maxX/2 - 27/2);
+	wattron(menuW, A_BOLD | A_DIM);
 
-	const char *menuStr = "Press number for selection:\n(1) single player\n(2) multiplayer\n(3) high scores\n(4) exit";
+	const char *menuStr = ""
+		"Press number for selection:\n"
+		"(1) single player\n"
+		"(2) multiplayer\n"
+		"(3) high scores\n"
+		"(4) exit";
 
 	mvwprintw(menuW, 0, 0, menuStr);
 
@@ -40,8 +46,9 @@ void dispScores() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
-
-	WINDOW *scoresW = newwin(maxY - 2, 25, 2, maxX/2 - 25/2);
+	WINDOW *scoresW = newwin(maxY - 2, 26, 2, maxX/2 - 26/2);
+	wattron(w, A_BOLD | A_DIM);
+	wattron(scoresW, A_BOLD | A_DIM);
 
 	char *title = ""
 		"RANK  SCORE    NAME      \n";
@@ -53,9 +60,11 @@ void dispScores() {
 		"5TH   0742400  HOSHIJIRO \n"
 		"6TH   0239115  IZANA     \n";
 
-	mvwprintw(w, maxY-1, 0, "press (q) to quit");
+	wattron(scoresW, COLOR_PAIR(3));
 	mvwprintw(scoresW, 0, 0, title);
+	wattroff(scoresW, COLOR_PAIR(3));
 	mvwprintw(scoresW, 2, 0, scores);
+	mvwprintw(w, maxY-1, 0, "press (q) to quit");
 
 	wrefresh(w);
 	wrefresh(scoresW);
@@ -73,6 +82,7 @@ void loadingScreen(int startUnixtime) {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
+	wattron(w, A_BOLD | A_DIM);
 
 	int currentUnixtime = (int)time(NULL);
 
