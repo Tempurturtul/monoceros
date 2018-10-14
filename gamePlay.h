@@ -1,6 +1,6 @@
 /*******************************************************************************************
-** Author: Chris Spravka
-** Date:  09 OCT 2018
+** Authors: Chris Spravka, Matthew Feidt
+** Date:  13 OCT 2018
 ** Description: gameplay header file
 *******************************************************************************************/
 #ifndef GAMEPLAY_H
@@ -17,7 +17,7 @@
 
 void updatePhysics(struct spriteList *local, float dt);
 
-void playGame(WINDOW*, WINDOW*);
-void waitQueue(WINDOW*, WINDOW*);
+void playGame();
+void waitQueue();
 
 #endif

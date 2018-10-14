@@ -1,6 +1,6 @@
 /*******************************************************************************************
-** Author: Chris Spravka
-** Date:  09 OCT 2018
+** Authors: Chris Spravka, Matthew Feidt
+** Date:  13 OCT 2018
 ** Description: gamePlay implementation file
 
 NOTES
@@ -26,9 +26,17 @@ NOTES
 #define REFRESH_RATE 50000
 
 
-void playGame(WINDOW * title, WINDOW * action) {
-	const char * gameStr = "playing this awesome game!";
-	int startX = centerText(action, gameStr);
+void playGame() {
+	// Create windows.
+	int maxX, maxY;
+	int titleSize = 3;
+	getmaxyx(stdscr, maxY, maxX);
+	WINDOW *title = newwin(titleSize, maxX, 0, 0);
+	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
+
+	// Capture arrow key input.
+	keypad(action, TRUE);
+
 	int playFlag = 1;
 	int i=0;
 	float time=0, timeLast=0; 	// ugh do you really want this?  it's good to decouple the game updatePlayer
@@ -119,7 +127,7 @@ void playGame(WINDOW * title, WINDOW * action) {
 		mvwprintw(title, 0, 1, "xLoc:%f",allSprites.spriteArr[0]->xLoc);
 		mvwprintw(title, 1, 1, "xVel:%f",allSprites.spriteArr[0]->xVel);
 		mvwprintw(title, 2, 1, "xAcc:%f",allSprites.spriteArr[0]->xAcc);
-		mvwprintw(title, 1, startX, "time: %f", time);
+		mvwprintw(title, 0, maxX - 15, "time: %f", time);
 		wrefresh(title);
 		wrefresh(action);
 		
@@ -136,7 +144,9 @@ void playGame(WINDOW * title, WINDOW * action) {
 	// clean up - do a better job of this!
 	freeSpriteList(&allSprites);
 	freeEffectList(&allEffects);
-	
+
+	delwin(title);
+	delwin(action);
 }
 
 void updatePhysics(struct spriteList *local, float dt) {
@@ -155,18 +165,15 @@ void updatePhysics(struct spriteList *local, float dt) {
 		}
 }
 
+void waitQueue() {
+	int start = (int)time(NULL);
+	int now = start;
 
+	// Timeout after 6 seconds.
+	while (now - start < 6) {
+		loadingScreen("waiting for players", now - start);
 
-void waitQueue(WINDOW * title, WINDOW * action) {
-	const char * gameStr = "waiting for friends!!";
-	int startX = centerText(action, gameStr);
-	
-	wclear(title);
-	wclear(action);
-	//mvwprintw(title, 0, titleX, gameTitle);
-	mvwprintw(action, 5,startX, gameStr);
-	wrefresh(title);
-	wrefresh(action);	
-	sleep(3);	
+		sleep(0.5);
+		now = (int)time(NULL);
+	}
 }
-

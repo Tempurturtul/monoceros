@@ -1,7 +1,7 @@
 #########################################################
 # File: Makefile
 # Description: rudimentary makefile for Monoceros project
-# Author: cspravka
+# Authors: Chris Spravka, Matthew Feidt
 # or just...
 # gcc -o main main.c menu.h menu.c gamePlay.c gamePlay.h sprites.c sprites.h effects.c effects.h -lncurses
 #########################################################
