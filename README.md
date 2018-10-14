@@ -1,6 +1,12 @@
 # Monoceros
 
-## Essential Git Commands
+- [Resources](#resources)
+  - [Essential Git Commands](#essential-git-commands)
+  - [NCURSES](#ncurses)  
+
+## Resources
+
+### Essential Git Commands
 
 **Get this repository for the first time:**
 
@@ -63,3 +69,8 @@ git commit -m "My message describing what these changes do"
 ```sh
 git push
 ```
+
+### NCURSES
+
+[tldp.org/HOWTO/NCURSES-Programming-HOWTO](http://www.tldp.org/HOWTO/NCURSES-Programming-HOWTO/index.html)
+
