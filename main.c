@@ -14,6 +14,7 @@ NOTES
 
 #include "menu.h"
 #include "gamePlay.h"
+#include "sprites.h"
 
 void startCurses();
 void endCurses();
@@ -22,10 +23,16 @@ int main(int argc, char *argv[]) {
 	startCurses();
 
 	int menuChoice = 0;
-
+	// do you want this here? i'm starting to think you do not
+/*	struct library * lib = malloc(sizeof(struct library));
+	struct gameState * state = malloc(sizeof(struct gameState));
+	struct levelData * level = malloc(sizeof(struct levelData));
+	initGame(state, lib, level);
+*/
 	while (menuChoice != 4) {
 		switch (menuChoice) {
 			case 1:
+				//playGame(state, lib, level);
 				playGame();
 				break;
 			case 2:
@@ -69,6 +76,8 @@ void startCurses() {
 	init_pair(2, COLOR_RED, COLOR_BLACK);
 	init_pair(3, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(4, COLOR_CYAN, COLOR_BLACK);
+	init_pair(5, COLOR_BLUE, COLOR_BLACK);
+	init_pair(6, COLOR_GREEN, COLOR_BLUE);
 }
 
 void endCurses() {

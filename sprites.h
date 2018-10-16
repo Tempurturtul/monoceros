@@ -10,35 +10,15 @@
 #include <ncurses.h>
 #include <string.h>
 
-//#include "gamePlay.h"
+#include "interfaces.h"
 
-#define MAX_SPRITES 256
 
-struct sprite {
-	int ID;
-	// x,y location will indicate the top left of the sprite by convention
-	float xLoc;
-	float yLoc;
-	// physics here or it's own struct?
-	float xVel;
-	float yVel;
-	float xAcc;
-	float yAcc;
-	float mass;
-	char disp[256];
-	// color? color by character, probably?
-	// overall size (for collision detection)?
-	// thruster/effects locations?
-};
+void initSprite(struct sprite *inputSprite, int ID, float xLoc, float yLoc);
+void initDispPairSprite(struct sprite *inputSprite, int cpIn, int attrIn, const char *dispIn);
+void initSpriteLibrary(struct spriteList *localList);
+void addSprite(int ID, struct gameState * state, struct library * lib);
 
-struct spriteList {
-	int numSprites;
-	struct sprite *spriteArr[MAX_SPRITES];
-};
-
-void initSprite(struct sprite *inputSprite, int ID, float xLoc, float yLoc, const char * disp);
-void initSpriteList(struct spriteList *localList);
-void printSprite(WINDOW* window, struct sprite* spriteIn);
+void printSprite(WINDOW* window, struct gameState * state);
 void freeSpriteList(struct spriteList *localList);
 
 #endif

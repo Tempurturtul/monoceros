@@ -10,13 +10,15 @@
 #include <ncurses.h>
 #include <string.h>
 
-#include "sprites.h"
-
-#define DISP_SIZE 256
+#include "interfaces.h"
 
 
-void updatePhysics(struct spriteList *local, float dt);
 
+void initGame(struct gameState * state, struct library * lib, struct levelData * level);
+
+void updatePhysics(struct gameState * state);
+
+//void playGame(struct gameState * state, struct library * lib, struct levelData * level);
 void playGame();
 void waitQueue();
 

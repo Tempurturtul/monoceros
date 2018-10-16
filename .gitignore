@@ -3,3 +3,11 @@
 
 # Executables
 main
+main.exe
+
+# my trash files
+mainJunk.c
+junk.exe
+
+# my failures
+*.stackdump
