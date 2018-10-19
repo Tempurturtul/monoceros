@@ -41,32 +41,57 @@ int mainMenu() {
 	return (input-48);
 }
 
-void dispScores() {
+// Arguments must be sorted by score descending and properly aligned with one another.
+// For example, scores[0] and names[0] must be the highest score and corresponding player's name.
+void dispScores(int scores[10], char *names[10]) {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
-	WINDOW *scoresW = newwin(maxY - 2, 26, 2, maxX/2 - 1 - 26/2);
-	wattron(w, A_BOLD | A_DIM);
+
+	int lineLength = 25; // 3 for rank + 3 for spacing, 7 for score + 2 for spacing, 10 for name.
+
+	WINDOW *scoresW = newwin(12, lineLength, 2, maxX/2 - 1 - lineLength/2);
 	wattron(scoresW, A_BOLD | A_DIM);
 
-	char *title = ""
-		"RANK  SCORE    NAME      \n";
-	char *first = ""
-		"1ST   9999999  NAGATE    \n";
-	char *rest = ""
-		"2ND   9999999  NAGATE    \n"
-		"3RD   9999999  NAGATE    \n"
-		"4TH   9999999  NAGATE    \n"
-		"5TH   0742400  HOSHIJIRO \n"
-		"6TH   0239115  IZANA     \n";
-
+	// Title.
 	wattron(scoresW, COLOR_PAIR(4));
-	mvwprintw(scoresW, 0, 0, title);
+	wprintw(scoresW, "RANK  SCORE    NAME");
 	wattroff(scoresW, COLOR_PAIR(4));
-	wattron(scoresW, COLOR_PAIR(3));
-	mvwprintw(scoresW, 2, 0, first);
-	wattroff(scoresW, COLOR_PAIR(3));
-	mvwprintw(scoresW, 3, 0, rest);
+
+	char *ranks[10] = {
+		"1ST",
+		"2ND",
+		"3RD",
+		"4TH",
+		"5TH",
+		"6TH",
+		"7TH",
+		"8TH",
+		"9TH",
+		"10TH"
+	};
+	char line[lineLength+1];
+
+	// First through tenth place.
+	int i;
+	for (i = 0; i < 10; i++) {
+		// Don't display zero score.
+		if (scores[i] == 0) {
+			break;
+		}
+
+		// Rank space-padded to 4 characters, scores zero-padded to 7 digits, and name space-padded to 10 characters and left-aligned.
+		sprintf(line, "%4s  %07d  %-10s", ranks[i], scores[i], names[i]);
+
+		if (i == 0) {
+			// Give first place yellow font color.
+			wattron(scoresW, COLOR_PAIR(3));
+			mvwprintw(scoresW, i+2, 0, line);
+			wattroff(scoresW, COLOR_PAIR(3));
+		} else {
+			mvwprintw(scoresW, i+2, 0, line);
+		}
+	}
 
 	wrefresh(w);
 	wrefresh(scoresW);
@@ -106,5 +131,36 @@ void loadingScreen(const char *text, int secondsLoading) {
 	wrefresh(w);
 
 	free(loadingText);
+	delwin(w);
+}
+
+void deathScreen(int finalScore) {
+	int maxX, maxY;
+	getmaxyx(stdscr, maxY, maxX);
+	WINDOW *w = newwin(maxY, maxX, 0, 0);
+	wattron(w, A_BOLD | A_DIM);
+
+	const char *deathMsg = "YOU DIED x_x";
+	wattron(w, COLOR_PAIR(2)); // Red on black.
+	mvwprintw(w, maxY/2 - 2, maxX/2 - 1 - strlen(deathMsg)/2, deathMsg);
+	wattroff(w, COLOR_PAIR(2));
+
+	const char *scoreMsgPrefix = "Final Score: ";
+	char scoreMsg[strlen(scoreMsgPrefix)+7];
+	sprintf(scoreMsg, "%s%07d", scoreMsgPrefix, finalScore); // Scores displayed as 7 digits with padding zeros (0001234).
+
+	WINDOW *scoreW = newwin(1, strlen(scoreMsg), maxY/2, maxX/2 - 1 - strlen(scoreMsg)/2);
+	wattron(scoreW, A_BOLD | A_DIM);
+
+	wprintw(scoreW, scoreMsg);
+
+	wrefresh(w);
+	wrefresh(scoreW);
+
+	// Wait one second then allow exit with any input.
+	sleep(1);
+	wgetch(w);
+
+	delwin(scoreW);
 	delwin(w);
 }

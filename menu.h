@@ -10,7 +10,8 @@
 #include <ncurses.h>
 
 int mainMenu();
-void dispScores();
+void dispScores(int scores[10], char *names[10]);
 void loadingScreen(const char *text, int secondsLoading);
+void deathScreen(int score);
 
 #endif
