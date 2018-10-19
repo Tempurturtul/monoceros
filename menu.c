@@ -138,29 +138,29 @@ void deathScreen(int finalScore) {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
-	wattron(w, A_BOLD | A_DIM);
 
+	char scoreMsg[13+7+1]; // 13 character prefix including space, 7 digit score, null-terminator.
+	sprintf(scoreMsg, "Final Score: %07d", finalScore);
+
+	WINDOW *msgW = newwin(3, strlen(scoreMsg), maxY/2 - 1 - 3/2, maxX/2 - 1 - strlen(scoreMsg)/2);
+	wattron(msgW, A_BOLD | A_DIM);
+
+	// Print death message with red font.
 	const char *deathMsg = "YOU DIED x_x";
-	wattron(w, COLOR_PAIR(2)); // Red on black.
-	mvwprintw(w, maxY/2 - 2, maxX/2 - 1 - strlen(deathMsg)/2, deathMsg);
-	wattroff(w, COLOR_PAIR(2));
+	wattron(msgW, COLOR_PAIR(2));
+	mvwprintw(msgW, 0, strlen(scoreMsg)/2 - 1 - strlen(deathMsg)/2, deathMsg); // Note score message must be wider than death message.
+	wattroff(msgW, COLOR_PAIR(2));
 
-	const char *scoreMsgPrefix = "Final Score: ";
-	char scoreMsg[strlen(scoreMsgPrefix)+7];
-	sprintf(scoreMsg, "%s%07d", scoreMsgPrefix, finalScore); // Scores displayed as 7 digits with padding zeros (0001234).
-
-	WINDOW *scoreW = newwin(1, strlen(scoreMsg), maxY/2, maxX/2 - 1 - strlen(scoreMsg)/2);
-	wattron(scoreW, A_BOLD | A_DIM);
-
-	wprintw(scoreW, scoreMsg);
+	// Print final score.
+	mvwprintw(msgW, 2, 0, scoreMsg);
 
 	wrefresh(w);
-	wrefresh(scoreW);
+	wrefresh(msgW);
 
 	// Wait one second then allow exit with any input.
 	sleep(1);
 	wgetch(w);
 
-	delwin(scoreW);
+	delwin(msgW);
 	delwin(w);
 }
