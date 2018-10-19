@@ -29,6 +29,10 @@ int main(int argc, char *argv[]) {
 	struct levelData * level = malloc(sizeof(struct levelData));
 	initGame(state, lib, level);
 */
+
+	int scores[10] = { 9999999, 9999999, 9999999, 9999999, 9999999, 6718703, 103580, 0, 0, 0 };
+	char *names[10] = { "NAGATE", "NAGATE", "NAGATE", "NAGATE", "NAGATE", "HOSHIJIRO", "IZANA", "", "", "" };
+
 	while (menuChoice != 4) {
 		switch (menuChoice) {
 			case 1:
@@ -39,7 +43,10 @@ int main(int argc, char *argv[]) {
 				waitQueue();
 				break;
 			case 3:
-				dispScores();
+				dispScores(scores, names);
+				break;
+			case 5:
+				deathScreen(34230);
 				break;
 		}
 
