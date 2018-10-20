@@ -43,7 +43,7 @@ int mainMenu() {
 
 // Arguments must be sorted by score descending and properly aligned with one another.
 // For example, scores[0] and names[0] must be the highest score and corresponding player's name.
-void dispScores(int scores[10], char *names[10]) {
+void dispScores(int scores[10], char names[10][11]) {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
@@ -140,7 +140,7 @@ void loadingScreen(const char *text, int secondsLoading) {
 	delwin(w);
 }
 
-void deathScreen(int finalScore) {
+void deathScreen(int finalScore, char nameBuffer[11]) {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
@@ -148,12 +148,12 @@ void deathScreen(int finalScore) {
 	char scoreMsg[13+7+1]; // 13 character prefix including space, 7 digit score, null-terminator.
 	sprintf(scoreMsg, "Final Score: %07d", finalScore);
 
-	WINDOW *msgW = newwin(3, strlen(scoreMsg), maxY/2 - 1 - 3/2, maxX/2 - 1 - strlen(scoreMsg)/2);
+	WINDOW *msgW = newwin(5, strlen(scoreMsg), maxY/2 - 1 - 5/2, maxX/2 - 1 - strlen(scoreMsg)/2);
 	wattron(msgW, A_BOLD | A_DIM);
 
-	// Print death message with red font.
+	// Print death message.
 	const char *deathMsg = "YOU DIED x_x";
-	wattron(msgW, COLOR_PAIR(2));
+	wattron(msgW, COLOR_PAIR(2)); // Red font.
 	mvwprintw(msgW, 0, strlen(scoreMsg)/2 - 1 - strlen(deathMsg)/2, deathMsg); // Note score message must be wider than death message.
 	wattroff(msgW, COLOR_PAIR(2));
 
@@ -163,8 +163,40 @@ void deathScreen(int finalScore) {
 	wrefresh(w);
 	wrefresh(msgW);
 
-	// Wait one second then allow exit with any input.
-	sleep(1);
+	// Prepare name prompt.
+	char namePrompt[6+10+1]; // "Name: " (6) + input (10) + null terminator (1).
+	// Make sure name buffer contains an empty string.
+	nameBuffer[0] = '\0';
+
+	// Print initial name prompt.
+	sprintf(namePrompt, "Name: %s", nameBuffer);
+	wattron(msgW, A_BLINK);
+	mvwprintw(msgW, 4, strlen(scoreMsg)/2 - 1 - 16/2, namePrompt);
+	wattroff(msgW, A_BLINK);
+	wrefresh(msgW);
+
+	// Wait half a second in case the user is spamming input post-death.
+	sleep(0.5);
+
+	// TODO: Collect input and update name prompt.
+	// keypad(w, TRUE);
+	// char input = ' ';
+	// int chars = 0;
+	// while (input = wgetch(w)) {
+	// 	if (chars > 0 && (input == KEY_ENTER || input == KEY_EXIT)) {
+	// 		break;
+	// 	}
+
+	// 	switch (input) {
+	// 		case KEY_BACKSPACE:
+	// 			if (chars > 0) {
+	// 				nameBuffer[chars-1] = ' ';
+	// 				chars--;
+	// 			}
+	// 			break;
+	// 	}
+	// }
+
 	wgetch(w);
 
 	delwin(msgW);
