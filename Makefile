@@ -3,11 +3,11 @@
 # Description: rudimentary makefile for Monoceros project
 # Authors: Chris Spravka, Matthew Feidt
 # or just...
-# gcc -o main main.c menu.h menu.c gamePlay.c gamePlay.h sprites.c sprites.h effects.c effects.h levels.c levels.h interfaces.h -lncurses
+# gcc -o main main.c menu.h menu.c gamePlay.c gamePlay.h sprites.c sprites.h effects.c effects.h levels.c levels.h interfaces.h -lncurses -lm
 #########################################################
 
 #CFLAGS = -Wall -fpic -coverage -lm -std=c99
-CFLAGS = -lncurses -Wall
+CFLAGS = -lncurses -lm -Wall
 
 default: all
 
