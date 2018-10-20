@@ -50,13 +50,13 @@ void dispScores(int scores[10], char *names[10]) {
 
 	int lineLength = 25; // 3 for rank + 3 for spacing, 7 for score + 2 for spacing, 10 for name.
 
-	WINDOW *scoresW = newwin(12, lineLength, 2, maxX/2 - 1 - lineLength/2);
+	WINDOW *scoresW = newwin(12, lineLength, maxY/2 - 1 - 12/2, maxX/2 - 1 - lineLength/2);
 	wattron(scoresW, A_BOLD | A_DIM);
 
-	// Title.
-	wattron(scoresW, COLOR_PAIR(4));
+	// Header in red.
+	wattron(scoresW, COLOR_PAIR(2));
 	wprintw(scoresW, "RANK  SCORE    NAME");
-	wattroff(scoresW, COLOR_PAIR(4));
+	wattroff(scoresW, COLOR_PAIR(2));
 
 	char *ranks[10] = {
 		"1ST",
@@ -88,7 +88,13 @@ void dispScores(int scores[10], char *names[10]) {
 			wattron(scoresW, COLOR_PAIR(3));
 			mvwprintw(scoresW, i+2, 0, line);
 			wattroff(scoresW, COLOR_PAIR(3));
+		} else if (i < 3) {
+			// Give second and third place cyan font color.
+			wattron(scoresW, COLOR_PAIR(4));
+			mvwprintw(scoresW, i+2, 0, line);
+			wattroff(scoresW, COLOR_PAIR(4));
 		} else {
+			// Remaining places get no special font color.
 			mvwprintw(scoresW, i+2, 0, line);
 		}
 	}
