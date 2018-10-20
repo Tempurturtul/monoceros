@@ -14,7 +14,18 @@
 
 
 void initLevelData(struct levelData * level);
-void procGen(struct gameState * state, struct library * lib, struct levelData * level);
+void procGen(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window);
+void addEnemy(struct gameState * state, struct library * lib, int ID, int AIlevel);
 void freeLevelDisps(struct levelData * level);
+
+void spawnEnemies(struct gameState * state, struct library * lib, struct levelData * level);
+
+void manageSprites(struct gameState * state, struct library * lib, struct levelData * level);
+
+void genOpenSpaceBG(struct gameState * state, struct library * lib);
+
+void initOpenSpaceBG(struct gameState * state, struct library * lib);
+
+int getRand(int, int);
 
 #endif

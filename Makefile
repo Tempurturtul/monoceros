@@ -25,9 +25,12 @@ effects.o: effects.c effects.h interfaces.h
 
 levels.o: levels.c levels.h interfaces.h
 	gcc -c levels.c -g $(CFLAGS)
+	
+ai.o: ai.c ai.h interfaces.h
+	gcc -c ai.c -g $(CFLAGS)
 
-all: menu.o sprites.o gamePlay.o effects.o main.c levels.o interfaces.h
-	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o $(CFLAGS)
+all: menu.o sprites.o gamePlay.o effects.o main.c levels.o ai.o interfaces.h
+	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o ai.o $(CFLAGS)
 
 clean:
 	rm -f *.o main

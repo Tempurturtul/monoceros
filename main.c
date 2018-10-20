@@ -21,14 +21,10 @@ void endCurses();
 
 int main(int argc, char *argv[]) { 
 	startCurses();
+	srand(time(0));
 
 	int menuChoice = 0;
-	// do you want this here? i'm starting to think you do not
-/*	struct library * lib = malloc(sizeof(struct library));
-	struct gameState * state = malloc(sizeof(struct gameState));
-	struct levelData * level = malloc(sizeof(struct levelData));
-	initGame(state, lib, level);
-*/
+
 	while (menuChoice != 4) {
 		switch (menuChoice) {
 			case 1:
