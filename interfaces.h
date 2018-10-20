@@ -14,18 +14,24 @@
 
 
 #define MAX_DISP_SUBSIZE 64
-#define REFRESH_RATE 50000
+//#define REFRESH_RATE 50000
+//#define REFRESH_RATE 125000
+#define REFRESH_RATE 75000
 
-#define MAX_EFFECTS 16
+// this is only so high because you aren't cleaning them out as you go
+#define MAX_EFFECTS 1024
 #define MAX_EFFECT_DISPS 16
 
-#define MAX_SPRITES 32
+#define MAX_SPRITES 1024
 #define MAX_SPRITE_DISPS 16
+#define MAX_SPRITE_EFFECTS 16
 
 #define MAX_LEVEL_DISPS 256
 
+
+/** SPRITES **/
 struct sprite {
-	int ID;
+	int type;		// 0 for player, 1 for enemy ship, 2 for projectile, 3 for non-interacting background
 	// x,y location will indicate the top left of the sprite by convention
 	float xLoc;
 	float yLoc;
@@ -34,12 +40,21 @@ struct sprite {
 	float yVel;
 	float xAcc;
 	float yAcc;
-	float mass;
+	// collision detection, center of mass & radius
+	float xCoM;
+	float yCoM;
+	float radius;
 	// color? color by character, probably?
 	// overall size (for collision detection)?
 	// thruster/effects locations?
 	int numDisps;
 	struct dispPair *dispArr[MAX_SPRITE_DISPS];
+	
+	int effectIDs[MAX_SPRITE_EFFECTS];
+	int numEffects;
+	
+	int markedForDeath;
+	int AI;
 };
 
 struct spriteList {
@@ -47,6 +62,9 @@ struct spriteList {
 	struct sprite *spriteArr[MAX_SPRITES];
 };
 
+
+
+/** EFFECTS **/
 struct effect {
 	int ID;
 	float start;
@@ -61,6 +79,9 @@ struct effect {
 	struct dispPair *dispArr[MAX_EFFECT_DISPS];
 	
 	int parentID;
+	
+	int xSize;
+	int ySize;
 };
 
 struct effectList {
@@ -69,12 +90,19 @@ struct effectList {
 };
 
 
+/** GAME STRUCTURES **/
 struct gameState {
 	struct spriteList * allSprites;
 	struct effectList * allEffects;
 	float time;
 	float timeLast;
 	int score;
+	int deltaKills;
+	float scoreTimeLast;
+	// are we going to need this to adjudicate between the minimum console
+	// size of all participants?
+	int maxX;
+	int maxY;
 };
 
 struct library {

@@ -31,8 +31,28 @@ void initEffect(struct effect *inputEffect, int ID, float ttl,  float xLoc, floa
 	inputEffect->start =-1;
 	
 	inputEffect->numDisps=0;
+	
+	inputEffect->xSize=0;
+	inputEffect->ySize=0;
 
 }
+
+void modEffect(int effectIndex, float start, float xLoc, float yLoc, struct gameState * state) {
+	if (effectIndex == -1) {
+		effectIndex = state->allEffects->numEffects -1;
+	}
+	struct effect *e1 = state->allEffects->effectArr[effectIndex];
+	if (e1->xLoc != -999) {
+		e1->xLoc = xLoc - e1->xSize/2;
+	}
+	if (e1->yLoc != -999) {
+		e1->yLoc = yLoc - e1->ySize/2;
+	}	
+	
+	e1->start = start;
+
+}
+
 void initDispPair(struct effect *inputEffect, int cpIn, int attrIn, const char * dispIn) {
 	// error/length checking?
 	inputEffect->dispArr[inputEffect->numDisps] = malloc(sizeof(struct dispPair));
@@ -40,6 +60,11 @@ void initDispPair(struct effect *inputEffect, int cpIn, int attrIn, const char *
 	inputEffect->dispArr[inputEffect->numDisps]->attr = attrIn;
 	strcpy(inputEffect->dispArr[inputEffect->numDisps]->disp, dispIn);
 	inputEffect->numDisps++;
+}
+
+void setEffectSize(struct effect * effectIn, int x, int y) {
+	effectIn->xSize = x;
+	effectIn->ySize = y;
 }
 
 // instead of this, i think i would like to read these from a file initially or something
@@ -111,6 +136,19 @@ void initEffectLibrary(struct effectList *localList) {
 	initDispPair(dwThrust2, 1, 0, "-\n\n");
 	localList->effectArr[localList->numEffects] = dwThrust2;
 	localList->numEffects++;
+	
+	//ship explosion 1
+	struct effect * shipEx1 = malloc(sizeof(struct effect));
+	shipEx1->parentID = 0;
+	initEffect(shipEx1, 0, 1, -1,-1);					// effect, ID (not used), ttl, x, y
+	initDispPair(shipEx1, 2, 0, "\n\n\n   o   \n\n\n");		// effect, colorPair, attr, char *
+	initDispPair(shipEx1, 3, 0, "\n\n \\*O*/ \n -O*O- \n /*O*\\ \n\n");
+	initDispPair(shipEx1, 1, 0, "\no-+|.o-\n*      '\n.      o\n*^+-|\\o\n");
+	initDispPair(shipEx1, 1, A_DIM, ".......\n.      .\n.      .\n.      .\n.......");
+	setEffectSize(shipEx1, 7, 8);
+	localList->effectArr[localList->numEffects] = shipEx1;
+	localList->numEffects++;
+	
 
 
 	// generate more effects!
@@ -129,58 +167,96 @@ void addEffect(int ID, int parentID, struct gameState * state, struct library * 
 		memcpy(dpTemp, lib->allEffects->effectArr[ID]->dispArr[i], sizeof(struct dispPair));
 		temp->dispArr[i] = dpTemp;
 	}
-	temp->parentID = parentID;
+	temp->parentID = parentID; // this doesn't stay pertinent for long
 	state->allEffects->effectArr[state->allEffects->numEffects] = temp;
+	// goes both ways - > effect->sprite and sprite-> effect, this is needed because how how frequently sprites are 
+	// created and destroyed and index values change
+	state->allSprites->spriteArr[parentID]->effectIDs[state->allSprites->spriteArr[parentID]->numEffects] = state->allEffects->numEffects;
+	state->allSprites->spriteArr[parentID]->numEffects++;
 	state->allEffects->numEffects++;
+
 }
 
 
-
+// rewrote to cycle through sprites first (more robust for timing!)
 void printEffect(WINDOW* window, struct gameState * state) {
-	int effectCount = 0;
-	for (effectCount=0; effectCount < state->allEffects->numEffects; effectCount++) {
-		struct effect * effectIn = state->allEffects->effectArr[effectCount];
-		struct spriteList * localSpriteList = state->allSprites;
-		char tdisp[MAX_DISP_SUBSIZE];
-		// this is just a place holder until you figure out how you want to organize this
-		// you'll probably just loop through based on 'numDisps' or something
-		int dispIndex = 0;
-		if (effectIn->start > 0) { 
-			if  ((state->time-effectIn->start) < effectIn->ttl) {
-				dispIndex = (int)effectIn->numDisps*((state->time-effectIn->start)/effectIn->ttl);
-				//mvwprintw(window,20,20,"disp:%i, dt:%f, ttl:%f", dispIndex, time-effectIn->start, effectIn->ttl);			
-				strcpy(tdisp, effectIn->dispArr[dispIndex]->disp);
-				wcolor_set(window, effectIn->dispArr[dispIndex]->colorPair, NULL);
-				wattron(window, effectIn->dispArr[dispIndex]->attr);
-			}
-			// turn it off and reset it
-			else {
-				strcpy(tdisp, "");
-				effectIn->start = -1;
-				wcolor_set(window, 1, NULL);
-				wattroff(window, effectIn->dispArr[dispIndex]->attr);
-			}
-			// decompose the display string to print through the vertical axis
-			// you can't just you /n in curses because it will start all the back at the front of the line, not
-			// where you started printing
-			int i=0, j=0, n=0;
-			//int dum=0;
-			char temp[256];
-			for (i=0; i<= strlen(tdisp); i++) {
-				// render each line individually, but keep track of where you left off in the sprite->disp with 'n'
-				if (tdisp[i] == '\n' || tdisp[i] == '\0') {
-					memcpy(temp, &(tdisp[n]), (i-n)*sizeof(char));
-					// manually terminate your new string
-					temp[i-n] = '\0';
-					// print to buffer but don't refresh here
-					mvwprintw(window, localSpriteList->spriteArr[effectIn->parentID]->yLoc + effectIn->yLoc+j, localSpriteList->spriteArr[effectIn->parentID]->xLoc + effectIn->xLoc, temp);
-					// this is i+1 to skip the newline character in the next substring
-					n=i+1;
-					j++;
+	int effectCount = 0, spriteCount=0;
+	struct spriteList * localSpriteList = state->allSprites;
+	for (spriteCount=0; spriteCount < localSpriteList->numSprites; spriteCount++) {
+		for (effectCount=0; effectCount < localSpriteList->spriteArr[spriteCount]->numEffects; effectCount++) {
+			struct effect * effectIn = state->allEffects->effectArr[localSpriteList->spriteArr[spriteCount]->effectIDs[effectCount]];
+			char tdisp[MAX_DISP_SUBSIZE];
+			// results based on time
+			int dispIndex = 0;
+			if (effectIn->start > 0) { 
+				if  ((state->time-effectIn->start) < effectIn->ttl) {
+					dispIndex = (int)effectIn->numDisps*((state->time-effectIn->start)/effectIn->ttl);
+					//mvwprintw(window,20,20,"disp:%i, dt:%f, ttl:%f", dispIndex, time-effectIn->start, effectIn->ttl);			
+					strcpy(tdisp, effectIn->dispArr[dispIndex]->disp);
+					wcolor_set(window, effectIn->dispArr[dispIndex]->colorPair, NULL);
+					wattron(window, effectIn->dispArr[dispIndex]->attr);
 				}
+				// turn it off and reset it
+				else {
+					strcpy(tdisp, "");
+					effectIn->start = -1;
+					wcolor_set(window, 1, NULL);
+					wattroff(window, effectIn->dispArr[dispIndex]->attr);
+					// gross
+					if (localSpriteList->spriteArr[spriteCount]->markedForDeath > 0) {
+						localSpriteList->spriteArr[spriteCount]->markedForDeath=-1;
+					}
+				}
+				// decompose the display string to print through the vertical axis
+				// you can't just you /n in curses because it will start all the back at the front of the line, not
+				// where you started printing
+				int i=0, j=0, n=0;
+				//int dum=0;
+				char temp[256];
+				for (i=0; i<= strlen(tdisp); i++) {
+					// render each line individually, but keep track of where you left off in the sprite->disp with 'n'
+					if (tdisp[i] == '\n' || tdisp[i] == '\0') {
+						memcpy(temp, &(tdisp[n]), (i-n)*sizeof(char));
+						// manually terminate your new string
+						temp[i-n] = '\0';
+						// print to buffer but don't refresh here
+						int dx=0;
+						// this little ditty will prevent it from overprinting the spaces, so you don't get 
+						// a big dumb background block around your sprite
+						while (dx < strlen(temp)) {
+							if (temp[dx] != ' ') {
+								mvwprintw(window, localSpriteList->spriteArr[spriteCount]->yLoc + effectIn->yLoc+j, localSpriteList->spriteArr[spriteCount]->xLoc + effectIn->xLoc+(float)dx, "%c", temp[dx]);
+							}
+							dx++;
+						}
+						// this is i+1 to skip the newline character in the next substring
+						n=i+1;
+						j++;
+					}
+				}
+			wattroff(window, effectIn->dispArr[dispIndex]->attr);
 			}
 		}
 	}
+}
+
+// fix me - you need to regularly call this function and look for defunct effects
+// in order to stay under the limit (and manage your memory better)
+// i think you really want a linked-list here, so you don't lose track of folks
+void delEffect(struct gameState * state, int parentIndex) {
+	// fix and clean this up
+	// find the effect
+	struct sprite * spriteIn = state->allSprites->spriteArr[parentIndex];
+	int i,j;
+	for (i=0; i<spriteIn->numEffects; i++) {
+		for (j=0; j<state->allEffects->effectArr[spriteIn->effectIDs[i]]->numDisps; j++) {
+			free(state->allEffects->effectArr[spriteIn->effectIDs[i]]->dispArr[j]);
+		}
+		free(state->allEffects->effectArr[spriteIn->effectIDs[i]]);
+	}
+	// this only works because you are currently killing the last thing you
+	// gave an effect to
+	state->allEffects->numEffects--;
 }
 
 

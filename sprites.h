@@ -17,7 +17,9 @@ void initSprite(struct sprite *inputSprite, int ID, float xLoc, float yLoc);
 void initDispPairSprite(struct sprite *inputSprite, int cpIn, int attrIn, const char *dispIn);
 void initSpriteLibrary(struct spriteList *localList);
 void addSprite(int ID, struct gameState * state, struct library * lib);
-
+void modSprite(int spriteIndex, float xLoc, float yLoc, float dxAcc, float dyAcc, int AI, struct gameState * state);
+void delSprite(struct gameState * state, int index);
+void calcCoM(struct sprite *inputSprite);
 void printSprite(WINDOW* window, struct gameState * state);
 void freeSpriteList(struct spriteList *localList);
 

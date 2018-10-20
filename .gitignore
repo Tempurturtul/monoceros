@@ -7,7 +7,8 @@ main.exe
 
 # my trash files
 mainJunk.c
-junk.exe
+testPrint.c
+*.exe
 
 # my failures
 *.stackdump

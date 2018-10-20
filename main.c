@@ -21,14 +21,9 @@ void endCurses();
 
 int main(int argc, char *argv[]) { 
 	startCurses();
+	srand(time(0));
 
 	int menuChoice = 0;
-	// do you want this here? i'm starting to think you do not
-/*	struct library * lib = malloc(sizeof(struct library));
-	struct gameState * state = malloc(sizeof(struct gameState));
-	struct levelData * level = malloc(sizeof(struct levelData));
-	initGame(state, lib, level);
-*/
 
 	int scores[10] = { 9999999, 9999999, 9999999, 9999999, 9999999, 6718703, 103580, 0, 0, 0 };
 	char *names[10] = { "NAGATE", "NAGATE", "NAGATE", "NAGATE", "NAGATE", "HOSHIJIRO", "IZANA", "", "", "" };
