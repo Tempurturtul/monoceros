@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <ncurses.h>
+#include <arpa/inet.h>
 
 int mainMenu();
 void dispScores();

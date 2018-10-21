@@ -5,7 +5,7 @@
 *******************************************************************************************/
 #include <stdlib.h>
 #include <unistd.h>
-#include <ncurses.h> 
+#include <ncurses.h>
 #include <string.h>
 
 #include "menu.h"
@@ -28,7 +28,7 @@ int mainMenu() {
 
 	wrefresh(w);
 	wrefresh(menuW);
-	
+
 	char input = ' ';
 	while (input == ' ') {
 		input = wgetch(menuW);

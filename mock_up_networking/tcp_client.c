@@ -1,10 +1,19 @@
+/*******************************************************************************************
+** Authors: Chad Erdwins
+** Date:    14 OCT 2018
+** Description: client side code
+*******************************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
-int main () {
+#include "menu.h"
+#include "gamePlay.h"
+
+int client_connect() {
   /* create the socket */
   int network_socket;
   /* specifying TCP protocol here */
@@ -23,7 +32,8 @@ int main () {
 
   /* check for errors in the connection */
   if (connection_status == -1) {
-    printf("There was an error making a connection to the remote socket!\n\n");
+    //printf("There was an error making a connection to the remote socket!\n\n");
+    loadingScreen("There was an error connecting to the server", NULL);
   }
 
   /* this string holds the information we get back from the server */
@@ -32,8 +42,8 @@ int main () {
   recv(network_socket, &server_response, sizeof(server_response), 0);
 
   /* show the user the data we received from the server */
-  printf("The server sent the response: %s\n", server_response);
-
+  //printf("The server sent the response: %s\n", server_response);
+  loadingScreen(server_response, NULL);
   /* close the socket */
   close(network_socket);
 

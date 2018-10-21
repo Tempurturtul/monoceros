@@ -1,13 +1,13 @@
 #########################################################
 # File: Makefile
 # Description: rudimentary makefile for Monoceros project
-# Authors: Chris Spravka, Matthew Feidt
+# Authors: Chris Spravka, Matthew Feidt, Chad Erdwins
 # or just...
-# gcc -o main main.c menu.h menu.c gamePlay.c gamePlay.h sprites.c sprites.h effects.c effects.h levels.c levels.h interfaces.h -lncurses
+# gcc -o main main.c menu.h menu.c gamePlay.c gamePlay.h sprites.c sprites.h effects.c effects.h levels.c levels.h interfaces.h -lncurses -lm
 #########################################################
 
 #CFLAGS = -Wall -fpic -coverage -lm -std=c99
-CFLAGS = -lncurses -Wall
+CFLAGS = -lncurses -Wall -lm #added -lm here to solve compile issue
 
 default: all
 
@@ -16,7 +16,7 @@ menu.o: menu.c menu.h
 
 gamePlay.o: gamePlay.c gamePlay.h interfaces.h
 	gcc -c gamePlay.c -g $(CFLAGS)
-	
+
 sprites.o: sprites.c sprites.h interfaces.h
 	gcc -c sprites.c -g $(CFLAGS)
 
@@ -25,7 +25,7 @@ effects.o: effects.c effects.h interfaces.h
 
 levels.o: levels.c levels.h interfaces.h
 	gcc -c levels.c -g $(CFLAGS)
-	
+
 ai.o: ai.c ai.h interfaces.h
 	gcc -c ai.c -g $(CFLAGS)
 
