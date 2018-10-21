@@ -7,7 +7,7 @@
 #########################################################
 
 #CFLAGS = -Wall -fpic -coverage -lm -std=c99
-CFLAGS = -lncurses -Wall -lm #added -lm here to solve compile issue
+CFLAGS = -lncurses -lm -Wall
 
 default: all
 
