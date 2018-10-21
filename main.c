@@ -19,7 +19,7 @@ NOTES
 void startCurses();
 void endCurses();
 
-int main(int argc, char *argv[]) { 
+int main(int argc, char *argv[]) {
 	startCurses();
 	srand(time(0));
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 
 void startCurses() {
 	// Initialize curses.
-	initscr(); 
+	initscr();
 
 	// Require color support.
 	if (has_colors() == FALSE) {
@@ -73,7 +73,7 @@ void startCurses() {
 	// TODO Use raw() or cbreak() to get unbuffered user input?
 
 	// Don't echo user input.
-	noecho(); 
+	noecho();
 
 	// Hide the cursor.
 	curs_set(0);

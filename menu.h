@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <ncurses.h>
+#include <arpa/inet.h>
 
 // Displays main menu options and returns player number selection.
 int mainMenu();

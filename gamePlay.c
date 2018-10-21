@@ -8,12 +8,15 @@ NOTES
 2. need to determine game state structure and what needs to be passed to clients
 *******************************************************************************************/
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <ncurses.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
 #include <time.h>
-#include <stdio.h>
 #include <math.h>
 
 #include "gamePlay.h"
@@ -24,22 +27,18 @@ NOTES
 
 #include "ai.h"
 
-
-
-
-
 void initGame(struct gameState * state, struct library * lib, struct levelData * level) {
 	// init your library
 	lib->allSprites = malloc(sizeof(struct spriteList));
 	initSpriteLibrary(lib->allSprites);
 	lib->allEffects = malloc(sizeof(struct effectList));
 	initEffectLibrary(lib->allEffects);
-	
+
 	// init state sprites
 	state->allSprites = malloc(sizeof(struct spriteList));
 	state->allSprites->numSprites = 0;
 	addSprite(0, state, lib);
-	
+
 	// init state effects
 	state->allEffects = malloc(sizeof(struct effectList));
 	state->allEffects->numEffects = 0;
@@ -50,10 +49,10 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	addEffect(4, 0, state, lib);
 	addEffect(5, 0, state, lib);
 	addEffect(6, 0, state, lib);
-	
+
 	// init the level
 	initLevelData(level);
-	
+
 	// init state variables
 	state->deltaKills = 0;
 	state->timeLast=-REFRESH_RATE/1e6;
@@ -62,9 +61,9 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
-	
 
-	
+
+
 	usleep(REFRESH_RATE);
 }
 
@@ -74,13 +73,13 @@ void freeGame(struct gameState * state, struct library * lib, struct levelData *
 
 	freeSpriteList(lib->allSprites);
 	freeEffectList(lib->allEffects);
-	
+
 	freeLevelDisps(level);
 
 	free(state);
 	free(lib);
 	free(level);
-	
+
 }
 
 //void playGame(struct gameState * state, struct library * lib, struct levelData * level) {
@@ -107,21 +106,21 @@ void playGame() {
 
 	// init background (only needed for level 1, will fly into other backgrounds)
 	initOpenSpaceBG(state, lib);
-					
+
 	int inputChar;
-	
+
 	// sets the blocking timer for wgetch
 	wtimeout(action, 1);
 
-	// init timing function 
+	// init timing function
 	struct timespec timeHold;
 	clock_gettime(CLOCK_MONOTONIC, &timeHold);
 	float tstart = timeHold.tv_sec + timeHold.tv_nsec / 1e9;
-	
+
 	// main play loop, will modify flag on player death or quit
 	 while (playFlag) {
 		//tstart = clock();
-		
+
 		// getNetUpdates()
 		// need to clean this up and and a switch for single or multiplayer controls
 		// get this into its own function eventually
@@ -130,7 +129,7 @@ void playGame() {
 		if (inputChar == 'q') {
 			playFlag =0;
 		}
-		// FOR PLAYER CONTROLS - consider: 
+		// FOR PLAYER CONTROLS - consider:
 							// limiting total velocity
 							// increasing deltaAcc for counter thrust
 							// applying counter acc at window borders
@@ -157,24 +156,24 @@ void playGame() {
 			state->allSprites->spriteArr[0]->xAcc += 4*(1e6)/REFRESH_RATE;
 			state->allEffects->effectArr[0]->start = state->time;
 		}
-		
+
 		// procGen()
 		procGen(state, lib, level, action);
-		
+
 		// updatePlayer()
-		
+
 		// updateSprites()
 		updateSpriteAI(state);
 		updatePhysics(state);
-		
+
 		// collisionDetection()
 		detectCollision(state, lib, level);
-		
+
 		// calcScore()
-		calcScore(state, level);	
-		
+		calcScore(state, level);
+
 		// draw screen!
-		
+
 		// this all could be done elsewhere i think, make a separate func
 		wclear(title);
 		wclear(action);
@@ -200,7 +199,7 @@ void playGame() {
 		mvwprintw(title, 1, maxX - 15, "SCORE: %i", state->score);
 		wrefresh(title);
 		wrefresh(action);
-		
+
 
 		usleep(REFRESH_RATE);
 		// generate the output game time (and time used for physics)
@@ -208,9 +207,9 @@ void playGame() {
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
 	}
-	
-	
-	
+
+
+
 	// clean up - do a better job of this!
 	freeGame(state, lib, level);
 
@@ -245,7 +244,7 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 	struct sprite * s2;
 	// only check my ship right now
 	for (i=0; i<1; i++) {
-		// only check everyone else if current sprite is a colliding type sprite 
+		// only check everyone else if current sprite is a colliding type sprite
 		s1 = state->allSprites->spriteArr[i];
 		if (s1->type != 3 && s1->markedForDeath == 0) {
 			// cycle through everyone else
@@ -269,7 +268,7 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 							s2->markedForDeath=1;
 							state->deltaKills++;
 						}
-						
+
 					}
 				}
 			}
@@ -287,15 +286,15 @@ float calcDistance(struct sprite * s1, struct sprite * s2) {
 	y1 = s1->yLoc+s1->yCoM;
 	x2 = s2->xLoc+s2->xCoM;
 	y2 = s2->yLoc+s2->yCoM;
-	
+
 	return sqrt( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1)  );
-	
+
 }
 
 int checkOverlap(struct sprite * s1, struct sprite * s2) {
 	struct absLoc s1Loc;
 	struct absLoc s2Loc;
-	
+
 	calcAbsLoc(s1, &s1Loc);
 	calcAbsLoc(s2, &s2Loc);
 	// run through comparing the absolute locations of printing characters
@@ -308,7 +307,7 @@ int checkOverlap(struct sprite * s1, struct sprite * s2) {
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -317,7 +316,7 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc) {
 	int init = -1;
 	memcpy(loc, &init, sizeof(struct absLoc));
 	loc->numChars=0;
-	
+
 	int dispCount;
 	char tdisp[MAX_DISP_SUBSIZE];
 	char temp[MAX_DISP_SUBSIZE];
@@ -374,15 +373,62 @@ void calcScore(struct gameState * state, struct levelData * level) {
 	}
 }
 
-void waitQueue() {
+int waitQueue() {
+	/* create the socket */
+	int network_socket;
+	/* specifying TCP protocol here */
+	network_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+	/* specify the address for the socket */
+	struct sockaddr_in server_address;
+	server_address.sin_family = AF_INET;
+	/* specify port 10005 */
+	server_address.sin_port = htons(2997);
+	/* ip address connection (server_address) */
+	server_address.sin_addr.s_addr = inet_addr("128.193.36.41");
+
+	/* calling the actual connect function here */
+	int connection_status = connect(network_socket, (struct sockaddr *) &server_address, sizeof(server_address));
+
+	/* check for errors in the connection */
 	int start = (int)time(NULL);
 	int now = start;
-
-	// Timeout after 6 seconds.
-	while (now - start < 6) {
-		loadingScreen("waiting for players", now - start);
+	while (now - start < 6 && connection_status == -1) {
+		loadingScreen("There was an error connecting to the server", now - start);
 
 		sleep(0.5);
 		now = (int)time(NULL);
+
 	}
+
+
+	/* this string holds the information we get back from the server */
+	char server_response[256];
+	/* receive data from the server */
+	recv(network_socket, &server_response, sizeof(server_response), 0);
+
+	/* show the user the data we received from the server */
+	//printf("The server sent the response: %s\n", server_response);
+
+	/* close the socket */
+	close(network_socket);
+
+	// Timeout after 6 seconds.
+	while (now - start < 6 && connection_status == 0) {
+		loadingScreen("Now connecting", now - start);
+
+		sleep(0.5);
+		now = (int)time(NULL);
+
+	}
+	start = (int)time(NULL);
+	now = start;
+	while (now - start < 6 && connection_status == 0) {
+		loadingScreen(server_response, now - start);
+
+		sleep(0.5);
+		now = (int)time(NULL);
+
+	}
+	return 0;
 }

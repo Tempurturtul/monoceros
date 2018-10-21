@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 #include "interfaces.h"
 

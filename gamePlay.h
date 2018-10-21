@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <ncurses.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 #include "interfaces.h"
 
@@ -29,6 +30,6 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc);
 //void playGame(struct gameState * state, struct library * lib, struct levelData * level);
 void calcScore(struct gameState * state, struct levelData * level);
 void playGame();
-void waitQueue();
+int waitQueue();
 
 #endif
