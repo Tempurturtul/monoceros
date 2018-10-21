@@ -17,6 +17,7 @@ int mainMenu() {
 	WINDOW *menuW = newwin(maxY - 4, 27, 4, maxX/2 - 1 - 27/2);
 	wattron(menuW, A_BOLD | A_DIM);
 
+	const char *menuTitle = "=== MONOCEROS ===";
 	const char *menuStr = ""
 		"Press number for selection:\n"
 		"(1) single player\n"
@@ -24,15 +25,21 @@ int mainMenu() {
 		"(3) high scores\n"
 		"(4) exit";
 
-	mvwprintw(menuW, 0, 0, menuStr);
+	wattron(menuW, COLOR_PAIR(5));
+	wattroff(menuW, A_DIM);
+	mvwprintw(menuW, 0, 27/2 + 1 - strlen(menuTitle)/2, menuTitle);
+	wattron(menuW, A_DIM);
+	wattroff(menuW, COLOR_PAIR(5));
+
+	mvwprintw(menuW, 2, 0, menuStr);
+	
+	// TODO: Remove when option 5 is removed.
+	mvwprintw(menuW, 9, 0, "(5) preview death screen");
 
 	wrefresh(w);
 	wrefresh(menuW);
-	
-	char input = ' ';
-	while (input == ' ') {
-		input = wgetch(menuW);
-	}
+
+	int input = wgetch(menuW);
 
 	delwin(menuW);
 	delwin(w);
@@ -211,7 +218,6 @@ void deathScreen(int finalScore, char nameBuffer[11]) {
 
 		sprintf(namePrompt, "Name: %s", nameBuffer);
 		mvwprintw(msgW, 4, strlen(scoreMsg)/2 - 1 - 16/2, namePrompt);
-		mvwprintw(msgW, 4, strlen(scoreMsg)-2, "%d", input);
 		wrefresh(msgW);
 	}
 
