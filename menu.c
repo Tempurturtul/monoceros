@@ -178,26 +178,42 @@ void deathScreen(int finalScore, char nameBuffer[11]) {
 	// Wait half a second in case the user is spamming input post-death.
 	sleep(0.5);
 
-	// TODO: Collect input and update name prompt.
-	// keypad(w, TRUE);
-	// char input = ' ';
-	// int chars = 0;
-	// while (input = wgetch(w)) {
-	// 	if (chars > 0 && (input == KEY_ENTER || input == KEY_EXIT)) {
-	// 		break;
-	// 	}
+	keypad(w, TRUE);
+	int input;
+	int chars = 0;
+	bool collectInput = true;
+	while (collectInput) {
+		input = wgetch(w);
 
-	// 	switch (input) {
-	// 		case KEY_BACKSPACE:
-	// 			if (chars > 0) {
-	// 				nameBuffer[chars-1] = ' ';
-	// 				chars--;
-	// 			}
-	// 			break;
-	// 	}
-	// }
+		if (input == '\n' || input == '\r') {
+			// Enter key.
+			if (chars > 0) {
+				collectInput = false;
+			}
+		} else if (input == KEY_BACKSPACE) {
+			// Backspace key.
+			if (chars > 0) {
+				nameBuffer[chars-1] = ' ';
+				chars--;
+			}
+		} else if ((input >= 65 && input <= 90) || (input >= 97 && input <= 122)) {
+			// A-Z or a-z.
+			if (chars < 10) {
+				// Convert lowercase to uppercase.
+				if (input > 90) {
+					input -= 32;
+				}
+				nameBuffer[chars] = input;
+				nameBuffer[chars+1] = '\0';
+				chars++;
+			}
+		}
 
-	wgetch(w);
+		sprintf(namePrompt, "Name: %s", nameBuffer);
+		mvwprintw(msgW, 4, strlen(scoreMsg)/2 - 1 - 16/2, namePrompt);
+		mvwprintw(msgW, 4, strlen(scoreMsg)-2, "%d", input);
+		wrefresh(msgW);
+	}
 
 	delwin(msgW);
 	delwin(w);
