@@ -121,41 +121,18 @@ void playGame() {
 	 while (playFlag) {
 		//tstart = clock();
 
-		// getNetUpdates()
-		// need to clean this up and and a switch for single or multiplayer controls
-		// get this into its own function eventually
-		// coupling effects with events feels klugey this way
-		inputChar = wgetch(action);
-		if (inputChar == 'q') {
-			playFlag =0;
+		// TODO: Add flag for multiplayer / single player.
+		if (false) {
+			// Multiplayer.
+			// inputChar = getNetUpdates(); // TODO: Maybe use a static variable so each time we call this we switch which player's input we get?
+		} else {
+			// Single player.
+			inputChar = wgetch(action);
 		}
-		// FOR PLAYER CONTROLS - consider:
-							// limiting total velocity
-							// increasing deltaAcc for counter thrust
-							// applying counter acc at window borders
-							// limiting limits at window borders
-		else if (inputChar == KEY_UP) {
-			//allSprites.spriteArr[0]->yLoc += -1;
-			state->allSprites->spriteArr[0]->yAcc += -4*(1e6)/REFRESH_RATE;
-			state->allEffects->effectArr[2]->start = state->time;
-			state->allEffects->effectArr[3]->start = state->time;
-		}
-		else if (inputChar == KEY_LEFT) {
-			//allSprites.spriteArr[0]->xLoc += -10;
-			state->allSprites->spriteArr[0]->xAcc += -4*(1e6)/REFRESH_RATE;
-			state->allEffects->effectArr[1]->start = state->time;
-			}
-		else if (inputChar == KEY_DOWN) {
-			//allSprites.spriteArr[0]->yLoc += 1;
-			state->allSprites->spriteArr[0]->yAcc += 4*(1e6)/REFRESH_RATE;
-			state->allEffects->effectArr[4]->start = state->time;
-			state->allEffects->effectArr[5]->start = state->time;
-		}
-		else if (inputChar == KEY_RIGHT) {
-			//allSprites.spriteArr[0]->xLoc += 1;
-			state->allSprites->spriteArr[0]->xAcc += 4*(1e6)/REFRESH_RATE;
-			state->allEffects->effectArr[0]->start = state->time;
-		}
+
+		handleInput(inputChar, &playFlag, state);
+
+		restrictPlaySpace(state);
 
 		// procGen()
 		procGen(state, lib, level, action);
@@ -431,4 +408,101 @@ int waitQueue() {
 
 	}
 	return 0;
+}
+
+void handleInput(int inputChar, int *playFlag, struct gameState *state) {
+	if (inputChar == 'q') {
+		*playFlag = 0;
+	}
+	// FOR PLAYER CONTROLS - consider:
+						// limiting total velocity
+						// increasing deltaAcc for counter thrust
+						// applying counter acc at window borders -- Done
+						// limiting limits at window borders -- Done
+	else if (inputChar == KEY_UP) {
+		//allSprites.spriteArr[0]->yLoc += -1;
+		state->allSprites->spriteArr[0]->yAcc += -4*(1e6)/REFRESH_RATE;
+		state->allEffects->effectArr[2]->start = state->time;
+		state->allEffects->effectArr[3]->start = state->time;
+	}
+	else if (inputChar == KEY_LEFT) {
+		//allSprites.spriteArr[0]->xLoc += -10;
+		state->allSprites->spriteArr[0]->xAcc += -4*(1e6)/REFRESH_RATE;
+		state->allEffects->effectArr[1]->start = state->time;
+		}
+	else if (inputChar == KEY_DOWN) {
+		//allSprites.spriteArr[0]->yLoc += 1;
+		state->allSprites->spriteArr[0]->yAcc += 4*(1e6)/REFRESH_RATE;
+		state->allEffects->effectArr[4]->start = state->time;
+		state->allEffects->effectArr[5]->start = state->time;
+	}
+	else if (inputChar == KEY_RIGHT) {
+		//allSprites.spriteArr[0]->xLoc += 1;
+		state->allSprites->spriteArr[0]->xAcc += 4*(1e6)/REFRESH_RATE;
+		state->allEffects->effectArr[0]->start = state->time;
+	}
+}
+
+void restrictPlaySpace(struct gameState *state) {
+	struct sprite *player = state->allSprites->spriteArr[0];
+
+	// TODO: Determine this based on CoM and radius?
+	int playerHeight = 4;
+	int playerWidth = 24;
+
+	if (player->xLoc <= 0) {
+		// Left border.
+
+		// Ensure the player didn't slip past the boundary.
+		player->xLoc = 0;
+
+		// Only allow positive acceleration / velocity.
+		if (player->xVel < 0) {
+			player->xVel = 0;
+		}
+		if (player->xAcc < 0) {
+			player->xAcc = 0;
+		}
+	} else if (player->xLoc + playerWidth >= state->maxX) {
+		// Right border.
+
+		// Ensure the player didn't slip past the boundary.
+		player->xLoc = state->maxX - playerWidth;
+
+		// Only allow negative acceleration / velocity.
+		if (player->xVel > 0) {
+			player->xVel = 0;
+		}
+		if (player->xAcc > 0) {
+			player->xAcc = 0;
+		}
+	}
+	
+	if (player->yLoc <= 0) {
+		// Top border.
+
+		// Ensure the player didn't slip past the boundary.
+		player->yLoc = 0;
+		
+		// Only allow positive acceleration / velocity.
+		if (player->yVel < 0) {
+			player->yVel = 0;
+		}
+		if (player->yAcc < 0) {
+			player->yAcc = 0;
+		}
+	} else if (player->yLoc + playerHeight >= state->maxY) {
+		// Bottom border.
+
+		// Ensure the player didn't slip past the boundary.
+		player->yLoc = state->maxY - playerHeight;
+		
+		// Only allow negative acceleration / velocity.
+		if (player->yVel > 0) {
+			player->yVel = 0;
+		}
+		if (player->yAcc > 0) {
+			player->yAcc = 0;
+		}
+	}
 }

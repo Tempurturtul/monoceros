@@ -31,5 +31,7 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc);
 void calcScore(struct gameState * state, struct levelData * level);
 void playGame();
 int waitQueue();
+void handleInput(int inputChar, int *playFlag, struct gameState *state);
+void restrictPlaySpace(struct gameState *state);
 
 #endif
