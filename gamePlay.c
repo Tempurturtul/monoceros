@@ -497,7 +497,7 @@ void restrictPlaySpace(struct gameState *state) {
 		// Ensure the player didn't slip past the boundary.
 		player->yLoc = state->maxY - playerHeight;
 		
-		//	Only allow negative acceleration / velocity.
+		// Only allow negative acceleration / velocity.
 		if (player->yVel > 0) {
 			player->yVel = 0;
 		}
