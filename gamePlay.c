@@ -368,16 +368,10 @@ int waitQueue() {
 	int connection_status = connect(network_socket, (struct sockaddr *) &server_address, sizeof(server_address));
 
 	/* check for errors in the connection */
-	int start = (int)time(NULL);
-	int now = start;
-	while (now - start < 6 && connection_status == -1) {
-		loadingScreen("There was an error connecting to the server", now - start);
-
-		sleep(0.5);
-		now = (int)time(NULL);
-
+	if (connection_status == -1) {
+		messageScreen("There was an error connecting to the server.");
+		getch();
 	}
-
 
 	/* this string holds the information we get back from the server */
 	char server_response[256];
@@ -391,22 +385,22 @@ int waitQueue() {
 	close(network_socket);
 
 	// Timeout after 6 seconds.
+	int start = (int)time(NULL);
+	int now = start;
+	messageScreen("Now connecting...");
 	while (now - start < 6 && connection_status == 0) {
-		loadingScreen("Now connecting", now - start);
-
 		sleep(0.5);
 		now = (int)time(NULL);
-
 	}
+
 	start = (int)time(NULL);
 	now = start;
+	messageScreen(server_response);
 	while (now - start < 6 && connection_status == 0) {
-		loadingScreen(server_response, now - start);
-
 		sleep(0.5);
 		now = (int)time(NULL);
-
 	}
+
 	return 0;
 }
 

@@ -116,35 +116,17 @@ void dispScores(int scores[10], char names[10][11]) {
 	delwin(w);
 }
 
-void loadingScreen(const char *text, int secondsLoading) {
+void messageScreen(const char *text) {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
-	WINDOW *w = newwin(maxY, maxX, 0, 0);
-	wattron(w, A_BOLD | A_DIM);
 
-	char *loadingText = malloc(sizeof(char) * (strlen(text) + 4));
-	strcpy(loadingText, text);
+	wattron(stdscr, A_BOLD | A_DIM);
 
-	switch (secondsLoading % 4) {
-		case 0:
-			strcat(loadingText, "   ");
-			break;
-		case 1:
-			strcat(loadingText, ".  ");
-			break;
-		case 2:
-			strcat(loadingText, ".. ");
-			break;
-		default:
-			strcat(loadingText, "...");
-			break;
-	}
+	wclear(stdscr);
+	mvwprintw(stdscr, maxY/2 - 1, maxX/2 - strlen(text)/2 - 1, text);
+	wrefresh(stdscr);
 
-	mvwprintw(w, maxY/2 - 1, maxX/2 - strlen(text)/2 - 1, loadingText);
-	wrefresh(w);
-
-	free(loadingText);
-	delwin(w);
+	wattroff(stdscr, A_BOLD | A_DIM);
 }
 
 void deathScreen(int finalScore, char nameBuffer[11]) {
