@@ -47,15 +47,31 @@ void modSprite(int spriteIndex, float xLoc, float yLoc, float dxAcc, float dyAcc
 		spriteIndex = state->allSprites->numSprites-1;
 	}
 	struct sprite * temp = state->allSprites->spriteArr[spriteIndex];
-	if (xLoc > 0) {
+	if (xLoc > -999) {
 		temp->xLoc = xLoc;
 	}
-	if (yLoc > 0) {
+	if (yLoc > -999) {
 		temp->yLoc = yLoc;
 	}
 	temp->xAcc += dxAcc;
 	temp->yAcc += dyAcc;
 	temp->AI = AI;
+}
+
+void gndSprite(int spriteIndex, float xLoc, float yLoc, float xVel, float yVel, struct gameState * state) {
+	if (spriteIndex < 0) {
+		spriteIndex = state->allSprites->numSprites-1;
+	}
+	struct sprite * temp = state->allSprites->spriteArr[spriteIndex];
+	if (xLoc > -999) {
+		temp->xLoc = xLoc;
+	}
+	if (yLoc > -999) {
+		temp->yLoc = yLoc;
+	}
+	temp->xVel = xVel;
+	temp->yVel = yVel;
+	
 }
 
 void calcCoM(struct sprite *spriteIn) {
@@ -168,6 +184,90 @@ void initSpriteLibrary(struct spriteList *localList) {
 	initSprite(NIbackground4, 3,10,10);
 	initDispPairSprite(NIbackground4, 1, 0, "*");
 	localList->spriteArr[localList->numSprites] = NIbackground4;
+	localList->numSprites++;
+	//ID=6
+	struct sprite * missRt = malloc(sizeof(struct sprite));
+	initSprite(missRt, 2,10,10);
+	initDispPairSprite(missRt, 2, 0, "o)");
+	initDispPairSprite(missRt, 4, 0, " >=>");
+	calcCoM(missRt);
+	localList->spriteArr[localList->numSprites] = missRt;
+	localList->numSprites++;
+	//ID=7
+	struct sprite * missLt = malloc(sizeof(struct sprite));
+	initSprite(missLt, 0,10,10);
+	initDispPairSprite(missLt, 4, 0, "<=< ");
+	initDispPairSprite(missLt, 2, 0, "(o");
+	localList->spriteArr[localList->numSprites] = missLt;
+	localList->numSprites++;
+	//ID=8
+	struct sprite * lasRt = malloc(sizeof(struct sprite));
+	initSprite(lasRt, 4,10,10);
+ 	char temp[MAX_DISP_SUBSIZE];
+	strcpy(temp, "-");
+	int i;
+	for (i=0; i< MAX_DISP_SUBSIZE-2; i++) {
+		strcat(temp, "-");
+	} 
+	initDispPairSprite(lasRt, 7, 0, temp);
+	calcCoM(lasRt);
+	localList->spriteArr[localList->numSprites] = lasRt;
+	localList->numSprites++;
+
+	// ID=9
+	struct sprite * ast1 = malloc(sizeof(struct sprite));
+	initSprite(ast1, 2,0,0);
+	initDispPairSprite(ast1, 1, A_DIM, "/\\-|\\");
+	initDispPairSprite(ast1, 1, A_DIM, "\n[ .-*\\");
+	initDispPairSprite(ast1, 1, A_DIM, "\n\n<8 o |");
+	initDispPairSprite(ast1, 1, A_DIM, "\n\n\n {^ ,/\n");
+	initDispPairSprite(ast1, 1, A_DIM, "\n\n\n\n  -\\/\n");
+	calcCoM(ast1);
+	localList->spriteArr[localList->numSprites] = ast1;
+	localList->numSprites++;
+
+	// ID=10
+	struct sprite * ast2 = malloc(sizeof(struct sprite));
+	initSprite(ast2, 2,0,0);
+	initDispPairSprite(ast2, 9, A_DIM, " ooo ");
+	initDispPairSprite(ast2, 9, A_DIM, "\nooooo");
+	initDispPairSprite(ast2, 9, A_DIM, "\n\n ooo \n");
+	calcCoM(ast2);
+	localList->spriteArr[localList->numSprites] = ast2;
+	localList->numSprites++;
+
+	// ID=11
+	struct sprite * ast3 = malloc(sizeof(struct sprite));
+	initSprite(ast3, 2,0,0);
+	initDispPairSprite(ast3, 1, 0, " /\\ ");
+	initDispPairSprite(ast3, 1, 0, "\n|p_-");
+	initDispPairSprite(ast3, 1, 0, "\n\n\\// \n");
+	calcCoM(ast3);
+	localList->spriteArr[localList->numSprites] = ast3;
+	localList->numSprites++;
+
+	// ID=12
+	struct sprite * sk1 = malloc(sizeof(struct sprite));
+	initSprite(sk1, 3,0,0);
+	initDispPairSprite(sk1, 10, A_DIM, "o");
+	calcCoM(sk1);
+	localList->spriteArr[localList->numSprites] = sk1;
+	localList->numSprites++;
+	
+	// ID=13
+	struct sprite * sk2 = malloc(sizeof(struct sprite));
+	initSprite(sk2, 3,0,0);
+	initDispPairSprite(sk2, 11, A_DIM, "o");
+	calcCoM(sk2);
+	localList->spriteArr[localList->numSprites] = sk2;
+	localList->numSprites++;
+
+	// ID=14
+	struct sprite * gnd1 = malloc(sizeof(struct sprite));
+	initSprite(gnd1, 4,0,0);
+	initDispPairSprite(gnd1, 12, A_DIM, "-");
+	calcCoM(gnd1);
+	localList->spriteArr[localList->numSprites] = gnd1;
 	localList->numSprites++;
 
 	// generate more sprites!

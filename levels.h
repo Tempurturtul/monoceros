@@ -27,6 +27,8 @@ void genOpenSpaceBG(struct gameState * state, struct library * lib);
 
 void initOpenSpaceBG(struct gameState * state, struct library * lib);
 
+void genAsteroidBG(struct gameState * state, struct library * lib, struct levelData * level);
+
 int getRand(int, int);
 
 #endif

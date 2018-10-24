@@ -130,7 +130,7 @@ void playGame() {
 			inputChar = wgetch(action);
 		}
 
-		handleInput(inputChar, &playFlag, state);
+		handleInput(inputChar, &playFlag, state, lib);
 
 		restrictPlaySpace(state);
 
@@ -161,7 +161,7 @@ void playGame() {
 		// i needed this for debugging
 		mvwprintw(title, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
 		mvwprintw(title, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
-		mvwprintw(title, 2, 1, "xAcc:%f",state->allSprites->spriteArr[0]->xAcc);
+		mvwprintw(title, 2, 1, "xMax:%i",state->maxX);
 
 		mvwprintw(title, 0, 20, "numEnemies:%i",level->numEnemies);
 		mvwprintw(title, 1, 20, "numSprites:%i",state->allSprites->numSprites);
@@ -174,6 +174,7 @@ void playGame() {
 
 		mvwprintw(title, 0, maxX - 15, "time: %.1f", round(state->time*10)/10);
 		mvwprintw(title, 1, maxX - 15, "SCORE: %i", state->score);
+		mvwprintw(title, 2, maxX - 15, "LEVEL: %i", level->currLevel);
 		wrefresh(title);
 		wrefresh(action);
 
@@ -199,13 +200,20 @@ void updatePhysics(struct gameState * state) {
 	struct spriteList *local = state->allSprites;
 	int i=0;
 	for (i=0; i< local->numSprites; i++) {
-		//local->spriteArr[i]->yAcc += 10;		// 10 is my trial grav constant
+																	 
 		local->spriteArr[i]->yVel += (local->spriteArr[i]->yAcc)*dt;
+		if (i==0) {
+			limitVel(local->spriteArr[i], 30);
+		}
+		
 		local->spriteArr[i]->yLoc += ((local->spriteArr[i]->yVel)*dt+0.5*(local->spriteArr[i]->yAcc)*(dt*dt));
 		local->spriteArr[i]->yAcc = 0;
-
+		
 		//local->spriteArr[i]->xAcc += 10;		// 10 is my trial grav constant
 		local->spriteArr[i]->xVel += (local->spriteArr[i]->xAcc)*dt;
+		if (i==0) {
+			limitVel(local->spriteArr[i], 30);
+		}
 		local->spriteArr[i]->xLoc += (((local->spriteArr[i]->xVel)*dt+0.5*(local->spriteArr[i]->xAcc)*(dt*dt)));
 		local->spriteArr[i]->xAcc = 0;
 
@@ -220,7 +228,7 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 	struct sprite * s1;
 	struct sprite * s2;
 	// only check my ship right now
-	for (i=0; i<1; i++) {
+	for (i=0; i<state->allSprites->numSprites; i++) {
 		// only check everyone else if current sprite is a colliding type sprite
 		s1 = state->allSprites->spriteArr[i];
 		if (s1->type != 3 && s1->markedForDeath == 0) {
@@ -228,7 +236,7 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 			for (j=0; j< state->allSprites->numSprites; j++) {
 				// check for colliding-type and yourself
 				s2 = state->allSprites->spriteArr[j];
-				if (s2->type != 3 && i != j && s2->markedForDeath == 0) {
+				if (s2->type != 3 && i != j && s2->markedForDeath == 0 && s2->type != s1->type) {
 					dist = calcDistance(s1,s2);
 					// if the distance between the sprites is within one of their spheres of influence
 					// only then do a closer check for collision (expensive) (really only need the smaller sphere of influence, but this is safer)
@@ -237,13 +245,20 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 						if (checkOverlap(s1, s2)) {
 							//s1->xAcc += -20*(1e6)/REFRESH_RATE;
 							// oh so klugey
-							//addEffect(6,i,state, lib);
-							//modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-							addEffect(6,j,state, lib);
-							modEffect(-1, state->time, s2->xCoM, s2->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-							//s1->markedForDeath=1;
-							s2->markedForDeath=1;
-							state->deltaKills++;
+							if (s1->type != 4 ) {
+								addEffect(shipEx1,i,state, lib);
+								modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+								s1->markedForDeath=1;
+							}
+							if (s2->type !=4) {
+								addEffect(shipEx1,j,state, lib);
+								modEffect(-1, state->time, s2->xCoM, s2->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+								s2->markedForDeath=1;
+							}
+							if (s1->type == 1 || s2->type ==1) {
+								state->deltaKills++;
+							}
+							
 						}
 
 					}
@@ -252,8 +267,6 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 		}
 	}
 }
-
-
 /// ***********//
 // should probably move physics to its own header and implementation file
 // oh so pythagoras
@@ -308,7 +321,7 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc) {
 				// manually terminate your new string
 				temp[i-n] = '\0';
 				int dx = 0;
-				while (dx < strlen(temp)) {
+				while (dx <= strlen(temp)) {
 					if (temp[dx] != ' ') {
 						loc->x[loc->numChars] = (int)spriteIn->xLoc+dx;
 						loc->y[loc->numChars] = (int)spriteIn->yLoc+j;
@@ -350,7 +363,9 @@ void calcScore(struct gameState * state, struct levelData * level) {
 	}
 }
 
+
 int waitQueue() {
+
 	/* create the socket */
 	int network_socket;
 	/* specifying TCP protocol here */
@@ -368,10 +383,16 @@ int waitQueue() {
 	int connection_status = connect(network_socket, (struct sockaddr *) &server_address, sizeof(server_address));
 
 	/* check for errors in the connection */
-	if (connection_status == -1) {
-		messageScreen("There was an error connecting to the server.");
-		getch();
+	int start = (int)time(NULL);
+	int now = start;
+	while (now - start < 6 && connection_status == -1) {
+//		loadingScreen("There was an error connecting to the server", now - start);
+
+		sleep(0.5);
+		now = (int)time(NULL);
+
 	}
+
 
 	/* this string holds the information we get back from the server */
 	char server_response[256];
@@ -385,26 +406,49 @@ int waitQueue() {
 	close(network_socket);
 
 	// Timeout after 6 seconds.
-	int start = (int)time(NULL);
-	int now = start;
-	messageScreen("Now connecting...");
+							 
+				 
+									
 	while (now - start < 6 && connection_status == 0) {
+//		loadingScreen("Now connecting", now - start);
+
 		sleep(0.5);
 		now = (int)time(NULL);
+
 	}
 
 	start = (int)time(NULL);
 	now = start;
-	messageScreen(server_response);
+								
 	while (now - start < 6 && connection_status == 0) {
+//		loadingScreen(server_response, now - start);
+
 		sleep(0.5);
 		now = (int)time(NULL);
+
 	}
 
 	return 0;
 }
 
-void handleInput(int inputChar, int *playFlag, struct gameState *state) {
+void limitVel(struct sprite * temp, float limit) {
+	if (temp->yVel > 0 && temp->yVel > limit) {
+		temp->yVel = limit;
+	}
+	else if (temp->yVel < 0 && temp->yVel < -limit) {
+		temp->yVel = -limit;
+	}
+	if (temp->xVel > 0 && temp->xVel > limit) {
+		temp->xVel = limit;
+	}
+	else if (temp->xVel < 0 && temp->xVel < -limit) {
+		temp->xVel = -limit;
+	}
+}
+
+void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib) {
+	struct sprite * pShip = state->allSprites->spriteArr[0];
+
 	if (inputChar == 'q') {
 		*playFlag = 0;
 	}
@@ -415,26 +459,45 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state) {
 						// limiting limits at window borders -- Done
 	else if (inputChar == KEY_UP) {
 		//allSprites.spriteArr[0]->yLoc += -1;
-		state->allSprites->spriteArr[0]->yAcc += -4*(1e6)/REFRESH_RATE;
+		pShip->yAcc += -4*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[2]->start = state->time;
 		state->allEffects->effectArr[3]->start = state->time;
 	}
 	else if (inputChar == KEY_LEFT) {
 		//allSprites.spriteArr[0]->xLoc += -10;
-		state->allSprites->spriteArr[0]->xAcc += -4*(1e6)/REFRESH_RATE;
+		pShip->xAcc += -4*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[1]->start = state->time;
 		}
 	else if (inputChar == KEY_DOWN) {
 		//allSprites.spriteArr[0]->yLoc += 1;
-		state->allSprites->spriteArr[0]->yAcc += 4*(1e6)/REFRESH_RATE;
+		pShip->yAcc += 4*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[4]->start = state->time;
 		state->allEffects->effectArr[5]->start = state->time;
 	}
 	else if (inputChar == KEY_RIGHT) {
 		//allSprites.spriteArr[0]->xLoc += 1;
-		state->allSprites->spriteArr[0]->xAcc += 4*(1e6)/REFRESH_RATE;
+		pShip->xAcc += 4*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[0]->start = state->time;
 	}
+	else if (inputChar == ' ') {
+		// player missle (only one at a time here for testing)
+		if (0) {
+			addSprite(missleRt, state, lib);
+			// if you want to be real physicsy then you'd actually copy the pShip
+			// velocities to the new sprite as well
+			modSprite(-1, pShip->xLoc+ pShip->xCoM, pShip->yLoc+pShip->yCoM, 30*(1e6)/REFRESH_RATE, 0, 0, state);
+		}
+		// player laser
+		else {
+			addSprite(laser, state, lib);
+			modSprite(-1, pShip->xLoc+ pShip->xCoM, pShip->yLoc+pShip->yCoM, 150*(1e6)/REFRESH_RATE, 0, 0, state);
+			//struct sprite * laserPtr = state->allSprites->spriteArr[state->allSprites->numSprites-1];
+			addEffect(laserEffect,state->allSprites->numSprites-1,state, lib);
+			modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+
+			}
+	}
+
 }
 
 void restrictPlaySpace(struct gameState *state) {

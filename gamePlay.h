@@ -22,7 +22,7 @@ struct absLoc {
 void initGame(struct gameState * state, struct library * lib, struct levelData * level);
 
 void updatePhysics(struct gameState * state);
-
+void limitVel(struct sprite * temp, float limit);
 void detectCollision(struct gameState * state, struct library * lib, struct levelData * level );
 float calcDistance(struct sprite * s1, struct sprite * s2);
 int checkOverlap(struct sprite * s1, struct sprite * s2);
@@ -31,7 +31,7 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc);
 void calcScore(struct gameState * state, struct levelData * level);
 void playGame();
 int waitQueue();
-void handleInput(int inputChar, int *playFlag, struct gameState *state);
+void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib);
 void restrictPlaySpace(struct gameState *state);
 
 #endif

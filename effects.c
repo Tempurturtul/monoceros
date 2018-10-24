@@ -42,10 +42,10 @@ void modEffect(int effectIndex, float start, float xLoc, float yLoc, struct game
 		effectIndex = state->allEffects->numEffects -1;
 	}
 	struct effect *e1 = state->allEffects->effectArr[effectIndex];
-	if (e1->xLoc != -999) {
+	if (e1->xLoc > -1000) {
 		e1->xLoc = xLoc - e1->xSize/2;
 	}
-	if (e1->yLoc != -999) {
+	if (e1->yLoc > -1000) {
 		e1->yLoc = yLoc - e1->ySize/2;
 	}	
 	
@@ -147,6 +147,23 @@ void initEffectLibrary(struct effectList *localList) {
 	initDispPair(shipEx1, 1, A_DIM, ".......\n.      .\n.      .\n.      .\n.......");
 	setEffectSize(shipEx1, 7, 8);
 	localList->effectArr[localList->numEffects] = shipEx1;
+	localList->numEffects++;
+
+	//laser effect
+	struct effect * lasEff = malloc(sizeof(struct effect));
+	lasEff->parentID = 0;
+	initEffect(lasEff, 0, 1, 5,5);					// effect, ID (not used), ttl, x, y
+	char temp[MAX_DISP_SUBSIZE];
+	strcpy(temp, "-");
+	int i;;
+	for (i=0; i< MAX_DISP_SUBSIZE-2; i++) {
+		strcat(temp, "-");
+	}
+	initDispPair(lasEff, 8, 0, temp);		// effect, colorPair, attr, char *
+	initDispPair(lasEff, 8, A_DIM, temp);
+	initDispPair(lasEff, 1, A_DIM, temp);
+	//setEffectSize(lasEff, 7, 8);
+	localList->effectArr[localList->numEffects] = lasEff;
 	localList->numEffects++;
 	
 

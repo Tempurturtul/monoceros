@@ -15,23 +15,32 @@
 
 #define MAX_DISP_SUBSIZE 64
 //#define REFRESH_RATE 50000
-//#define REFRESH_RATE 125000
+//#define REFRESH_RATE 100000
 #define REFRESH_RATE 75000
 
 // this is only so high because you aren't cleaning them out as you go
 #define MAX_EFFECTS 1024
 #define MAX_EFFECT_DISPS 16
 
-#define MAX_SPRITES 1024
+#define MAX_SPRITES 32768
 #define MAX_SPRITE_DISPS 16
 #define MAX_SPRITE_EFFECTS 16
 
 #define MAX_LEVEL_DISPS 256
 
+enum STYPE {
+ship = 0, eny1, openSpace1, openSpace2, openSpace3, openSpace4, missleRt, missleLt, laser,
+asteroid1, asteroid2, asteroid3, sky1, sky2, gnd1
+};
+
+enum ETYPE {
+	rtThrust = 0, ltThrust, upThrust1, upThrust2, dwThrust1, dwThrust2, shipEx1, laserEffect
+};
+
 
 /** SPRITES **/
 struct sprite {
-	int type;		// 0 for player, 1 for enemy ship, 2 for projectile, 3 for non-interacting background
+	int type;		// 0 for player, 1 for enemy ship, 2 for projectile, 3 for non-interacting background, 4 for indestructible
 	// x,y location will indicate the top left of the sprite by convention
 	float xLoc;
 	float yLoc;
@@ -123,6 +132,9 @@ struct levelData {
 	int maxNumEnemies;
 	int spawnOK;
 	int AIlevel;
+	int skyRate;
+	int skyLimit;
+	int groundVel;
 	
 	// maybe you want levels to have single char disps?
 	// that might be easier to procedurally generate
