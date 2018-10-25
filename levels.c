@@ -33,6 +33,7 @@ void initLevelData(struct levelData * level) {
 	level->groundVel=15;
 	
 	level->groundOK=0;
+	level->maxHeight=25;
 
 }
 
@@ -257,11 +258,11 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 		else if (temp->type == 5) {
 			// this is looking to find the last column of landscape,
 			// along with its height, since you are looping through everyone anyways
-			if (temp->xLoc >= xExtent) {
+			if (temp->xLoc > xExtent) {
 				xExtent = temp->xLoc;
-				if (temp->yLoc <= yExtent) {
+				//if (temp->yLoc <= yExtent) {
 					yExtent = temp->yLoc;
-				}
+				//}
 			}
 			if (temp->xLoc < 0) {
 				delSprite(state, i);
@@ -271,6 +272,18 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 	}
 	// need to modify baddies so they are only coming from 'above ground'
 	// do you want the ground to be destructable?
+	if (getRand(1,100)<20 ) {
+		if (getRand(1,100) >50  && state->maxY - yExtent< level->maxHeight) {
+			// buids up
+			yExtent += -getRand(1,5);
+		}
+		else if (yExtent < state->maxY) {
+			// goes down
+			yExtent += +getRand(1,5);
+		}
+		// limit yExtent 
+		//limiter(&yExtent,state->maxY- level->maxHeight, state->maxY);
+	}
 	while (xExtent < state->maxX+2) {
 		for (i = (int)yExtent; i < state->maxY; i++) {
 			addSprite(gnd1, state, lib);
@@ -319,7 +332,12 @@ void initPlanetBG(struct gameState * state, struct library * lib, struct levelDa
 	for (i=0; i<state->maxX; i++) {
 		if (getRand(1,100) < down) {
 			addSprite(getRand(sky1,sky2), state, lib);
-			modSprite(-1, i, state->maxY, 0,-1.0*(1e6)/REFRESH_RATE, 0, state);			
+			if (level->skyRate > level->skyLimit) {
+				modSprite(-1, i, state->maxY, 0,-3.0*(1e6)/REFRESH_RATE, 0, state);
+			}
+			else {
+				modSprite(-1, i, state->maxY, 0,-1.0*(1e6)/REFRESH_RATE, 0, state);			
+			}
 		}
 	}
 	level->skyRate++;
@@ -337,4 +355,13 @@ void freeLevelDisps(struct levelData * level) {
 // don't have any other reason for an interfaces.c yet
 int getRand(int low, int hi) {
 	return (rand() % (hi-low+1)) + low;
+}
+
+void limiter(float * valIn, float low, float high) {
+	if (*valIn > high) {
+		*valIn = high;
+	}
+	else if (*valIn < low) {
+		*valIn = low;
+	}
 }
