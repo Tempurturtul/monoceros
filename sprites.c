@@ -264,7 +264,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 
 	// ID=14
 	struct sprite * gnd1 = malloc(sizeof(struct sprite));
-	initSprite(gnd1, 4,0,0);
+	initSprite(gnd1, 5,0,0);
 	initDispPairSprite(gnd1, 12, A_DIM, "-");
 	calcCoM(gnd1);
 	localList->spriteArr[localList->numSprites] = gnd1;

@@ -22,7 +22,7 @@
 #define MAX_EFFECTS 1024
 #define MAX_EFFECT_DISPS 16
 
-#define MAX_SPRITES 32768
+#define MAX_SPRITES 4096
 #define MAX_SPRITE_DISPS 16
 #define MAX_SPRITE_EFFECTS 16
 
@@ -135,6 +135,8 @@ struct levelData {
 	int skyRate;
 	int skyLimit;
 	int groundVel;
+	
+	int groundOK;
 	
 	// maybe you want levels to have single char disps?
 	// that might be easier to procedurally generate

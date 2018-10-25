@@ -29,8 +29,10 @@ void initLevelData(struct levelData * level) {
 	level->AIlevel=0;
 	level->numDisps=0;
 	level->skyRate=-35;
-	level->skyLimit=25;
-	level->groundVel=5;
+	level->skyLimit=20;
+	level->groundVel=15;
+	
+	level->groundOK=0;
 
 }
 
@@ -42,7 +44,7 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 	// set level
 	// move this eventually
 	// and I think you want finer granularity
-	if (state->score > 15 ) {
+	if (state->score > 15 && state->score < 30) {
 		level->currLevel = 15;
 		level->AIlevel = 1;	
 		level->maxNumEnemies = 6;
@@ -76,7 +78,7 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 
 	
 	// clean up irrelevant enemies & sprites & spawn new stuff for background
-	manageSprites(state, lib, level);
+	manageSprites(state, lib, level, window);
 }
 
 void spawnEnemies(struct gameState * state, struct library * lib, struct levelData * level) {
@@ -104,7 +106,7 @@ void spawnEnemies(struct gameState * state, struct library * lib, struct levelDa
 
 }
 
-void manageSprites(struct gameState * state, struct library * lib, struct levelData * level) {
+void manageSprites(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window) {
 	float positionTol = 1.1;
 	int i;	
 	for (i=1; i < state->allSprites->numSprites; i++) {
@@ -146,16 +148,43 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 			level->spawnOK = -9;   // caution this is dependent on REFRESH_RATE
 		}
 	}
-	if (level->currLevel > 25) {
+	i=0;
+	int j;
+	if (level->currLevel > 25  && !level->groundOK) {
 		if (level->skyRate<2*level->skyLimit) {
 			initPlanetBG(state, lib, level);
 		}
+		// you want this to be an else if
 		else {
-			genPlanetBG(state, lib, level);
+			if (level->skyRate == 2*level->skyLimit) {
+				//wbkgd(window, COLOR_PAIR(13));
+				for(j=0; j< 8; j++) {
+					for (i=0; i < state->maxX+2; i++ ) {
+						addSprite(gnd1, state, lib);
+						gndSprite(-1, i, state->maxY+40+j, 0,-3, state);	
+					}				
+				}
+
+				level->skyRate++;
+			}
+			else {
+				for (i=0; i<state->allSprites->numSprites; i++) {
+					if (state->allSprites->spriteArr[i]->type == 5 && 
+						state->allSprites->spriteArr[i]->yLoc <= state->maxY-7) {
+							// stop sprites
+							transitionPlanetBG(state, lib, level);
+						}
+				}
+			}
+			//genPlanetBG(state, lib, level);
 		}
 		
 	}
+	if (level->groundOK) {
+		genPlanetBG(state, lib, level);
+	}
 }
+
 
 void addEnemy(struct gameState * state, struct library * lib, int ID, int AIlevel) {
 	addSprite(ID, state, lib);
@@ -219,27 +248,55 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 	int noSprite= 0;
 	int something = state->maxY-5;
 	int i;
+	float xExtent=0, yExtent=state->maxY;
 	for (i=0; i< state->allSprites->numSprites; i++) {
 		struct sprite * temp = state->allSprites->spriteArr[i];
-		if (temp->type == 3) {
-			temp->yAcc += -0.5*(1e6)/REFRESH_RATE;
-		}
-		else if (temp->type == 0) {
+		if (temp->type == 0) {
 			temp->yAcc += 1.0*(1e6)/REFRESH_RATE;
 		}
-		// this here?!
-		if (temp->xLoc == state->maxX && temp->yLoc == something) {
-			noSprite = 1;
+		else if (temp->type == 5) {
+			// this is looking to find the last column of landscape,
+			// along with its height, since you are looping through everyone anyways
+			if (temp->xLoc >= xExtent) {
+				xExtent = temp->xLoc;
+				if (temp->yLoc <= yExtent) {
+					yExtent = temp->yLoc;
+				}
+			}
+			if (temp->xLoc < 0) {
+				delSprite(state, i);
+			}
+			
 		}
 	}
 	// need to modify baddies so they are only coming from 'above ground'
 	// do you want the ground to be destructable?
-	if (!noSprite) {
-		addSprite(gnd1, state, lib);
-		gndSprite(-1, state->maxX, something, -5, 0, state);	
-		noSprite=0;
-		
+	while (xExtent < state->maxX+2) {
+		for (i = (int)yExtent; i < state->maxY; i++) {
+			addSprite(gnd1, state, lib);
+//			gndSprite(-1, state->maxX-20, 50, -level->groundVel,0, state);		
+//			gndSprite(-1,xExtent+1, (int)yExtent, -level->groundVel,0, state);	
+			gndSprite(-1,xExtent+1, i, -level->groundVel,0, state);	
+
+//	printf("x:%f y:%i\n",xExtent,i);
+//	sleep(1);
+		}
+		xExtent++;
 	}
+	
+}
+void transitionPlanetBG(struct gameState * state, struct library * lib, struct levelData * level) {
+	int i;
+	for (i=0; i<state->allSprites->numSprites; i++) {
+		struct sprite * temp = state->allSprites->spriteArr[i];
+		if (temp->type == 5 ) {
+			gndSprite(i, -1000, -1000, -level->groundVel,0, state);
+		}
+		else if (temp->type == 3) {
+			gndSprite(i, -1000, -1000, -level->groundVel, 0, state);
+		}
+	}
+	level->groundOK = 1;
 	
 }
 
@@ -252,7 +309,7 @@ void initPlanetBG(struct gameState * state, struct library * lib, struct levelDa
 	}
 	for (i=0; i< state->allSprites->numSprites; i++) {
 		struct sprite * temp = state->allSprites->spriteArr[i];
-		if (temp->type == 3) {
+		if (temp->type == 3 || temp->type == 2) {
 			temp->yAcc += -0.5*(1e6)/REFRESH_RATE;
 		}
 		else if (temp->type == 0) {

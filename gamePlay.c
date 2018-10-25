@@ -57,7 +57,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->deltaKills = 0;
 	state->timeLast=-REFRESH_RATE/1e6;
 	state->time = 0;
-	state->score = 0;
+	state->score = 60;
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;

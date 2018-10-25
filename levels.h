@@ -21,7 +21,7 @@ void freeLevelDisps(struct levelData * level);
 
 void spawnEnemies(struct gameState * state, struct library * lib, struct levelData * level);
 
-void manageSprites(struct gameState * state, struct library * lib, struct levelData * level);
+void manageSprites(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window);
 
 void genOpenSpaceBG(struct gameState * state, struct library * lib);
 
