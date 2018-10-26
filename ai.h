@@ -13,8 +13,8 @@
 
 #include "interfaces.h"
 
-void updateSpriteAI(struct gameState * state);
+void updateSpriteAI(struct gameState * state, struct library * lib);
 void calcMovement(int sIndex, struct gameState * state);
-void trackY(int sIndex, struct gameState * state);
-void trackXY(int sIndex, struct gameState * state);
+void trackP(int sIndex, struct gameState * state);
+void trackPI(int sIndex, struct gameState * state);
 #endif
