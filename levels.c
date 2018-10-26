@@ -69,10 +69,16 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 	if (state->score > 75) {
 		level->currLevel = 35;
 		level->maxNumEnemies += (int)((state->score - 75)/10);
+		//level->groundVel++;
 	}
-//	level->AIlevel = 1;
-//	level->maxNumEnemies =2;
-
+	// debugging ai
+	/*
+	level->AIlevel = 1;
+	level->maxNumEnemies =2;
+	if (level->numEnemies >= 1) {
+		level->AIlevel=2;
+	}
+	*/
 	
 	// get new enemies (if needed) and set AI
 	spawnEnemies(state, lib, level);
@@ -89,7 +95,15 @@ void spawnEnemies(struct gameState * state, struct library * lib, struct levelDa
 		if (level->currLevel < 20) {
 			// here you can vary the enemy type by percentage (when you get more enemies)
 		}
+		// debugging!!!!
+	if (level->AIlevel == 2) {
+		addEnemy(state, lib, eny2, level->AIlevel);
+	}
+	else{
 		addEnemy(state, lib, eny1, level->AIlevel);
+		state->allSprites->spriteArr[state->allSprites->numSprites-1]->isShooter =1;
+	}
+	
 		if (level->AIlevel>0) {
 			// if you want to do this, you'll need a way of activating the effects
 			// at the appropriate time (i.e. the AI fires thrusters)
@@ -191,7 +205,7 @@ void addEnemy(struct gameState * state, struct library * lib, int ID, int AIleve
 	addSprite(ID, state, lib);
 	int xAcc = getRand(25,30);
 //	xAcc = 0;	// for debugging
-	modSprite(-1, state->maxX, getRand(1, state->maxY), -xAcc*(1e6)/REFRESH_RATE, 0, AIlevel, state);
+	modSprite(-1, state->maxX, getRand(1, state->gndHeight), -xAcc*(1e6)/REFRESH_RATE, 0, AIlevel, state);
 }
 
 void genOpenSpaceBG(struct gameState * state, struct library * lib) {
@@ -246,14 +260,12 @@ void genAsteroidBG(struct gameState * state, struct library * lib, struct levelD
 
 void genPlanetBG(struct gameState * state, struct library * lib, struct levelData * level) {
 	// apply gravity
-	int noSprite= 0;
-	int something = state->maxY-5;
 	int i;
 	float xExtent=0, yExtent=state->maxY;
 	for (i=0; i< state->allSprites->numSprites; i++) {
 		struct sprite * temp = state->allSprites->spriteArr[i];
 		if (temp->type == 0) {
-			temp->yAcc += 1.0*(1e6)/REFRESH_RATE;
+			temp->yAcc += 0.75*(1e6)/REFRESH_RATE;
 		}
 		else if (temp->type == 5) {
 			// this is looking to find the last column of landscape,
@@ -285,17 +297,21 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 		//limiter(&yExtent,state->maxY- level->maxHeight, state->maxY);
 	}
 	while (xExtent < state->maxX+2) {
-		for (i = (int)yExtent; i < state->maxY; i++) {
+			addSprite(gnd1, state, lib);
+			gndSprite(-1,xExtent+1, (int)yExtent, -level->groundVel,0, state);	
+		for (i = (int)yExtent+1; i < state->maxY; i++) {
 			addSprite(gnd1, state, lib);
 //			gndSprite(-1, state->maxX-20, 50, -level->groundVel,0, state);		
 //			gndSprite(-1,xExtent+1, (int)yExtent, -level->groundVel,0, state);	
 			gndSprite(-1,xExtent+1, i, -level->groundVel,0, state);	
+			state->allSprites->spriteArr[state->allSprites->numSprites-1]->type=3;
 
 //	printf("x:%f y:%i\n",xExtent,i);
 //	sleep(1);
 		}
 		xExtent++;
 	}
+	state->gndHeight = yExtent;
 	
 }
 void transitionPlanetBG(struct gameState * state, struct library * lib, struct levelData * level) {

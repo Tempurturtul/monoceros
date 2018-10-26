@@ -38,6 +38,8 @@ void initSprite(struct sprite *inputSprite, int type, float xLoc, float yLoc) {
 	inputSprite->markedForDeath=0;
 	inputSprite->AI=0;
 	inputSprite->numEffects = 0;
+	inputSprite->errLast = 0;
+	inputSprite->isShooter = -1;
 	
 	
 }
@@ -160,6 +162,16 @@ void initSpriteLibrary(struct spriteList *localList) {
 	calcCoM(eny1);
 	localList->spriteArr[localList->numSprites] = eny1;
 	localList->numSprites++;
+	// ID=1
+	// NEED NEW ENEMIES AND COLOR!!
+	struct sprite * eny2 = malloc(sizeof(struct sprite));
+	initSprite(eny2, 1,100,20);
+	initDispPairSprite(eny2, 2, A_BOLD,       " __________/|");
+	initDispPairSprite(eny2, 2, A_BOLD,   "\n/___\\    |__|=");
+	initDispPairSprite(eny2, 2, A_BOLD," \n\n    _\\___|    ");
+	calcCoM(eny2);
+	localList->spriteArr[localList->numSprites] = eny2;
+	localList->numSprites++;
 
 	//ID=2
 	struct sprite * NIbackground1 = malloc(sizeof(struct sprite));
@@ -195,7 +207,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	localList->numSprites++;
 	//ID=7
 	struct sprite * missLt = malloc(sizeof(struct sprite));
-	initSprite(missLt, 0,10,10);
+	initSprite(missLt, 2,10,10);
 	initDispPairSprite(missLt, 4, 0, "<=< ");
 	initDispPairSprite(missLt, 2, 0, "(o");
 	localList->spriteArr[localList->numSprites] = missLt;

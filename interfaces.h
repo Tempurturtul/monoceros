@@ -29,7 +29,7 @@
 #define MAX_LEVEL_DISPS 256
 
 enum STYPE {
-ship = 0, eny1, openSpace1, openSpace2, openSpace3, openSpace4, missleRt, missleLt, laser,
+ship = 0, eny1, eny2, openSpace1, openSpace2, openSpace3, openSpace4, missleRt, missleLt, laser,
 asteroid1, asteroid2, asteroid3, sky1, sky2, gnd1
 };
 
@@ -37,6 +37,8 @@ enum ETYPE {
 	rtThrust = 0, ltThrust, upThrust1, upThrust2, dwThrust1, dwThrust2, shipEx1, laserEffect
 };
 
+
+int getRand(int, int);
 
 /** SPRITES **/
 struct sprite {
@@ -64,6 +66,8 @@ struct sprite {
 	
 	int markedForDeath;
 	int AI;
+	float errLast;
+	float isShooter;
 };
 
 struct spriteList {
@@ -112,6 +116,7 @@ struct gameState {
 	// size of all participants?
 	int maxX;
 	int maxY;
+	int gndHeight;
 };
 
 struct library {
@@ -138,6 +143,7 @@ struct levelData {
 	
 	int groundOK;
 	float maxHeight;
+//	float groundHeight;
 	
 	// maybe you want levels to have single char disps?
 	// that might be easier to procedurally generate

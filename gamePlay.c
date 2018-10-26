@@ -57,7 +57,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->deltaKills = 0;
 	state->timeLast=-REFRESH_RATE/1e6;
 	state->time = 0;
-	state->score = 60;
+	state->score = 0; //45;  // debugging!
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
@@ -103,6 +103,7 @@ void playGame() {
 	initGame(state, lib, level);
 	state->maxX = maxX;
 	state->maxY = maxY-titleSize;
+	state->gndHeight = maxY;
 
 	// init background (only needed for level 1, will fly into other backgrounds)
 	initOpenSpaceBG(state, lib);
@@ -140,7 +141,7 @@ void playGame() {
 		// updatePlayer()
 
 		// updateSprites()
-		updateSpriteAI(state);
+		updateSpriteAI(state, lib);
 		updatePhysics(state);
 
 		// collisionDetection()
