@@ -14,6 +14,9 @@ default: all
 menu.o: menu.c menu.h
 	gcc -c menu.c -g $(CFLAGS)
 
+tcp_client.o: tcp_client.o tcp_client.h
+	gcc -c tcp_client.c -g $(CFLAGS)
+
 gamePlay.o: gamePlay.c gamePlay.h interfaces.h
 	gcc -c gamePlay.c -g $(CFLAGS)
 
@@ -29,8 +32,8 @@ levels.o: levels.c levels.h interfaces.h
 ai.o: ai.c ai.h interfaces.h
 	gcc -c ai.c -g $(CFLAGS)
 
-all: menu.o sprites.o gamePlay.o effects.o main.c levels.o ai.o interfaces.h
-	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o ai.o $(CFLAGS)
+all: menu.o sprites.o gamePlay.o effects.o main.c levels.o ai.o interfaces.h tcp_client.o tcp_client.h
+	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o ai.o tcp_client.o $(CFLAGS)
 
 clean:
 	rm -f *.o main

@@ -15,6 +15,7 @@ NOTES
 #include "menu.h"
 #include "gamePlay.h"
 #include "sprites.h"
+#include "tcp_client.h"
 
 void startCurses();
 void endCurses();

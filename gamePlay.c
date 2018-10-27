@@ -24,8 +24,8 @@ NOTES
 #include "sprites.h"
 #include "effects.h"
 #include "levels.h"
-
 #include "ai.h"
+#include "tcp_client.h"
 
 void initGame(struct gameState * state, struct library * lib, struct levelData * level) {
 	// init your library
@@ -201,15 +201,15 @@ void updatePhysics(struct gameState * state) {
 	struct spriteList *local = state->allSprites;
 	int i=0;
 	for (i=0; i< local->numSprites; i++) {
-																	 
+
 		local->spriteArr[i]->yVel += (local->spriteArr[i]->yAcc)*dt;
 		if (i==0) {
 			limitVel(local->spriteArr[i], 30);
 		}
-		
+
 		local->spriteArr[i]->yLoc += ((local->spriteArr[i]->yVel)*dt+0.5*(local->spriteArr[i]->yAcc)*(dt*dt));
 		local->spriteArr[i]->yAcc = 0;
-		
+
 		//local->spriteArr[i]->xAcc += 10;		// 10 is my trial grav constant
 		local->spriteArr[i]->xVel += (local->spriteArr[i]->xAcc)*dt;
 		if (i==0) {
@@ -259,7 +259,7 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 							if (s1->type == 1 || s2->type ==1) {
 								state->deltaKills++;
 							}
-							
+
 						}
 
 					}
@@ -366,69 +366,32 @@ void calcScore(struct gameState * state, struct levelData * level) {
 
 
 int waitQueue() {
-
-	/* create the socket */
-	int network_socket;
-	/* specifying TCP protocol here */
-	network_socket = socket(AF_INET, SOCK_STREAM, 0);
-
-	/* specify the address for the socket */
-	struct sockaddr_in server_address;
-	server_address.sin_family = AF_INET;
-	/* specify port 10005 */
-	server_address.sin_port = htons(2997);
-	/* ip address connection (server_address) */
-	server_address.sin_addr.s_addr = inet_addr("128.193.36.41");
-
-	/* calling the actual connect function here */
-	int connection_status = connect(network_socket, (struct sockaddr *) &server_address, sizeof(server_address));
-
-	/* check for errors in the connection */
 	int start = (int)time(NULL);
 	int now = start;
-	while (now - start < 6 && connection_status == -1) {
-//		loadingScreen("There was an error connecting to the server", now - start);
+	int connection_stat = establish_connection();
 
+	while (now - start < 6 && connection_stat == -1) {
+		messageScreen("There was an error connecting to the server");
 		sleep(0.5);
 		now = (int)time(NULL);
-
 	}
 
-
-	/* this string holds the information we get back from the server */
-	char server_response[256];
-	/* receive data from the server */
-	recv(network_socket, &server_response, sizeof(server_response), 0);
-
-	/* show the user the data we received from the server */
-	//printf("The server sent the response: %s\n", server_response);
-
-	/* close the socket */
-	close(network_socket);
-
-	// Timeout after 6 seconds.
-							 
-				 
-									
-	while (now - start < 6 && connection_status == 0) {
-//		loadingScreen("Now connecting", now - start);
-
+	while (now - start < 6 && connection_stat == 0) {
+		messageScreen("Now connecting...");
 		sleep(0.5);
 		now = (int)time(NULL);
-
 	}
 
 	start = (int)time(NULL);
 	now = start;
-								
-	while (now - start < 6 && connection_status == 0) {
-//		loadingScreen(server_response, now - start);
 
+	while (now - start < 6 && connection_stat == 0) {
+		messageScreen((void *)(intptr_t)receive_data());
 		sleep(0.5);
 		now = (int)time(NULL);
-
 	}
 
+	closing_connection();
 	return 0;
 }
 
@@ -535,13 +498,13 @@ void restrictPlaySpace(struct gameState *state) {
 			player->xAcc = 0;
 		}
 	}
-	
+
 	if (player->yLoc <= 0) {
 		// Top border.
 
 		// Ensure the player didn't slip past the boundary.
 		player->yLoc = 0;
-		
+
 		// Only allow positive acceleration / velocity.
 		if (player->yVel < 0) {
 			player->yVel = 0;
@@ -554,7 +517,7 @@ void restrictPlaySpace(struct gameState *state) {
 
 		// Ensure the player didn't slip past the boundary.
 		player->yLoc = state->maxY - playerHeight;
-		
+
 		// Only allow negative acceleration / velocity.
 		if (player->yVel > 0) {
 			player->yVel = 0;
