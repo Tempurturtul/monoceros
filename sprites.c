@@ -40,6 +40,7 @@ void initSprite(struct sprite *inputSprite, int type, float xLoc, float yLoc) {
 	inputSprite->numEffects = 0;
 	inputSprite->errLast = 0;
 	inputSprite->isShooter = -1;
+	inputSprite->wpnSelect = 0;
 	
 	
 }
@@ -209,7 +210,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	struct sprite * missLt = malloc(sizeof(struct sprite));
 	initSprite(missLt, 2,10,10);
 	initDispPairSprite(missLt, 4, 0, "<=< ");
-	initDispPairSprite(missLt, 2, 0, "(o");
+	initDispPairSprite(missLt, 2, 0, "    (o");
 	localList->spriteArr[localList->numSprites] = missLt;
 	localList->numSprites++;
 	//ID=8
@@ -281,6 +282,39 @@ void initSpriteLibrary(struct spriteList *localList) {
 	calcCoM(gnd1);
 	localList->spriteArr[localList->numSprites] = gnd1;
 	localList->numSprites++;
+/*
+	struct sprite * ammoM = malloc(sizeof(struct sprite));
+	initSprite(ammoM, 6,0,0);
+	initDispPairSprite(ammoM, 1, 0, " _ \n/ \\\n| |\n| |\n\\_/\n/-\\");
+	initDispPairSprite(ammoM, 15, 0, "\n\n M\n -");
+	calcCoM(ammoM);
+	localList->spriteArr[localList->numSprites] = ammoM;
+	localList->numSprites++;
+
+	struct sprite * ammoPC = malloc(sizeof(struct sprite));
+	initSprite(ammoPC, 7,0,0);
+	initDispPairSprite(ammoPC, 1, 0, "  ||\n  ||\n  ||\n (88)");
+	initDispPairSprite(ammoPC, 15, 0, "\n  PC");
+	calcCoM(ammoPC);
+	localList->spriteArr[localList->numSprites] = ammoPC;
+	localList->numSprites++;
+*/
+	struct sprite * ammoM = malloc(sizeof(struct sprite));
+	initSprite(ammoM, 6,0,0);
+	initDispPairSprite(ammoM, 15, 0, "....\n....\n....");
+	initDispPairSprite(ammoM, 15, 0, "\n MA");
+	calcCoM(ammoM);
+	localList->spriteArr[localList->numSprites] = ammoM;
+	localList->numSprites++;
+
+	struct sprite * ammoPC = malloc(sizeof(struct sprite));
+	initSprite(ammoPC, 7,0,0);
+	initDispPairSprite(ammoPC, 15, 0, "....\n....\n....");
+	initDispPairSprite(ammoPC, 15, 0, "\n PC");
+	calcCoM(ammoPC);
+	localList->spriteArr[localList->numSprites] = ammoPC;
+	localList->numSprites++;
+
 
 	// generate more sprites!
 	// .. //

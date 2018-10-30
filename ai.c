@@ -43,7 +43,7 @@ void updateSpriteAI(struct gameState * state, struct library * lib) {
 						addSprite(missleLt, state, lib);
 						// if you want to be real physicsy then you'd actually copy the pShip
 						// velocities to the new sprite as well
-						modSprite(-1, sIn->xLoc+sIn->xCoM, sIn->yLoc+sIn->yCoM, -60*(1e6)/REFRESH_RATE, 0, 0, state);
+						modSprite(-1, sIn->xLoc+sIn->xCoM-1, sIn->yLoc+sIn->yCoM, -60*(1e6)/REFRESH_RATE, 0, 0, state);
 
 						sIn->isShooter = state->time;
 				}

@@ -34,6 +34,8 @@ void initLevelData(struct levelData * level) {
 	
 	level->groundOK=0;
 	level->maxHeight=25;
+	
+	level->pctAmmo=10;
 
 }
 
@@ -116,6 +118,14 @@ void spawnEnemies(struct gameState * state, struct library * lib, struct levelDa
 	}
 	else {
 		level->spawnOK += 1;
+		if (getRand(1,1000) < level->pctAmmo) {
+			if (getRand(1,100) < 50 ) {
+				addEnemy(state, lib, ammoPC, 0);
+			}
+			else {
+				addEnemy(state, lib, ammoM, 0);
+			}
+		}
 	}
 
 
@@ -172,7 +182,7 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 		// you want this to be an else if
 		else {
 			if (level->skyRate == 2*level->skyLimit) {
-				//wbkgd(window, COLOR_PAIR(13));
+				//wbkgd(window, COLOR_PAIR(15));
 				for(j=0; j< 8; j++) {
 					for (i=0; i < state->maxX+2; i++ ) {
 						addSprite(gnd1, state, lib);
@@ -188,6 +198,7 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 						state->allSprites->spriteArr[i]->yLoc <= state->maxY-7) {
 							// stop sprites
 							transitionPlanetBG(state, lib, level);
+							wbkgd(window, COLOR_PAIR(15));
 						}
 				}
 			}

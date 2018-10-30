@@ -6,8 +6,8 @@
 # gcc -o main main.c menu.h menu.c gamePlay.c gamePlay.h sprites.c sprites.h effects.c effects.h levels.c levels.h interfaces.h -lncurses -lm
 #########################################################
 
-#CFLAGS = -Wall -fpic -coverage -lm -std=c99
-CFLAGS = -lncurses -lm -Wall
+#CFLAGS = -Wall -fpic -coverage -lm -std=c99 -D_XOPEN_SOURCE_EXTENDED
+CFLAGS = -lncursesw -lm -Wall 
 
 default: all
 

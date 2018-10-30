@@ -93,7 +93,9 @@ void startCurses() {
 	init_pair(10, COLOR_YELLOW, COLOR_YELLOW);
 	init_pair(11, COLOR_RED, COLOR_RED);
 	init_pair(12, COLOR_GREEN, COLOR_GREEN);
-	init_pair(13, COLOR_WHITE, COLOR_CYAN);
+	init_pair(13, COLOR_BLUE, COLOR_WHITE);
+	init_pair(14, COLOR_RED, COLOR_WHITE);
+	init_pair(15, COLOR_RED, COLOR_CYAN);
 }
 
 void endCurses() {

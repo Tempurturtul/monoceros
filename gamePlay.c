@@ -38,6 +38,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->allSprites = malloc(sizeof(struct spriteList));
 	state->allSprites->numSprites = 0;
 	addSprite(0, state, lib);
+	state->allSprites->spriteArr[0]->isShooter = 0;
 
 	// init state effects
 	state->allEffects = malloc(sizeof(struct effectList));
@@ -172,7 +173,9 @@ void playGame() {
 		//mvwprintw(title, 1, 40, "numDisps eff6:%i",state->allEffects->effectArr[6]->numDisps);
 		//mvwprintw(title, 2, 40, "numDisps eff6:%i",lib->allEffects->effectArr[6]->numDisps);
 
+		mvwprintw(title, 1, 60, "AMMO:%i",(int)state->allSprites->spriteArr[0]->isShooter);
 
+		
 		mvwprintw(title, 0, maxX - 15, "time: %.1f", round(state->time*10)/10);
 		mvwprintw(title, 1, maxX - 15, "SCORE: %i", state->score);
 		mvwprintw(title, 2, maxX - 15, "LEVEL: %i", level->currLevel);
@@ -228,6 +231,7 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 	float dist;
 	struct sprite * s1;
 	struct sprite * s2;
+	int effectType=shipEx1;
 	// only check my ship right now
 	for (i=0; i<state->allSprites->numSprites; i++) {
 		// only check everyone else if current sprite is a colliding type sprite
@@ -247,11 +251,43 @@ void detectCollision(struct gameState * state, struct library * lib, struct leve
 							//s1->xAcc += -20*(1e6)/REFRESH_RATE;
 							// oh so klugey
 							if (s1->type != 4 ) {
-								addEffect(shipEx1,i,state, lib);
-								modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-								s1->markedForDeath=1;
+								if (i==0) {
+									if (s2->type < 6) {
+										//effectType = shipEx2;
+										addEffect(shipEx2,i,state, lib);
+										modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+										addEffect(shipEx3,i,state, lib);
+										modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+										s1->markedForDeath=1;
+									}
+									else {
+										if (s2->type == 6) {
+											// switch to missle or add ammo
+											s1->isShooter = 25;
+											s1->wpnSelect = -1;
+											s2->markedForDeath=1;
+											addEffect(ammo1,j,state, lib);
+											modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+										}
+										else if (s2->type == 7) {
+											// switch to plasma cannon or add ammo
+											s1->isShooter = 15;
+											s1->wpnSelect = 1;
+											s2->markedForDeath=1;
+											addEffect(ammo1,j,state, lib);
+											modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+										}
+									}
+								}
+								else {
+									effectType = shipEx1;
+									addEffect(effectType,i,state, lib);
+									modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+									s1->markedForDeath=1;
+								}
+								
 							}
-							if (s2->type !=4) {
+							if (s2->type != 4 && s2->type != 6 && s2->type != 7) {
 								addEffect(shipEx1,j,state, lib);
 								modEffect(-1, state->time, s2->xCoM, s2->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 								s2->markedForDeath=1;
@@ -443,16 +479,18 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 		pShip->xAcc += 4*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[0]->start = state->time;
 	}
-	else if (inputChar == ' ') {
+	else if (inputChar == ' ' && pShip->isShooter > 0) {
 		// player missle (only one at a time here for testing)
-		if (0) {
+		if (pShip->wpnSelect==-1) {
+			pShip->isShooter -= 1;
 			addSprite(missleRt, state, lib);
 			// if you want to be real physicsy then you'd actually copy the pShip
 			// velocities to the new sprite as well
-			modSprite(-1, pShip->xLoc+ pShip->xCoM, pShip->yLoc+pShip->yCoM, 30*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc+ pShip->xCoM+5, pShip->yLoc+pShip->yCoM, 45*(1e6)/REFRESH_RATE, 0, 0, state);
 		}
 		// player laser
-		else {
+		else if (pShip->wpnSelect==1) {
+			pShip->isShooter -= 1;
 			addSprite(laser, state, lib);
 			modSprite(-1, pShip->xLoc+ pShip->xCoM, pShip->yLoc+pShip->yCoM, 150*(1e6)/REFRESH_RATE, 0, 0, state);
 			//struct sprite * laserPtr = state->allSprites->spriteArr[state->allSprites->numSprites-1];
