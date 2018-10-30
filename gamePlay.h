@@ -29,8 +29,8 @@ int checkOverlap(struct sprite * s1, struct sprite * s2);
 void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc);
 //void playGame(struct gameState * state, struct library * lib, struct levelData * level);
 void calcScore(struct gameState * state, struct levelData * level);
-void playGame();
-int waitQueue();
+void playGame(int network_socket);
+void waitQueue();
 void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib);
 void restrictPlaySpace(struct gameState *state);
 

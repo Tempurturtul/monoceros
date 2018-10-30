@@ -83,7 +83,7 @@ void freeGame(struct gameState * state, struct library * lib, struct levelData *
 }
 
 //void playGame(struct gameState * state, struct library * lib, struct levelData * level) {
-void playGame() {
+void playGame(int network_socket) {
 	// Create windows.
 	int maxX, maxY;
 	int titleSize = 3;
@@ -122,14 +122,13 @@ void playGame() {
 	 while (playFlag) {
 		//tstart = clock();
 
-		// TODO: Add flag for multiplayer / single player.
-		if (false) {
+		// The value of network_socket acts as a flag for multiplayer / single player.
+		if (network_socket > 0) {
 			// Multiplayer.
-			// inputChar = getNetUpdates(); // TODO: Maybe use a static variable so each time we call this we switch which player's input we get?
-		} else {
-			// Single player.
-			inputChar = wgetch(action);
+			// receive_data(network_socket, netData, netDataLen);
 		}
+
+		inputChar = wgetch(action);
 
 		handleInput(inputChar, &playFlag, state, lib);
 
@@ -166,7 +165,7 @@ void playGame() {
 
 		mvwprintw(title, 0, 20, "numEnemies:%i",level->numEnemies);
 		mvwprintw(title, 1, 20, "numSprites:%i",state->allSprites->numSprites);
-//		mvwprintw(title, 2, 20, "yVel:%f",state->allSprites->spriteArr[0]->xAcc);
+		//mvwprintw(title, 2, 20, "yVel:%f",state->allSprites->spriteArr[0]->xAcc);
 
 		mvwprintw(title, 0, 40, "numEffects:%i",state->allEffects->numEffects);
 		//mvwprintw(title, 1, 40, "numDisps eff6:%i",state->allEffects->effectArr[6]->numDisps);
@@ -364,35 +363,28 @@ void calcScore(struct gameState * state, struct levelData * level) {
 	}
 }
 
+void waitQueue() {
+	messageScreen("Now connecting...");
 
-int waitQueue() {
-	int start = (int)time(NULL);
-	int now = start;
-	int connection_stat = establish_connection();
+	int network_socket = establish_connection("128.193.36.41", 2997);
 
-	while (now - start < 6 && connection_stat == -1) {
+	if (network_socket == -1) {
 		messageScreen("There was an error connecting to the server");
-		sleep(0.5);
-		now = (int)time(NULL);
+		getch();
+		return;
 	}
 
-	while (now - start < 6 && connection_stat == 0) {
-		messageScreen("Now connecting...");
-		sleep(0.5);
-		now = (int)time(NULL);
-	}
+	messageScreen("Starting game in 3...");
+	sleep(1);
+	messageScreen("Starting game in 2...");
+	sleep(1);
+	messageScreen("Starting game in 1...");
+	sleep(1);
 
-	start = (int)time(NULL);
-	now = start;
+	playGame(network_socket);
 
-	while (now - start < 6 && connection_stat == 0) {
-		messageScreen((void *)(intptr_t)receive_data());
-		sleep(0.5);
-		now = (int)time(NULL);
-	}
-
-	closing_connection();
-	return 0;
+	closing_connection(network_socket);
+	return;
 }
 
 void limitVel(struct sprite * temp, float limit) {
