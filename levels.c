@@ -62,13 +62,13 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 		level->AIlevel = 1;
 		level->maxNumEnemies = 5;
 	}
-	if (state->score > 60 && state->score < 75) {
+	if (state->score > 60 && state->score < 100) {
 		level->currLevel = 30;
 		level->AIlevel = 2;
 		level->maxNumEnemies = 2;
 	}
 	// extended scale
-	if (state->score > 75) {
+	if (state->score > 100) {
 		level->currLevel = 35;
 		level->maxNumEnemies += (int)((state->score - 75)/10);
 		//level->groundVel++;
@@ -118,6 +118,8 @@ void spawnEnemies(struct gameState * state, struct library * lib, struct levelDa
 	}
 	else {
 		level->spawnOK += 1;
+		// goodies!
+		// careful this ends up being REFRESH_RATE dependent
 		if (getRand(1,1000) < level->pctAmmo) {
 			if (getRand(1,100) < 50 ) {
 				addEnemy(state, lib, ammoPC, 0);
@@ -155,7 +157,7 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 				}
 				else {
 					// do nothing at level 3!
-					//initPlanetBG(state, lib, level);
+					// because there's so much going on do this separately
 				}
 			}
 
@@ -173,48 +175,56 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 			level->spawnOK = -9;   // caution this is dependent on REFRESH_RATE
 		}
 	}
-	i=0;
-	int j;
 	if (level->currLevel > 25  && !level->groundOK) {
-		if (level->skyRate<2*level->skyLimit) {
-			initPlanetBG(state, lib, level);
-		}
-		// you want this to be an else if
-		else {
-			if (level->skyRate == 2*level->skyLimit) {
-				//wbkgd(window, COLOR_PAIR(15));
-				for(j=0; j< 8; j++) {
-					for (i=0; i < state->maxX+2; i++ ) {
-						addSprite(gnd1, state, lib);
-						gndSprite(-1, i, state->maxY+40+j, 0,-3, state);	
-					}				
-				}
-
-				level->skyRate++;
-			}
-			else {
-				for (i=0; i<state->allSprites->numSprites; i++) {
-					if (state->allSprites->spriteArr[i]->type == 5 && 
-						state->allSprites->spriteArr[i]->yLoc <= state->maxY-7) {
-							// stop sprites
-							transitionPlanetBG(state, lib, level);
-							wbkgd(window, COLOR_PAIR(15));
-						}
-				}
-			}
-			//genPlanetBG(state, lib, level);
-		}
-		
+		planetLevel(state, lib, level, window);
 	}
-	if (level->groundOK) {
+	else if (level->groundOK) {
 		genPlanetBG(state, lib, level);
+	}	
+
+}
+
+void planetLevel(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window) {
+	int i, j;
+	level->spawnOK=0;
+	if (level->skyRate<2*level->skyLimit) {
+		initPlanetBG(state, lib, level);
 	}
+	// you want this to be an else if
+	else {
+		if (level->skyRate == 2*level->skyLimit) {
+			//wbkgd(window, COLOR_PAIR(15));
+			level->spawnOK=0;
+			for(j=0; j< 8; j++) {
+				for (i=0; i < state->maxX+2; i++ ) {
+					addSprite(gnd1, state, lib);
+					gndSprite(-1, i, state->maxY+40+j, 0,-3, state);	
+				}				
+			}
+
+			level->skyRate++;
+		}
+		else {
+			for (i=0; i<state->allSprites->numSprites; i++) {
+				if (state->allSprites->spriteArr[i]->type == 5 && 
+					state->allSprites->spriteArr[i]->yLoc <= state->maxY-7) {
+						// stop sprites
+						transitionPlanetBG(state, lib, level);
+						wbkgd(window, COLOR_PAIR(15));
+						state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 16;
+						state->allSprites->spriteArr[0]->dispArr[1]->colorPair = 17;
+						level->spawnOK=1;
+					}
+			}
+		}
+	}
+
 }
 
 
 void addEnemy(struct gameState * state, struct library * lib, int ID, int AIlevel) {
 	addSprite(ID, state, lib);
-	int xAcc = getRand(25,30);
+	int xAcc = getRand(20,45);
 //	xAcc = 0;	// for debugging
 	modSprite(-1, state->maxX, getRand(1, state->gndHeight), -xAcc*(1e6)/REFRESH_RATE, 0, AIlevel, state);
 }

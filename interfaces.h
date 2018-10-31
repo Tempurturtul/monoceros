@@ -29,7 +29,7 @@
 #define MAX_LEVEL_DISPS 256
 
 enum STYPE {
-	ship = 0, eny1, eny2, openSpace1, openSpace2, openSpace3, openSpace4, missleRt, missleLt, laser,
+	ship = 0, eny1, eny1a, eny2, openSpace1, openSpace2, openSpace3, openSpace4, missleRt, missleLt, laser,
 	asteroid1, asteroid2, asteroid3, sky1, sky2, gnd1, ammoM, ammoPC
 };
 

@@ -71,16 +71,16 @@ void calcMovement(int sIndex, struct gameState * state) {
 
 void trackP(int sIndex, struct gameState * state) {
 	// define baseThrust in sprite? probably
-	float gain=1.;
-	float baseThrust = 1.;
+	float gain=getRand(2,10);
+	float baseThrust = 0.1;
 	struct sprite * target = state->allSprites->spriteArr[0];
 	struct sprite * sIn = state->allSprites->spriteArr[sIndex];
 	sIn->yAcc += gain*(target->yLoc/sIn->yLoc-1)*(baseThrust*(1e6)/REFRESH_RATE);
 }
 void trackPI(int sIndex, struct gameState * state) {
 	// proportional and integrator controller
-	float gain=1.;
-	float baseThrust = getRand(1,3);
+	float gain=0.5;
+	float baseThrust = getRand(1,6);
 	struct sprite * target = state->allSprites->spriteArr[0];
 	struct sprite * sIn = state->allSprites->spriteArr[sIndex];
 	float errCur = target->yLoc - sIn->yLoc;

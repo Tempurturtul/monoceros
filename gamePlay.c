@@ -146,7 +146,7 @@ void playGame() {
 		updatePhysics(state);
 
 		// collisionDetection()
-		detectCollision(state, lib, level);
+		detectCollision(state, lib);
 
 		// calcScore()
 		calcScore(state, level);
@@ -199,12 +199,101 @@ void playGame() {
 	delwin(action);
 }
 
+
+void detectCollision(struct gameState * state, struct library * lib) {
+	int i, j;
+	float dist;
+	struct sprite * s1;
+	struct sprite * s2;
+	// only check my ship right now
+	for (i=0; i<state->allSprites->numSprites; i++) {
+		// only check everyone else if current sprite is a colliding type sprite
+		s1 = state->allSprites->spriteArr[i];
+		if (s1->type != 3 && s1->markedForDeath == 0) {
+			// cycle through everyone else
+			for (j=0; j< state->allSprites->numSprites; j++) {
+				// check for colliding-type and yourself
+				s2 = state->allSprites->spriteArr[j];
+				if (s2->type != 3 && i != j && s2->markedForDeath == 0 && s2->type != s1->type) {
+					dist = calcDistance(s1,s2);
+					// if the distance between the sprites is within one of their spheres of influence
+					// only then do a closer check for collision (expensive) (really only need the smaller sphere of influence, but this is safer)
+					if (dist < s1->radius ||
+						dist < s2->radius) {
+						if (checkOverlap(s1, s2)) {
+							manageCollision(i, j, state, lib);
+						}
+
+					}
+				}
+			}
+		}
+	}
+}
+
+void manageCollision(int i, int j,struct gameState * state, struct library * lib) {
+	struct sprite * s1 = state->allSprites->spriteArr[i];
+	struct sprite * s2 = state->allSprites->spriteArr[j];
+	// 4 is indestructible, so don't bother 
+	if (s1->type != 4 ) {
+		// 0 is the player, this is checking first if you died (different exposion sequence)
+		// then if you got a powerup (cannon or missiles)
+		if (i==0) {
+			if (s2->type < 6) {
+				//effectType = shipEx2;
+				addEffect(shipEx2,i,state, lib);
+				modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				addEffect(shipEx3,i,state, lib);
+				modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				s1->markedForDeath=1;
+			}
+			else {
+				if (s2->type == 6) {
+					// switch to missle or add ammo
+					s1->isShooter = 25;
+					s1->wpnSelect = -1;
+					s2->markedForDeath=1;
+					addEffect(ammo1,j,state, lib);
+					modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				}
+				else if (s2->type == 7) {
+					// switch to plasma cannon or add ammo
+					s1->isShooter = 15;
+					s1->wpnSelect = 1;
+					s2->markedForDeath=1;
+					addEffect(ammo1,j,state, lib);
+					modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				}
+			}
+		}
+		// not the player, then kill it like normal
+		else {
+			addEffect(shipEx1,i,state, lib);
+			modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+			s1->markedForDeath=1;
+		}
+		
+	}
+	// just checking the other guy, 6 & 7 were handled above
+	if (s2->type != 4 && s2->type != 6 && s2->type != 7) {
+		addEffect(shipEx1,j,state, lib);
+		modEffect(-1, state->time, s2->xCoM, s2->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+		s2->markedForDeath=1;
+	}
+	// give the player credit if they killed a bad guy
+	if (s1->type == 1 || s2->type ==1) {
+		state->deltaKills++;
+	}	
+}
+/// ***********//
+// should probably move physics to its own header and implementation file
+
 void updatePhysics(struct gameState * state) {
 	float dt = state->time - state->timeLast;
 	struct spriteList *local = state->allSprites;
 	int i=0;
 	for (i=0; i< local->numSprites; i++) {
-
+		
 		local->spriteArr[i]->yVel += (local->spriteArr[i]->yAcc)*dt;
 		if (i==0) {
 			limitVel(local->spriteArr[i], 30);
@@ -224,88 +313,6 @@ void updatePhysics(struct gameState * state) {
 		}
 }
 
-// definitely doing too much here
-// will probably refactor - fix me still noodling
-void detectCollision(struct gameState * state, struct library * lib, struct levelData * level) {
-	int i, j;
-	float dist;
-	struct sprite * s1;
-	struct sprite * s2;
-	int effectType=shipEx1;
-	// only check my ship right now
-	for (i=0; i<state->allSprites->numSprites; i++) {
-		// only check everyone else if current sprite is a colliding type sprite
-		s1 = state->allSprites->spriteArr[i];
-		if (s1->type != 3 && s1->markedForDeath == 0) {
-			// cycle through everyone else
-			for (j=0; j< state->allSprites->numSprites; j++) {
-				// check for colliding-type and yourself
-				s2 = state->allSprites->spriteArr[j];
-				if (s2->type != 3 && i != j && s2->markedForDeath == 0 && s2->type != s1->type) {
-					dist = calcDistance(s1,s2);
-					// if the distance between the sprites is within one of their spheres of influence
-					// only then do a closer check for collision (expensive) (really only need the smaller sphere of influence, but this is safer)
-					if (dist < s1->radius ||
-						dist < s2->radius) {
-						if (checkOverlap(s1, s2)) {
-							//s1->xAcc += -20*(1e6)/REFRESH_RATE;
-							// oh so klugey
-							if (s1->type != 4 ) {
-								if (i==0) {
-									if (s2->type < 6) {
-										//effectType = shipEx2;
-										addEffect(shipEx2,i,state, lib);
-										modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-										addEffect(shipEx3,i,state, lib);
-										modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-										s1->markedForDeath=1;
-									}
-									else {
-										if (s2->type == 6) {
-											// switch to missle or add ammo
-											s1->isShooter = 25;
-											s1->wpnSelect = -1;
-											s2->markedForDeath=1;
-											addEffect(ammo1,j,state, lib);
-											modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-										}
-										else if (s2->type == 7) {
-											// switch to plasma cannon or add ammo
-											s1->isShooter = 15;
-											s1->wpnSelect = 1;
-											s2->markedForDeath=1;
-											addEffect(ammo1,j,state, lib);
-											modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-										}
-									}
-								}
-								else {
-									effectType = shipEx1;
-									addEffect(effectType,i,state, lib);
-									modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-									s1->markedForDeath=1;
-								}
-								
-							}
-							if (s2->type != 4 && s2->type != 6 && s2->type != 7) {
-								addEffect(shipEx1,j,state, lib);
-								modEffect(-1, state->time, s2->xCoM, s2->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-								s2->markedForDeath=1;
-							}
-							if (s1->type == 1 || s2->type ==1) {
-								state->deltaKills++;
-							}
-
-						}
-
-					}
-				}
-			}
-		}
-	}
-}
-/// ***********//
-// should probably move physics to its own header and implementation file
 // oh so pythagoras
 float calcDistance(struct sprite * s1, struct sprite * s2) {
 	float x1, x2, y1, y2;
@@ -448,6 +455,7 @@ void limitVel(struct sprite * temp, float limit) {
 
 void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib) {
 	struct sprite * pShip = state->allSprites->spriteArr[0];
+	float baseThrust = 10.0;
 
 	if (inputChar == 'q') {
 		*playFlag = 0;
@@ -459,24 +467,24 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 						// limiting limits at window borders -- Done
 	else if (inputChar == KEY_UP) {
 		//allSprites.spriteArr[0]->yLoc += -1;
-		pShip->yAcc += -4*(1e6)/REFRESH_RATE;
+		pShip->yAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[2]->start = state->time;
 		state->allEffects->effectArr[3]->start = state->time;
 	}
 	else if (inputChar == KEY_LEFT) {
 		//allSprites.spriteArr[0]->xLoc += -10;
-		pShip->xAcc += -4*(1e6)/REFRESH_RATE;
+		pShip->xAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[1]->start = state->time;
 		}
 	else if (inputChar == KEY_DOWN) {
 		//allSprites.spriteArr[0]->yLoc += 1;
-		pShip->yAcc += 4*(1e6)/REFRESH_RATE;
+		pShip->yAcc += baseThrust*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[4]->start = state->time;
 		state->allEffects->effectArr[5]->start = state->time;
 	}
 	else if (inputChar == KEY_RIGHT) {
 		//allSprites.spriteArr[0]->xLoc += 1;
-		pShip->xAcc += 4*(1e6)/REFRESH_RATE;
+		pShip->xAcc += baseThrust*(1e6)/REFRESH_RATE;
 		state->allEffects->effectArr[0]->start = state->time;
 	}
 	else if (inputChar == ' ' && pShip->isShooter > 0) {

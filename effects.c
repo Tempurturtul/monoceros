@@ -168,21 +168,21 @@ void initEffectLibrary(struct effectList *localList) {
 	struct effect * shipEx3 = malloc(sizeof(struct effect));
 	shipEx1->parentID = 0;
 	initEffect(shipEx3, 0, 1.5, 0,0);					// effect, ID (not used), ttl, x, y
-	initDispPair(shipEx3, 13, 0, "\n\n        -");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        \\");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        |");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        /");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        -");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        \\");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        |");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        /");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        -");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        \\");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        |");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        /");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        -");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        \\");		// effect, colorPair, attr, char *
-	initDispPair(shipEx3, 13, 0, "\n\n        |");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        -");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        \\");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        |");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        /");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        -");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        \\");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        |");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        /");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        -");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        \\");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        |");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        /");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        -");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        \\");		// effect, colorPair, attr, char *
+	initDispPair(shipEx3, 2, 0, "\n\n        |");		// effect, colorPair, attr, char *
 
 	//setEffectSize(shipEx2, 7, 8);
 	localList->effectArr[localList->numEffects] = shipEx3;

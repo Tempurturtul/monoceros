@@ -163,13 +163,29 @@ void initSpriteLibrary(struct spriteList *localList) {
 	calcCoM(eny1);
 	localList->spriteArr[localList->numSprites] = eny1;
 	localList->numSprites++;
+
+	struct sprite * eny1a = malloc(sizeof(struct sprite));
+	initSprite(eny1a, 1,100,20);
+	initDispPairSprite(eny1a, 5, 0, "    -+");
+	initDispPairSprite(eny1a, 1, 0, "\n    /");
+	initDispPairSprite(eny1a, 13, 0, "\n\n ----");
+	initDispPairSprite(eny1a, 5, A_BOLD, "\n\nO");
+	initDispPairSprite(eny1a, 1, 0, "\n\n\n    \\");
+	initDispPairSprite(eny1a, 5, 0, "\n\n\n\n    -+");
+	calcCoM(eny1a);
+	localList->spriteArr[localList->numSprites] = eny1a;
+	localList->numSprites++;
+
+	
 	// ID=1
 	// NEED NEW ENEMIES AND COLOR!!
 	struct sprite * eny2 = malloc(sizeof(struct sprite));
 	initSprite(eny2, 1,100,20);
-	initDispPairSprite(eny2, 2, A_BOLD,       " __________/|");
-	initDispPairSprite(eny2, 2, A_BOLD,   "\n/___\\    |__|=");
-	initDispPairSprite(eny2, 2, A_BOLD," \n\n    _\\___|    ");
+	initDispPairSprite(eny2, 15, A_BOLD,      " __________/|");
+	initDispPairSprite(eny2, 15, A_BOLD,   "\n/___\\    |__|=");
+	initDispPairSprite(eny2, 15, A_BOLD,"\n\n     _\\___|    ");
+	initDispPairSprite(eny2, 11, A_UNDERLINE,   "\n        .\n        .");
+	
 	calcCoM(eny2);
 	localList->spriteArr[localList->numSprites] = eny2;
 	localList->numSprites++;
