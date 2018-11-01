@@ -317,16 +317,18 @@ void initSpriteLibrary(struct spriteList *localList) {
 */
 	struct sprite * ammoM = malloc(sizeof(struct sprite));
 	initSprite(ammoM, 6,0,0);
-	initDispPairSprite(ammoM, 15, 0, "....\n....\n....");
-	initDispPairSprite(ammoM, 15, 0, "\n MA");
+	initDispPairSprite(ammoM, 20, 0, ". . \n . .\n. . ");
+	initDispPairSprite(ammoM, 21, 0, " . .\n. . \n . .");
+	initDispPairSprite(ammoM, 1, 0, "\n MA");
 	calcCoM(ammoM);
 	localList->spriteArr[localList->numSprites] = ammoM;
 	localList->numSprites++;
 
 	struct sprite * ammoPC = malloc(sizeof(struct sprite));
 	initSprite(ammoPC, 7,0,0);
-	initDispPairSprite(ammoPC, 15, 0, "....\n....\n....");
-	initDispPairSprite(ammoPC, 15, 0, "\n PC");
+	initDispPairSprite(ammoPC, 21, 0, ". . \n . .\n. . ");
+	initDispPairSprite(ammoPC, 20, 0, " . .\n. . \n . .");
+	initDispPairSprite(ammoPC, 1, 0, "\n PC");
 	calcCoM(ammoPC);
 	localList->spriteArr[localList->numSprites] = ammoPC;
 	localList->numSprites++;

@@ -19,6 +19,7 @@ NOTES
 #include "effects.h"
 
 #include "levels.h"
+#include "planet.h"
 
 
 void initLevelData(struct levelData * level) {
@@ -212,15 +213,33 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 						transitionPlanetBG(state, lib, level);
 						// modify for cyan sky background
 						wbkgd(window, COLOR_PAIR(15));
+						// fix player ship colors
 						state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 16;
 						state->allSprites->spriteArr[0]->dispArr[1]->colorPair = 17;
-						/*
-						for (i=0; i<lib->allEffects->numEffects; i++) {
-							lib->allEffects->effectArr[laserEffect]->dispArr[i]->colorPair = 18;
-						}
-						*/
+						//fix laser colors
+						lib->allEffects->effectArr[laserEffect]->dispArr[0]->colorPair = 15;
+						lib->allEffects->effectArr[laserEffect]->dispArr[1]->colorPair = 15;
+						lib->allEffects->effectArr[laserEffect]->dispArr[2]->colorPair = 16;
+						// fix missile colors
 						lib->allSprites->spriteArr[missileRt]->dispArr[0]->colorPair = 15;
 						lib->allSprites->spriteArr[missileRt]->dispArr[1]->colorPair = 19;
+						// fix enemy ship explosion
+						lib->allEffects->effectArr[shipEx1]->dispArr[0]->colorPair = 15;
+						lib->allEffects->effectArr[shipEx1]->dispArr[1]->colorPair = 22;
+						lib->allEffects->effectArr[shipEx1]->dispArr[2]->colorPair = 17;
+						lib->allEffects->effectArr[shipEx1]->dispArr[3]->colorPair = 17;
+						// fix player ship explosion
+						for (j=0; j < lib->allEffects->effectArr[shipEx3]->numDisps; j++) {
+							lib->allEffects->effectArr[shipEx3]->dispArr[j]->colorPair = 15;
+						}
+						lib->allEffects->effectArr[shipEx2]->dispArr[0]->colorPair = 17;
+						lib->allEffects->effectArr[shipEx2]->dispArr[1]->colorPair = 16;
+						lib->allEffects->effectArr[shipEx2]->dispArr[2]->colorPair = 16;
+						lib->allEffects->effectArr[shipEx2]->dispArr[3]->colorPair = 14;
+						lib->allEffects->effectArr[shipEx2]->dispArr[4]->colorPair = 22;
+						lib->allEffects->effectArr[shipEx2]->dispArr[5]->colorPair = 22;
+					
+
 						level->spawnOK=1;
 					}
 			}

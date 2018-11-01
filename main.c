@@ -101,6 +101,11 @@ void startCurses() {
 	init_pair(17, COLOR_BLACK, COLOR_CYAN);
 	init_pair(18, COLOR_GREEN, COLOR_CYAN);
 	init_pair(19, COLOR_BLUE, COLOR_CYAN);
+	// ammo crates
+	init_pair(20, COLOR_YELLOW, COLOR_RED);
+	init_pair(21, COLOR_RED, COLOR_YELLOW);
+	// sky motif again
+	init_pair(22, COLOR_YELLOW, COLOR_CYAN);
 }
 
 void endCurses() {

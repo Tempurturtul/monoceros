@@ -29,6 +29,9 @@ effects.o: effects.c effects.h interfaces.h
 levels.o: levels.c levels.h interfaces.h
 	gcc -c levels.c -g $(CFLAGS)
 
+planet.o: levels.o planet.h planet.c interfaces.h
+	gcc -c planet.c -g $(CFLAGS)
+
 ai.o: ai.c ai.h interfaces.h
 	gcc -c ai.c -g $(CFLAGS)
 
