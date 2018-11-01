@@ -65,7 +65,7 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 	if (state->score > 60 && state->score < 100) {
 		level->currLevel = 30;
 		level->AIlevel = 2;
-		level->maxNumEnemies = 2;
+		level->maxNumEnemies = 0;
 	}
 	// extended scale
 	if (state->score > 100) {
@@ -210,9 +210,17 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 					state->allSprites->spriteArr[i]->yLoc <= state->maxY-7) {
 						// stop sprites
 						transitionPlanetBG(state, lib, level);
+						// modify for cyan sky background
 						wbkgd(window, COLOR_PAIR(15));
 						state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 16;
 						state->allSprites->spriteArr[0]->dispArr[1]->colorPair = 17;
+						/*
+						for (i=0; i<lib->allEffects->numEffects; i++) {
+							lib->allEffects->effectArr[laserEffect]->dispArr[i]->colorPair = 18;
+						}
+						*/
+						lib->allSprites->spriteArr[missileRt]->dispArr[0]->colorPair = 15;
+						lib->allSprites->spriteArr[missileRt]->dispArr[1]->colorPair = 19;
 						level->spawnOK=1;
 					}
 			}
@@ -286,7 +294,7 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 	for (i=0; i< state->allSprites->numSprites; i++) {
 		struct sprite * temp = state->allSprites->spriteArr[i];
 		if (temp->type == 0) {
-			temp->yAcc += 0.75*(1e6)/REFRESH_RATE;
+			//temp->yAcc += 0.75*(1e6)/REFRESH_RATE;
 		}
 		else if (temp->type == 5) {
 			// this is looking to find the last column of landscape,

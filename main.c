@@ -95,9 +95,12 @@ void startCurses() {
 	init_pair(12, COLOR_GREEN, COLOR_GREEN);
 	init_pair(13, COLOR_BLUE, COLOR_GREEN);
 	init_pair(14, COLOR_RED, COLOR_WHITE);
+	// sky  motif
 	init_pair(15, COLOR_RED, COLOR_CYAN);
 	init_pair(16, COLOR_WHITE, COLOR_CYAN);
 	init_pair(17, COLOR_BLACK, COLOR_CYAN);
+	init_pair(18, COLOR_GREEN, COLOR_CYAN);
+	init_pair(19, COLOR_BLUE, COLOR_CYAN);
 }
 
 void endCurses() {

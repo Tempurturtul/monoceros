@@ -58,7 +58,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->deltaKills = 0;
 	state->timeLast=-REFRESH_RATE/1e6;
 	state->time = 0;
-	state->score = 0; //45;  // debugging!
+	state->score = 55; //55;  // debugging!
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
@@ -170,7 +170,8 @@ void playGame() {
 //		mvwprintw(title, 2, 20, "yVel:%f",state->allSprites->spriteArr[0]->xAcc);
 
 		mvwprintw(title, 0, 40, "numEffects:%i",state->allEffects->numEffects);
-		//mvwprintw(title, 1, 40, "numDisps eff6:%i",state->allEffects->effectArr[6]->numDisps);
+		mvwprintw(title, 1, 40, "radius gnd:%f",lib->allSprites->spriteArr[gnd1]->radius);
+		mvwprintw(title, 2, 40, "xCoM gnd:%f",lib->allSprites->spriteArr[gnd1]->xCoM);
 		//mvwprintw(title, 2, 40, "numDisps eff6:%i",lib->allEffects->effectArr[6]->numDisps);
 
 		mvwprintw(title, 1, 60, "AMMO:%i",(int)state->allSprites->spriteArr[0]->isShooter);
@@ -214,7 +215,7 @@ void detectCollision(struct gameState * state, struct library * lib) {
 			for (j=0; j< state->allSprites->numSprites; j++) {
 				// check for colliding-type and yourself
 				s2 = state->allSprites->spriteArr[j];
-				if (s2->type != 3 && i != j && s2->markedForDeath == 0 && s2->type != s1->type) {
+				if (s2->type != 3 && i != j && s2->markedForDeath == 0 && s1->markedForDeath == 0 && s2->type != s1->type) {
 					dist = calcDistance(s1,s2);
 					// if the distance between the sprites is within one of their spheres of influence
 					// only then do a closer check for collision (expensive) (really only need the smaller sphere of influence, but this is safer)
@@ -249,7 +250,7 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 			}
 			else {
 				if (s2->type == 6) {
-					// switch to missle or add ammo
+					// switch to missile or add ammo
 					s1->isShooter = 25;
 					s1->wpnSelect = -1;
 					s2->markedForDeath=1;
@@ -267,6 +268,9 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 			}
 		}
 		// not the player, then kill it like normal
+		else if (s1->type == 5) {
+			// nothing!
+		}
 		else {
 			addEffect(shipEx1,i,state, lib);
 			modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
@@ -276,6 +280,7 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 	}
 	// just checking the other guy, 6 & 7 were handled above
 	if (s2->type != 4 && s2->type != 6 && s2->type != 7) {
+//	if (s2->type < 4) {
 		addEffect(shipEx1,j,state, lib);
 		modEffect(-1, state->time, s2->xCoM, s2->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 		s2->markedForDeath=1;
@@ -365,7 +370,7 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc) {
 				// manually terminate your new string
 				temp[i-n] = '\0';
 				int dx = 0;
-				while (dx <= strlen(temp)) {
+				while (dx < strlen(temp)) {
 					if (temp[dx] != ' ') {
 						loc->x[loc->numChars] = (int)spriteIn->xLoc+dx;
 						loc->y[loc->numChars] = (int)spriteIn->yLoc+j;
@@ -488,10 +493,10 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 		state->allEffects->effectArr[0]->start = state->time;
 	}
 	else if (inputChar == ' ' && pShip->isShooter > 0) {
-		// player missle (only one at a time here for testing)
+		// player missile (only one at a time here for testing)
 		if (pShip->wpnSelect==-1) {
 			pShip->isShooter -= 1;
-			addSprite(missleRt, state, lib);
+			addSprite(missileRt, state, lib);
 			// if you want to be real physicsy then you'd actually copy the pShip
 			// velocities to the new sprite as well
 			modSprite(-1, pShip->xLoc+ pShip->xCoM+5, pShip->yLoc+pShip->yCoM, 45*(1e6)/REFRESH_RATE, 0, 0, state);
