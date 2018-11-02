@@ -94,11 +94,7 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 void spawnEnemies(struct gameState * state, struct library * lib, struct levelData * level) {
 	int enemyType, AIused;
 	if (level->numEnemies < level->maxNumEnemies && level->spawnOK > 0) {
-		// make a new enemy
-		if (level->currLevel < 20) {
-			// here you can vary the enemy type by percentage (when you get more enemies)
-		}
-		// debugging!!!!
+		// make a new enemy - vary by level and type stochasitcally
 		if (level->AIlevel == 2) {
 			enemyType = eny2;
 			AIused = 2;
@@ -123,7 +119,6 @@ void spawnEnemies(struct gameState * state, struct library * lib, struct levelDa
 			// at the appropriate time (i.e. the AI fires thrusters)
 			// addEffect(upThrust1, state->allSprites->numSprites-1,state, lib);
 		}
-		//addEffect(6,state->allSprites->numSprites-1,state, lib);
 		level->numEnemies++;
 		level->spawnOK = -9;   // caution (fix me) this is dependent on REFRESH_RATE
 		
@@ -206,8 +201,7 @@ void addEnemy(struct gameState * state, struct library * lib, int ID, int AIleve
 }
 
 void genOpenSpaceBG(struct gameState * state, struct library * lib) {
-	// space backrounds are openSpace1-4 
-	
+	// space backrounds!
 		addSprite(getRand(openSpace1, openSpace4), state, lib);
 		modSprite(-1, state->maxX, getRand(1,state->maxY), -getRand(1,5)*(1e6)/REFRESH_RATE, 0, 0, state);	
 }

@@ -14,9 +14,10 @@
 
 
 #define MAX_DISP_SUBSIZE 64
+// reworking this 
 //#define REFRESH_RATE 50000
 //#define REFRESH_RATE 100000
-#define REFRESH_RATE 75000
+#define REFRESH_RATE 75000 
 
 // this is only so high because you aren't cleaning them out as you go
 #define MAX_EFFECTS 1024

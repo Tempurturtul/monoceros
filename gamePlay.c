@@ -60,7 +60,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->timeWait = -REFRESH_RATE/1e6;
 	state->timeLast=-REFRESH_RATE/1e6;
 	state->time = 0;
-	state->score = 55; //55;  // debugging! gets you to planet level (stage 3)
+	state->score = 0; //55;  // debugging! gets you to planet level (stage 3)
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
@@ -474,14 +474,14 @@ void limitVel(struct sprite * temp, float limit) {
 
 void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib) {
 	struct sprite * pShip = state->allSprites->spriteArr[0];
-	float baseThrust = 10.0;
+	float baseThrust = 8.0;
 
 	if (inputChar == 'q') {
 		*playFlag = 0;
 	}
 	// FOR PLAYER CONTROLS - consider:
-						// limiting total velocity
-						// increasing deltaAcc for counter thrust
+						// limiting total velocity -- Done
+						// increasing deltaAcc for counter thrust  -- NA
 						// applying counter acc at window borders -- Done
 						// limiting limits at window borders -- Done
 	else if (inputChar == KEY_UP) {

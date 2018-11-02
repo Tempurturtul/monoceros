@@ -299,6 +299,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	localList->spriteArr[localList->numSprites] = gnd1;
 	localList->numSprites++;
 /*
+//	these just did not look right at all - let's use crates instead!
 	struct sprite * ammoM = malloc(sizeof(struct sprite));
 	initSprite(ammoM, 6,0,0);
 	initDispPairSprite(ammoM, 1, 0, " _ \n/ \\\n| |\n| |\n\\_/\n/-\\");

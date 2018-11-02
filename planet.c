@@ -111,8 +111,8 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 			
 		}
 	}
-	// need to modify baddies so they are only coming from 'above ground'
-	// do you want the ground to be destructable?
+	
+	// builds terrain up and down
 	if (getRand(1,100)<20 ) {
 		if (getRand(1,100) >50  && state->maxY - yExtent< level->maxHeight) {
 			// buids up
@@ -123,6 +123,8 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 			yExtent += +getRand(1,5);
 		}
 	}
+	// actually buid when appropriate, fill in with non-interacting sprites to 
+	// save overhead computation
 	while (xExtent < state->maxX+2) {
 			addSprite(gnd1, state, lib);
 			gndSprite(-1,xExtent+1, (int)yExtent, -level->groundVel,0, state);	
@@ -139,6 +141,8 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 }
 void transitionPlanetBG(struct gameState * state, struct library * lib, struct levelData * level) {
 	int i;
+	// gosh don't really need two logic checks here anymore
+	// clear the sprites that are still hanging out from the previous level
 	for (i=0; i<state->allSprites->numSprites; i++) {
 		struct sprite * temp = state->allSprites->spriteArr[i];
 		if (temp->type == 5 ) {
@@ -161,13 +165,16 @@ void initPlanetBG(struct gameState * state, struct library * lib, struct levelDa
 	}
 	for (i=0; i< state->allSprites->numSprites; i++) {
 		struct sprite * temp = state->allSprites->spriteArr[i];
+		// make sprites feel like they are moving up
 		if (temp->type == 3 || temp->type == 2) {
 			temp->yAcc += -0.5*(1e6)/REFRESH_RATE;
 		}
+		// make player feel like they are moving down
 		else if (temp->type == 0) {
 			temp->yAcc += 0.5*(1e6)/REFRESH_RATE;
 		}
 	}
+	// reentry sprites!
 	for (i=0; i<state->maxX; i++) {
 		if (getRand(1,100) < down) {
 			addSprite(getRand(sky1,sky2), state, lib);
