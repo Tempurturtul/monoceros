@@ -114,6 +114,7 @@ struct gameState {
 	struct effectList * allEffects;
 	float time;
 	float timeLast;
+	float timeWait;
 	int score;
 	int deltaKills;
 	float scoreTimeLast;

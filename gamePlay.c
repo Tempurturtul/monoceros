@@ -43,6 +43,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	// init state effects
 	state->allEffects = malloc(sizeof(struct effectList));
 	state->allEffects->numEffects = 0;
+	// these are the effects for the player ship thrusters
 	addEffect(0, 0, state, lib);
 	addEffect(1, 0, state, lib);
 	addEffect(2, 0, state, lib);
@@ -56,15 +57,14 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 
 	// init state variables
 	state->deltaKills = 0;
+	state->timeWait = -REFRESH_RATE/1e6;
 	state->timeLast=-REFRESH_RATE/1e6;
 	state->time = 0;
-	state->score = 0; //55;  // debugging!
+	state->score = 55; //55;  // debugging! gets you to planet level (stage 3)
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
-
-
-
+	
 	usleep(REFRESH_RATE);
 }
 
@@ -83,7 +83,6 @@ void freeGame(struct gameState * state, struct library * lib, struct levelData *
 
 }
 
-//void playGame(struct gameState * state, struct library * lib, struct levelData * level) {
 void playGame() {
 	// Create windows.
 	int maxX, maxY;
@@ -136,19 +135,18 @@ void playGame() {
 
 		restrictPlaySpace(state);
 
-		// procGen()
+		// procedural level generation
 		procGen(state, lib, level, action);
 
-		// updatePlayer()
-
-		// updateSprites()
+		// this updates the sprite actions (including firing)
 		updateSpriteAI(state, lib);
+		// update physics for all sprites
 		updatePhysics(state);
 
-		// collisionDetection()
+		// handles collision detection and collision results
 		detectCollision(state, lib);
 
-		// calcScore()
+		// calculates the current score, stores it in state
 		calcScore(state, level);
 
 		// draw screen!
@@ -157,9 +155,12 @@ void playGame() {
 		wclear(title);
 		wclear(action);
 		wcolor_set(action, 1, NULL);		// change this by referencing the appropriate colors in the sprites and effects themselves
-
+		
+		// prints all sprites
 		printSprite(action, state);
+		// prints all effects, very similar functions
 		printEffect(action, state);
+		
 		// i needed this for debugging
 		mvwprintw(title, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
 		mvwprintw(title, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
@@ -180,16 +181,26 @@ void playGame() {
 		mvwprintw(title, 0, maxX - 15, "time: %.1f", round(state->time*10)/10);
 		mvwprintw(title, 1, maxX - 15, "SCORE: %i", state->score);
 		mvwprintw(title, 2, maxX - 15, "LEVEL: %i", level->currLevel);
+		// actually print!
 		wrefresh(title);
 		wrefresh(action);
 
-
-		usleep(REFRESH_RATE);
+		// timing for gameplay, could make this a f(sprites) for
+		// smoother behavior - nvmd: normalizing to frames per second is pretty effective
+		clock_gettime(CLOCK_MONOTONIC, &timeHold);
+		state->timeWait = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
+		if (((1./12)-(state->timeWait-state->time))*1e6 > 0) {
+			usleep(((1./12)-(state->timeWait-state->time))*1e6);
+		}
+		else {
+			// do nothing! you're trying to catch up on frame rate!
+		}
 		// generate the output game time (and time used for physics)
 		state->timeLast=state->time;
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
-	}
+
+		}
 
 
 
@@ -214,6 +225,8 @@ void detectCollision(struct gameState * state, struct library * lib) {
 			// cycle through everyone else
 			for (j=0; j< state->allSprites->numSprites; j++) {
 				// check for colliding-type and yourself
+				// recheck s1 because multiple pixels can be colliding at once (and you don't
+				// want to bother with that)
 				s2 = state->allSprites->spriteArr[j];
 				if (s2->type != 3 && i != j && s2->markedForDeath == 0 && s1->markedForDeath == 0 && s2->type != s1->type) {
 					dist = calcDistance(s1,s2);
@@ -221,7 +234,10 @@ void detectCollision(struct gameState * state, struct library * lib) {
 					// only then do a closer check for collision (expensive) (really only need the smaller sphere of influence, but this is safer)
 					if (dist < s1->radius ||
 						dist < s2->radius) {
+						// they are within each other's sphere of influence
+						// do a detailed check
 						if (checkOverlap(s1, s2)) {
+							// determine outcome of collision
 							manageCollision(i, j, state, lib);
 						}
 
@@ -241,13 +257,14 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 		// then if you got a powerup (cannon or missiles)
 		if (i==0) {
 			if (s2->type < 6) {
-				//effectType = shipEx2;
+				// you actually hit something to kill you
 				addEffect(shipEx2,i,state, lib);
 				modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				addEffect(shipEx3,i,state, lib);
 				modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				s1->markedForDeath=1;
 			}
+			// powerups!
 			else {
 				if (s2->type == 6) {
 					// switch to missile or add ammo
@@ -268,9 +285,6 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 			}
 		}
 		// not the player, then kill it like normal
-		else if (s1->type == 5) {
-			// nothing!
-		}
 		else {
 			addEffect(shipEx1,i,state, lib);
 			modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
@@ -520,7 +534,7 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 
 			}
 	}
-
+	flushinp();
 }
 
 void restrictPlaySpace(struct gameState *state) {

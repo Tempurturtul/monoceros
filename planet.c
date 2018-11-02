@@ -27,7 +27,6 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 	// you want this to be an else if
 	else {
 		if (level->skyRate == 2*level->skyLimit) {
-			//wbkgd(window, COLOR_PAIR(15));
 			level->spawnOK=0;
 			for(j=0; j< 8; j++) {
 				for (i=0; i < state->maxX+2; i++ ) {
