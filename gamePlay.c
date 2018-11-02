@@ -110,6 +110,11 @@ void playGame(int network_socket) {
 
 	int inputChar;
 
+	// TODO: Remove
+	struct gameState *dummy_state = malloc(sizeof(struct gameState));
+	struct library *dummy_lib = malloc(sizeof(struct library));
+	struct levelData *dummy_level = malloc(sizeof(struct levelData));
+
 	// sets the blocking timer for wgetch
 	wtimeout(action, 1);
 
@@ -122,13 +127,18 @@ void playGame(int network_socket) {
 	 while (playFlag) {
 		//tstart = clock();
 
+		inputChar = wgetch(action);
+
 		// The value of network_socket acts as a flag for multiplayer / single player.
 		if (network_socket > 0) {
 			// Multiplayer.
-			// receive_data(network_socket, netData, netDataLen);
-		}
 
-		inputChar = wgetch(action);
+			// Receive updates from the server.
+			receive_data(network_socket, dummy_state, dummy_lib, dummy_level);
+
+			// Send our input to the server (if invalid the server should just reject it).
+			send_data(network_socket, &inputChar, sizeof(int));
+		}
 
 		handleInput(inputChar, &playFlag, state, lib);
 

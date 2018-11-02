@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 		switch (menuChoice) {
 			case 1:
 				//playGame(state, lib, level);
-				playGame();
+				playGame(0);
 				break;
 			case 2:
 				waitQueue();
