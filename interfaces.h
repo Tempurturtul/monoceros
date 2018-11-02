@@ -14,9 +14,10 @@
 
 
 #define MAX_DISP_SUBSIZE 64
+// reworking this 
 //#define REFRESH_RATE 50000
 //#define REFRESH_RATE 100000
-#define REFRESH_RATE 75000
+#define REFRESH_RATE 75000 
 
 // this is only so high because you aren't cleaning them out as you go
 #define MAX_EFFECTS 1024
@@ -27,14 +28,18 @@
 #define MAX_SPRITE_EFFECTS 16
 
 #define MAX_LEVEL_DISPS 256
+// oh gross
+#define LEVEL_THREE_SCORE 60
+#define EXTENDED_SCORE 100
 
 enum STYPE {
-ship = 0, eny1, eny2, openSpace1, openSpace2, openSpace3, openSpace4, missleRt, missleLt, laser,
-asteroid1, asteroid2, asteroid3, sky1, sky2, gnd1
+	ship = 0, eny1, eny1a, eny2, openSpace1, openSpace2, openSpace3, openSpace4, missileRt, missileLt, laser,
+	asteroid1, asteroid2, asteroid3, sky1, sky2, gnd1, ammoM, ammoPC
 };
 
 enum ETYPE {
-	rtThrust = 0, ltThrust, upThrust1, upThrust2, dwThrust1, dwThrust2, shipEx1, laserEffect
+	rtThrust = 0, ltThrust, upThrust1, upThrust2, dwThrust1, dwThrust2, shipEx1, shipEx2, shipEx3, 
+	laserEffect, ammo1
 };
 
 
@@ -68,6 +73,7 @@ struct sprite {
 	int AI;
 	float errLast;
 	float isShooter;
+	int wpnSelect;
 };
 
 struct spriteList {
@@ -109,6 +115,7 @@ struct gameState {
 	struct effectList * allEffects;
 	float time;
 	float timeLast;
+	float timeWait;
 	int score;
 	int deltaKills;
 	float scoreTimeLast;
@@ -144,6 +151,8 @@ struct levelData {
 	int groundOK;
 	float maxHeight;
 //	float groundHeight;
+
+	int pctAmmo;
 	
 	// maybe you want levels to have single char disps?
 	// that might be easier to procedurally generate

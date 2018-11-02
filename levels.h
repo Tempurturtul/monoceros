@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 
 #include "interfaces.h"
-
+#include "planet.h"
 
 void initLevelData(struct levelData * level);
 void procGen(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window);
@@ -29,9 +29,6 @@ void initOpenSpaceBG(struct gameState * state, struct library * lib);
 
 void genAsteroidBG(struct gameState * state, struct library * lib, struct levelData * level);
 
-void initPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
-void transitionPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
-void genPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
 
 int getRand(int, int);
 

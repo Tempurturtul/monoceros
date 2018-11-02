@@ -38,12 +38,13 @@ void updateSpriteAI(struct gameState * state, struct library * lib) {
 			if (sIn->isShooter > 0 ) {
 				struct sprite * pShip = state->allSprites->spriteArr[0];
 				if (state->time - sIn->isShooter > shootDelay  &&
-						fabs(sIn->yLoc-pShip->yLoc) < shootTol) {
+						fabs(sIn->yLoc-pShip->yLoc) < shootTol &&
+						getRand(1,1000) < 100) {
 						// fire at will!
-						addSprite(missleLt, state, lib);
+						addSprite(missileLt, state, lib);
 						// if you want to be real physicsy then you'd actually copy the pShip
 						// velocities to the new sprite as well
-						modSprite(-1, sIn->xLoc+sIn->xCoM, sIn->yLoc+sIn->yCoM, -60*(1e6)/REFRESH_RATE, 0, 0, state);
+						modSprite(-1, sIn->xLoc+sIn->xCoM-1, sIn->yLoc+sIn->yCoM, -60*(1e6)/REFRESH_RATE, 0, 0, state);
 
 						sIn->isShooter = state->time;
 				}
@@ -71,16 +72,16 @@ void calcMovement(int sIndex, struct gameState * state) {
 
 void trackP(int sIndex, struct gameState * state) {
 	// define baseThrust in sprite? probably
-	float gain=1.;
-	float baseThrust = 1.;
+	float gain=getRand(2,10);
+	float baseThrust = 0.1;
 	struct sprite * target = state->allSprites->spriteArr[0];
 	struct sprite * sIn = state->allSprites->spriteArr[sIndex];
 	sIn->yAcc += gain*(target->yLoc/sIn->yLoc-1)*(baseThrust*(1e6)/REFRESH_RATE);
 }
 void trackPI(int sIndex, struct gameState * state) {
 	// proportional and integrator controller
-	float gain=1.;
-	float baseThrust = getRand(1,3);
+	float gain=0.5;
+	float baseThrust = getRand(1,6);
 	struct sprite * target = state->allSprites->spriteArr[0];
 	struct sprite * sIn = state->allSprites->spriteArr[sIndex];
 	float errCur = target->yLoc - sIn->yLoc;
