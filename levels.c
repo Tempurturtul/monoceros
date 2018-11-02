@@ -63,13 +63,13 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 		level->AIlevel = 1;
 		level->maxNumEnemies = 5;
 	}
-	if (state->score > 60 && state->score < 100) {
+	if (state->score > LEVEL_THREE_SCORE && state->score < EXTENDED_SCORE) {
 		level->currLevel = 30;
 		level->AIlevel = 2;
-		level->maxNumEnemies = 0;
+		level->maxNumEnemies = 2;
 	}
 	// extended scale
-	if (state->score > 100) {
+	if (state->score > EXTENDED_SCORE) {
 		level->currLevel = 35;
 		level->maxNumEnemies += (int)((state->score - 75)/10);
 		//level->groundVel++;
@@ -92,20 +92,31 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 }
 
 void spawnEnemies(struct gameState * state, struct library * lib, struct levelData * level) {
-	//int enemyType=1;
+	int enemyType, AIused;
 	if (level->numEnemies < level->maxNumEnemies && level->spawnOK > 0) {
 		// make a new enemy
 		if (level->currLevel < 20) {
 			// here you can vary the enemy type by percentage (when you get more enemies)
 		}
 		// debugging!!!!
-	if (level->AIlevel == 2) {
-		addEnemy(state, lib, eny2, level->AIlevel);
-	}
-	else{
-		addEnemy(state, lib, eny1, level->AIlevel);
+		if (level->AIlevel == 2) {
+			enemyType = eny2;
+			AIused = 2;
+		}
+		else{
+			if (getRand(1,100) < 40 ) { 
+				AIused = level->AIlevel;
+			}
+			else {
+				AIused = 0;
+			}
+			enemyType = eny1;
+			if (AIused == 1) {
+				enemyType = eny1a;
+			}
+		}
+		addEnemy(state, lib, enemyType, AIused);
 		state->allSprites->spriteArr[state->allSprites->numSprites-1]->isShooter =1;
-	}
 	
 		if (level->AIlevel>0) {
 			// if you want to do this, you'll need a way of activating the effects
@@ -185,68 +196,6 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 
 }
 
-void planetLevel(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window) {
-	int i, j;
-	level->spawnOK=0;
-	if (level->skyRate<2*level->skyLimit) {
-		initPlanetBG(state, lib, level);
-	}
-	// you want this to be an else if
-	else {
-		if (level->skyRate == 2*level->skyLimit) {
-			//wbkgd(window, COLOR_PAIR(15));
-			level->spawnOK=0;
-			for(j=0; j< 8; j++) {
-				for (i=0; i < state->maxX+2; i++ ) {
-					addSprite(gnd1, state, lib);
-					gndSprite(-1, i, state->maxY+40+j, 0,-3, state);	
-				}				
-			}
-
-			level->skyRate++;
-		}
-		else {
-			for (i=0; i<state->allSprites->numSprites; i++) {
-				if (state->allSprites->spriteArr[i]->type == 5 && 
-					state->allSprites->spriteArr[i]->yLoc <= state->maxY-7) {
-						// stop sprites
-						transitionPlanetBG(state, lib, level);
-						// modify for cyan sky background
-						wbkgd(window, COLOR_PAIR(15));
-						// fix player ship colors
-						state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 16;
-						state->allSprites->spriteArr[0]->dispArr[1]->colorPair = 17;
-						//fix laser colors
-						lib->allEffects->effectArr[laserEffect]->dispArr[0]->colorPair = 15;
-						lib->allEffects->effectArr[laserEffect]->dispArr[1]->colorPair = 15;
-						lib->allEffects->effectArr[laserEffect]->dispArr[2]->colorPair = 16;
-						// fix missile colors
-						lib->allSprites->spriteArr[missileRt]->dispArr[0]->colorPair = 15;
-						lib->allSprites->spriteArr[missileRt]->dispArr[1]->colorPair = 19;
-						// fix enemy ship explosion
-						lib->allEffects->effectArr[shipEx1]->dispArr[0]->colorPair = 15;
-						lib->allEffects->effectArr[shipEx1]->dispArr[1]->colorPair = 22;
-						lib->allEffects->effectArr[shipEx1]->dispArr[2]->colorPair = 17;
-						lib->allEffects->effectArr[shipEx1]->dispArr[3]->colorPair = 17;
-						// fix player ship explosion
-						for (j=0; j < lib->allEffects->effectArr[shipEx3]->numDisps; j++) {
-							lib->allEffects->effectArr[shipEx3]->dispArr[j]->colorPair = 15;
-						}
-						lib->allEffects->effectArr[shipEx2]->dispArr[0]->colorPair = 17;
-						lib->allEffects->effectArr[shipEx2]->dispArr[1]->colorPair = 16;
-						lib->allEffects->effectArr[shipEx2]->dispArr[2]->colorPair = 16;
-						lib->allEffects->effectArr[shipEx2]->dispArr[3]->colorPair = 14;
-						lib->allEffects->effectArr[shipEx2]->dispArr[4]->colorPair = 22;
-						lib->allEffects->effectArr[shipEx2]->dispArr[5]->colorPair = 22;
-					
-
-						level->spawnOK=1;
-					}
-			}
-		}
-	}
-
-}
 
 
 void addEnemy(struct gameState * state, struct library * lib, int ID, int AIlevel) {
@@ -306,107 +255,6 @@ void genAsteroidBG(struct gameState * state, struct library * lib, struct levelD
 	}
 }
 
-void genPlanetBG(struct gameState * state, struct library * lib, struct levelData * level) {
-	// apply gravity
-	int i;
-	float xExtent=0, yExtent=state->maxY;
-	for (i=0; i< state->allSprites->numSprites; i++) {
-		struct sprite * temp = state->allSprites->spriteArr[i];
-		if (temp->type == 0) {
-			//temp->yAcc += 0.75*(1e6)/REFRESH_RATE;
-		}
-		else if (temp->type == 5) {
-			// this is looking to find the last column of landscape,
-			// along with its height, since you are looping through everyone anyways
-			if (temp->xLoc > xExtent) {
-				xExtent = temp->xLoc;
-				//if (temp->yLoc <= yExtent) {
-					yExtent = temp->yLoc;
-				//}
-			}
-			if (temp->xLoc < 0) {
-				delSprite(state, i);
-			}
-			
-		}
-	}
-	// need to modify baddies so they are only coming from 'above ground'
-	// do you want the ground to be destructable?
-	if (getRand(1,100)<20 ) {
-		if (getRand(1,100) >50  && state->maxY - yExtent< level->maxHeight) {
-			// buids up
-			yExtent += -getRand(1,5);
-		}
-		else if (yExtent < state->maxY) {
-			// goes down
-			yExtent += +getRand(1,5);
-		}
-		// limit yExtent 
-		//limiter(&yExtent,state->maxY- level->maxHeight, state->maxY);
-	}
-	while (xExtent < state->maxX+2) {
-			addSprite(gnd1, state, lib);
-			gndSprite(-1,xExtent+1, (int)yExtent, -level->groundVel,0, state);	
-		for (i = (int)yExtent+1; i < state->maxY; i++) {
-			addSprite(gnd1, state, lib);
-//			gndSprite(-1, state->maxX-20, 50, -level->groundVel,0, state);		
-//			gndSprite(-1,xExtent+1, (int)yExtent, -level->groundVel,0, state);	
-			gndSprite(-1,xExtent+1, i, -level->groundVel,0, state);	
-			state->allSprites->spriteArr[state->allSprites->numSprites-1]->type=3;
-
-//	printf("x:%f y:%i\n",xExtent,i);
-//	sleep(1);
-		}
-		xExtent++;
-	}
-	state->gndHeight = yExtent;
-	
-}
-void transitionPlanetBG(struct gameState * state, struct library * lib, struct levelData * level) {
-	int i;
-	for (i=0; i<state->allSprites->numSprites; i++) {
-		struct sprite * temp = state->allSprites->spriteArr[i];
-		if (temp->type == 5 ) {
-			gndSprite(i, -1000, -1000, -level->groundVel,0, state);
-		}
-		else if (temp->type == 3) {
-			gndSprite(i, -1000, -1000, -level->groundVel, 0, state);
-		}
-	}
-	level->groundOK = 1;
-	
-}
-
-void initPlanetBG(struct gameState * state, struct library * lib, struct levelData * level) {
-	int i;
-	int down;
-	down = level->skyRate;
-	if (level->skyRate > level->skyLimit) {
-		down = level->skyLimit - (level->skyRate - level->skyLimit);
-	}
-	for (i=0; i< state->allSprites->numSprites; i++) {
-		struct sprite * temp = state->allSprites->spriteArr[i];
-		if (temp->type == 3 || temp->type == 2) {
-			temp->yAcc += -0.5*(1e6)/REFRESH_RATE;
-		}
-		else if (temp->type == 0) {
-			temp->yAcc += 0.5*(1e6)/REFRESH_RATE;
-		}
-	}
-	for (i=0; i<state->maxX; i++) {
-		if (getRand(1,100) < down) {
-			addSprite(getRand(sky1,sky2), state, lib);
-			if (level->skyRate > level->skyLimit) {
-				modSprite(-1, i, state->maxY, 0,-3.0*(1e6)/REFRESH_RATE, 0, state);
-			}
-			else {
-				modSprite(-1, i, state->maxY, 0,-1.0*(1e6)/REFRESH_RATE, 0, state);			
-			}
-		}
-	}
-	level->skyRate++;
-	
-}
 
 void freeLevelDisps(struct levelData * level) {
 	int j;

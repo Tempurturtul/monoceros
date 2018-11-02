@@ -12,13 +12,12 @@
 #include <arpa/inet.h>
 
 #include "interfaces.h"
-#include "levels.h"
 
 
 
 void initPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
 void transitionPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
-void initSkyMotif(struct gameState * state, struct library * lib);
+void swapSkyMotif(struct gameState * state, struct library * lib);
 void genPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
 void planetLevel(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window);
 

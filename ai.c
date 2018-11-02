@@ -38,7 +38,8 @@ void updateSpriteAI(struct gameState * state, struct library * lib) {
 			if (sIn->isShooter > 0 ) {
 				struct sprite * pShip = state->allSprites->spriteArr[0];
 				if (state->time - sIn->isShooter > shootDelay  &&
-						fabs(sIn->yLoc-pShip->yLoc) < shootTol) {
+						fabs(sIn->yLoc-pShip->yLoc) < shootTol &&
+						getRand(1,1000) < 100) {
 						// fire at will!
 						addSprite(missileLt, state, lib);
 						// if you want to be real physicsy then you'd actually copy the pShip

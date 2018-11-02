@@ -58,7 +58,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->deltaKills = 0;
 	state->timeLast=-REFRESH_RATE/1e6;
 	state->time = 0;
-	state->score = 55; //55;  // debugging!
+	state->score = 0; //55;  // debugging!
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
@@ -473,24 +473,32 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 	else if (inputChar == KEY_UP) {
 		//allSprites.spriteArr[0]->yLoc += -1;
 		pShip->yAcc += -baseThrust*(1e6)/REFRESH_RATE;
-		state->allEffects->effectArr[2]->start = state->time;
-		state->allEffects->effectArr[3]->start = state->time;
+		if (state->score < LEVEL_THREE_SCORE) {
+			state->allEffects->effectArr[2]->start = state->time;
+			state->allEffects->effectArr[3]->start = state->time;
+		}
 	}
 	else if (inputChar == KEY_LEFT) {
 		//allSprites.spriteArr[0]->xLoc += -10;
 		pShip->xAcc += -baseThrust*(1e6)/REFRESH_RATE;
-		state->allEffects->effectArr[1]->start = state->time;
+		if (state->score < LEVEL_THREE_SCORE) {
+			state->allEffects->effectArr[1]->start = state->time;
 		}
+	}
 	else if (inputChar == KEY_DOWN) {
 		//allSprites.spriteArr[0]->yLoc += 1;
 		pShip->yAcc += baseThrust*(1e6)/REFRESH_RATE;
-		state->allEffects->effectArr[4]->start = state->time;
-		state->allEffects->effectArr[5]->start = state->time;
+		if (state->score < LEVEL_THREE_SCORE) {
+			state->allEffects->effectArr[4]->start = state->time;
+			state->allEffects->effectArr[5]->start = state->time;
+		}
 	}
 	else if (inputChar == KEY_RIGHT) {
 		//allSprites.spriteArr[0]->xLoc += 1;
 		pShip->xAcc += baseThrust*(1e6)/REFRESH_RATE;
-		state->allEffects->effectArr[0]->start = state->time;
+		if (state->score < LEVEL_THREE_SCORE) {
+			state->allEffects->effectArr[0]->start = state->time;
+		}
 	}
 	else if (inputChar == ' ' && pShip->isShooter > 0) {
 		// player missile (only one at a time here for testing)

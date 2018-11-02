@@ -1,3 +1,23 @@
+/*******************************************************************************************
+** Author: Chris Spravka
+** Date:  01 NOV 2018
+** Description: planet implementation file
+
+NOTES
+1.  planet is fundamentally different from other levels and has a ton of code, so I moved it here
+*******************************************************************************************/
+#include <stdlib.h>
+#include <unistd.h>
+#include <ncurses.h>
+#include <string.h>
+#include <math.h>
+
+
+#include "sprites.h"
+#include "effects.h"
+
+#include "planet.h"
+
 void planetLevel(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window) {
 	int i, j;
 	level->spawnOK=0;
@@ -26,7 +46,7 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 						transitionPlanetBG(state, lib, level);
 						// modify for cyan sky background
 						wbkgd(window, COLOR_PAIR(15));
-						initSkyMotif(state, lib);
+						swapSkyMotif(state, lib);
 						// okay to go
 						level->spawnOK=1;
 					}
@@ -36,7 +56,8 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 
 }
 
-void initSkyMotif(struct gameState * state, struct library * lib) {
+void swapSkyMotif(struct gameState * state, struct library * lib) {
+	int j;
 	// fix player ship colors
 	state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 16;
 	state->allSprites->spriteArr[0]->dispArr[1]->colorPair = 17;
@@ -47,6 +68,9 @@ void initSkyMotif(struct gameState * state, struct library * lib) {
 	// fix missile colors
 	lib->allSprites->spriteArr[missileRt]->dispArr[0]->colorPair = 15;
 	lib->allSprites->spriteArr[missileRt]->dispArr[1]->colorPair = 19;
+	// fix left missile colors
+	lib->allSprites->spriteArr[missileLt]->dispArr[0]->colorPair = 19;
+	lib->allSprites->spriteArr[missileLt]->dispArr[1]->colorPair = 15;
 	// fix enemy ship explosion
 	lib->allEffects->effectArr[shipEx1]->dispArr[0]->colorPair = 15;
 	lib->allEffects->effectArr[shipEx1]->dispArr[1]->colorPair = 22;
@@ -71,7 +95,7 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 	for (i=0; i< state->allSprites->numSprites; i++) {
 		struct sprite * temp = state->allSprites->spriteArr[i];
 		if (temp->type == 0) {
-			//temp->yAcc += 0.75*(1e6)/REFRESH_RATE;
+			temp->yAcc += 0.75*(1e6)/REFRESH_RATE;
 		}
 		else if (temp->type == 5) {
 			// this is looking to find the last column of landscape,
@@ -99,21 +123,15 @@ void genPlanetBG(struct gameState * state, struct library * lib, struct levelDat
 			// goes down
 			yExtent += +getRand(1,5);
 		}
-		// limit yExtent 
-		//limiter(&yExtent,state->maxY- level->maxHeight, state->maxY);
 	}
 	while (xExtent < state->maxX+2) {
 			addSprite(gnd1, state, lib);
 			gndSprite(-1,xExtent+1, (int)yExtent, -level->groundVel,0, state);	
 		for (i = (int)yExtent+1; i < state->maxY; i++) {
 			addSprite(gnd1, state, lib);
-//			gndSprite(-1, state->maxX-20, 50, -level->groundVel,0, state);		
-//			gndSprite(-1,xExtent+1, (int)yExtent, -level->groundVel,0, state);	
 			gndSprite(-1,xExtent+1, i, -level->groundVel,0, state);	
 			state->allSprites->spriteArr[state->allSprites->numSprites-1]->type=3;
 
-//	printf("x:%f y:%i\n",xExtent,i);
-//	sleep(1);
 		}
 		xExtent++;
 	}

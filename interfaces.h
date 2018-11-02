@@ -27,6 +27,9 @@
 #define MAX_SPRITE_EFFECTS 16
 
 #define MAX_LEVEL_DISPS 256
+// oh gross
+#define LEVEL_THREE_SCORE 60
+#define EXTENDED_SCORE 100
 
 enum STYPE {
 	ship = 0, eny1, eny1a, eny2, openSpace1, openSpace2, openSpace3, openSpace4, missileRt, missileLt, laser,
