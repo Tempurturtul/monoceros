@@ -93,7 +93,19 @@ void startCurses() {
 	init_pair(10, COLOR_YELLOW, COLOR_YELLOW);
 	init_pair(11, COLOR_RED, COLOR_RED);
 	init_pair(12, COLOR_GREEN, COLOR_GREEN);
-	init_pair(13, COLOR_WHITE, COLOR_CYAN);
+	init_pair(13, COLOR_BLUE, COLOR_GREEN);
+	init_pair(14, COLOR_RED, COLOR_WHITE);
+	// sky  motif
+	init_pair(15, COLOR_RED, COLOR_CYAN);
+	init_pair(16, COLOR_WHITE, COLOR_CYAN);
+	init_pair(17, COLOR_BLACK, COLOR_CYAN);
+	init_pair(18, COLOR_GREEN, COLOR_CYAN);
+	init_pair(19, COLOR_BLUE, COLOR_CYAN);
+	// ammo crates
+	init_pair(20, COLOR_YELLOW, COLOR_RED);
+	init_pair(21, COLOR_RED, COLOR_YELLOW);
+	// sky motif again
+	init_pair(22, COLOR_YELLOW, COLOR_CYAN);
 }
 
 void endCurses() {

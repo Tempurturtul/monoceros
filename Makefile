@@ -6,8 +6,8 @@
 # gcc -o main main.c menu.h menu.c gamePlay.c gamePlay.h sprites.c sprites.h effects.c effects.h levels.c levels.h interfaces.h -lncurses -lm
 #########################################################
 
-#CFLAGS = -Wall -fpic -coverage -lm -std=c99
-CFLAGS = -lncurses -lm -Wall
+#CFLAGS = -Wall -fpic -coverage -lm -std=c99 -D_XOPEN_SOURCE_EXTENDED
+CFLAGS = -lncursesw -lm -Wall 
 
 default: all
 
@@ -26,14 +26,17 @@ sprites.o: sprites.c sprites.h interfaces.h
 effects.o: effects.c effects.h interfaces.h
 	gcc -c effects.c -g $(CFLAGS)
 
-levels.o: levels.c levels.h interfaces.h
+levels.o: levels.c levels.h interfaces.h planet.h
 	gcc -c levels.c -g $(CFLAGS)
+
+planet.o: levels.o planet.h planet.c interfaces.h
+	gcc -c planet.c -g $(CFLAGS)
 
 ai.o: ai.c ai.h interfaces.h
 	gcc -c ai.c -g $(CFLAGS)
 
-all: menu.o sprites.o gamePlay.o effects.o main.c levels.o ai.o interfaces.h tcp_client.o tcp_client.h
-	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o ai.o tcp_client.o $(CFLAGS)
+all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o interfaces.h tcp_client.o tcp_client.h
+	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o planet.o ai.o tcp_client.o $(CFLAGS)
 
 server: tcp_server.c
 	gcc -o server tcp_server.c $(CFLAGS)

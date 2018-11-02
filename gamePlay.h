@@ -23,7 +23,8 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 
 void updatePhysics(struct gameState * state);
 void limitVel(struct sprite * temp, float limit);
-void detectCollision(struct gameState * state, struct library * lib, struct levelData * level );
+void detectCollision(struct gameState * state, struct library * lib);
+void manageCollision(int i, int j,struct gameState * state, struct library * lib);
 float calcDistance(struct sprite * s1, struct sprite * s2);
 int checkOverlap(struct sprite * s1, struct sprite * s2);
 void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc);

@@ -40,6 +40,7 @@ void initSprite(struct sprite *inputSprite, int type, float xLoc, float yLoc) {
 	inputSprite->numEffects = 0;
 	inputSprite->errLast = 0;
 	inputSprite->isShooter = -1;
+	inputSprite->wpnSelect = 0;
 	
 	
 }
@@ -146,7 +147,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	initSprite(ship, 0, 50,20);
 	// by convention,  start a newline with \n, don't terminate the previous one
 	initDispPairSprite(ship, 1, A_DIM, "-----      -------------");
-	initDispPairSprite(ship, 1, 0, "\n    \\      /\n   /-------/\\\n   \\--------/");
+	initDispPairSprite(ship, 1, 0, "\n    \\      /\n   /-------/\\\n   \\--------/");//\n      |\n      |");
 	calcCoM(ship);
 	localList->spriteArr[localList->numSprites] = ship;
 	localList->numSprites++;
@@ -162,13 +163,29 @@ void initSpriteLibrary(struct spriteList *localList) {
 	calcCoM(eny1);
 	localList->spriteArr[localList->numSprites] = eny1;
 	localList->numSprites++;
+
+	struct sprite * eny1a = malloc(sizeof(struct sprite));
+	initSprite(eny1a, 1,100,20);
+	initDispPairSprite(eny1a, 5, 0, "    -+");
+	initDispPairSprite(eny1a, 1, 0, "\n    /");
+	initDispPairSprite(eny1a, 13, 0, "\n\n ----");
+	initDispPairSprite(eny1a, 5, A_BOLD, "\n\nO");
+	initDispPairSprite(eny1a, 1, 0, "\n\n\n    \\");
+	initDispPairSprite(eny1a, 5, 0, "\n\n\n\n    -+");
+	calcCoM(eny1a);
+	localList->spriteArr[localList->numSprites] = eny1a;
+	localList->numSprites++;
+
+	
 	// ID=1
 	// NEED NEW ENEMIES AND COLOR!!
 	struct sprite * eny2 = malloc(sizeof(struct sprite));
 	initSprite(eny2, 1,100,20);
-	initDispPairSprite(eny2, 2, A_BOLD,       " __________/|");
-	initDispPairSprite(eny2, 2, A_BOLD,   "\n/___\\    |__|=");
-	initDispPairSprite(eny2, 2, A_BOLD," \n\n    _\\___|    ");
+	initDispPairSprite(eny2, 15, A_BOLD,      " __________/|");
+	initDispPairSprite(eny2, 15, A_BOLD,   "\n/___\\    |__|=");
+	initDispPairSprite(eny2, 15, A_BOLD,"\n\n     _\\___|    ");
+	initDispPairSprite(eny2, 11, A_UNDERLINE,   "\n        .\n        .");
+	
 	calcCoM(eny2);
 	localList->spriteArr[localList->numSprites] = eny2;
 	localList->numSprites++;
@@ -209,7 +226,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	struct sprite * missLt = malloc(sizeof(struct sprite));
 	initSprite(missLt, 2,10,10);
 	initDispPairSprite(missLt, 4, 0, "<=< ");
-	initDispPairSprite(missLt, 2, 0, "(o");
+	initDispPairSprite(missLt, 2, 0, "    (o");
 	localList->spriteArr[localList->numSprites] = missLt;
 	localList->numSprites++;
 	//ID=8
@@ -277,10 +294,46 @@ void initSpriteLibrary(struct spriteList *localList) {
 	// ID=14
 	struct sprite * gnd1 = malloc(sizeof(struct sprite));
 	initSprite(gnd1, 5,0,0);
-	initDispPairSprite(gnd1, 12, A_DIM, "-");
+	initDispPairSprite(gnd1, 12, A_DIM, "-\n");
 	calcCoM(gnd1);
 	localList->spriteArr[localList->numSprites] = gnd1;
 	localList->numSprites++;
+/*
+//	these just did not look right at all - let's use crates instead!
+	struct sprite * ammoM = malloc(sizeof(struct sprite));
+	initSprite(ammoM, 6,0,0);
+	initDispPairSprite(ammoM, 1, 0, " _ \n/ \\\n| |\n| |\n\\_/\n/-\\");
+	initDispPairSprite(ammoM, 15, 0, "\n\n M\n -");
+	calcCoM(ammoM);
+	localList->spriteArr[localList->numSprites] = ammoM;
+	localList->numSprites++;
+
+	struct sprite * ammoPC = malloc(sizeof(struct sprite));
+	initSprite(ammoPC, 7,0,0);
+	initDispPairSprite(ammoPC, 1, 0, "  ||\n  ||\n  ||\n (88)");
+	initDispPairSprite(ammoPC, 15, 0, "\n  PC");
+	calcCoM(ammoPC);
+	localList->spriteArr[localList->numSprites] = ammoPC;
+	localList->numSprites++;
+*/
+	struct sprite * ammoM = malloc(sizeof(struct sprite));
+	initSprite(ammoM, 6,0,0);
+	initDispPairSprite(ammoM, 20, 0, ". . \n . .\n. . ");
+	initDispPairSprite(ammoM, 21, 0, " . .\n. . \n . .");
+	initDispPairSprite(ammoM, 1, 0, "\n MA");
+	calcCoM(ammoM);
+	localList->spriteArr[localList->numSprites] = ammoM;
+	localList->numSprites++;
+
+	struct sprite * ammoPC = malloc(sizeof(struct sprite));
+	initSprite(ammoPC, 7,0,0);
+	initDispPairSprite(ammoPC, 21, 0, ". . \n . .\n. . ");
+	initDispPairSprite(ammoPC, 20, 0, " . .\n. . \n . .");
+	initDispPairSprite(ammoPC, 1, 0, "\n PC");
+	calcCoM(ammoPC);
+	localList->spriteArr[localList->numSprites] = ammoPC;
+	localList->numSprites++;
+
 
 	// generate more sprites!
 	// .. //

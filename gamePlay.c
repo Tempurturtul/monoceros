@@ -38,10 +38,12 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->allSprites = malloc(sizeof(struct spriteList));
 	state->allSprites->numSprites = 0;
 	addSprite(0, state, lib);
+	state->allSprites->spriteArr[0]->isShooter = 0;
 
 	// init state effects
 	state->allEffects = malloc(sizeof(struct effectList));
 	state->allEffects->numEffects = 0;
+	// these are the effects for the player ship thrusters
 	addEffect(0, 0, state, lib);
 	addEffect(1, 0, state, lib);
 	addEffect(2, 0, state, lib);
@@ -55,15 +57,14 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 
 	// init state variables
 	state->deltaKills = 0;
+	state->timeWait = -REFRESH_RATE/1e6;
 	state->timeLast=-REFRESH_RATE/1e6;
 	state->time = 0;
-	state->score = 0; //45;  // debugging!
+	state->score = 0; //55;  // debugging! gets you to planet level (stage 3)
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
-
-
-
+	
 	usleep(REFRESH_RATE);
 }
 
@@ -144,19 +145,18 @@ void playGame(int network_socket) {
 
 		restrictPlaySpace(state);
 
-		// procGen()
+		// procedural level generation
 		procGen(state, lib, level, action);
 
-		// updatePlayer()
-
-		// updateSprites()
+		// this updates the sprite actions (including firing)
 		updateSpriteAI(state, lib);
+		// update physics for all sprites
 		updatePhysics(state);
 
-		// collisionDetection()
-		detectCollision(state, lib, level);
+		// handles collision detection and collision results
+		detectCollision(state, lib);
 
-		// calcScore()
+		// calculates the current score, stores it in state
 		calcScore(state, level);
 
 		// draw screen!
@@ -165,9 +165,12 @@ void playGame(int network_socket) {
 		wclear(title);
 		wclear(action);
 		wcolor_set(action, 1, NULL);		// change this by referencing the appropriate colors in the sprites and effects themselves
-
+		
+		// prints all sprites
 		printSprite(action, state);
+		// prints all effects, very similar functions
 		printEffect(action, state);
+		
 		// i needed this for debugging
 		mvwprintw(title, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
 		mvwprintw(title, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
@@ -178,23 +181,36 @@ void playGame(int network_socket) {
 		//mvwprintw(title, 2, 20, "yVel:%f",state->allSprites->spriteArr[0]->xAcc);
 
 		mvwprintw(title, 0, 40, "numEffects:%i",state->allEffects->numEffects);
-		//mvwprintw(title, 1, 40, "numDisps eff6:%i",state->allEffects->effectArr[6]->numDisps);
+		mvwprintw(title, 1, 40, "radius gnd:%f",lib->allSprites->spriteArr[gnd1]->radius);
+		mvwprintw(title, 2, 40, "xCoM gnd:%f",lib->allSprites->spriteArr[gnd1]->xCoM);
 		//mvwprintw(title, 2, 40, "numDisps eff6:%i",lib->allEffects->effectArr[6]->numDisps);
 
+		mvwprintw(title, 1, 60, "AMMO:%i",(int)state->allSprites->spriteArr[0]->isShooter);
 
+		
 		mvwprintw(title, 0, maxX - 15, "time: %.1f", round(state->time*10)/10);
 		mvwprintw(title, 1, maxX - 15, "SCORE: %i", state->score);
 		mvwprintw(title, 2, maxX - 15, "LEVEL: %i", level->currLevel);
+		// actually print!
 		wrefresh(title);
 		wrefresh(action);
 
-
-		usleep(REFRESH_RATE);
+		// timing for gameplay, could make this a f(sprites) for
+		// smoother behavior - nvmd: normalizing to frames per second is pretty effective
+		clock_gettime(CLOCK_MONOTONIC, &timeHold);
+		state->timeWait = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
+		if (((1./12)-(state->timeWait-state->time))*1e6 > 0) {
+			usleep(((1./12)-(state->timeWait-state->time))*1e6);
+		}
+		else {
+			// do nothing! you're trying to catch up on frame rate!
+		}
 		// generate the output game time (and time used for physics)
 		state->timeLast=state->time;
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
-	}
+
+		}
 
 
 
@@ -205,12 +221,108 @@ void playGame(int network_socket) {
 	delwin(action);
 }
 
+
+void detectCollision(struct gameState * state, struct library * lib) {
+	int i, j;
+	float dist;
+	struct sprite * s1;
+	struct sprite * s2;
+	// only check my ship right now
+	for (i=0; i<state->allSprites->numSprites; i++) {
+		// only check everyone else if current sprite is a colliding type sprite
+		s1 = state->allSprites->spriteArr[i];
+		if (s1->type != 3 && s1->markedForDeath == 0) {
+			// cycle through everyone else
+			for (j=0; j< state->allSprites->numSprites; j++) {
+				// check for colliding-type and yourself
+				// recheck s1 because multiple pixels can be colliding at once (and you don't
+				// want to bother with that)
+				s2 = state->allSprites->spriteArr[j];
+				if (s2->type != 3 && i != j && s2->markedForDeath == 0 && s1->markedForDeath == 0 && s2->type != s1->type) {
+					dist = calcDistance(s1,s2);
+					// if the distance between the sprites is within one of their spheres of influence
+					// only then do a closer check for collision (expensive) (really only need the smaller sphere of influence, but this is safer)
+					if (dist < s1->radius ||
+						dist < s2->radius) {
+						// they are within each other's sphere of influence
+						// do a detailed check
+						if (checkOverlap(s1, s2)) {
+							// determine outcome of collision
+							manageCollision(i, j, state, lib);
+						}
+
+					}
+				}
+			}
+		}
+	}
+}
+
+void manageCollision(int i, int j,struct gameState * state, struct library * lib) {
+	struct sprite * s1 = state->allSprites->spriteArr[i];
+	struct sprite * s2 = state->allSprites->spriteArr[j];
+	// 4 is indestructible, so don't bother 
+	if (s1->type != 4 ) {
+		// 0 is the player, this is checking first if you died (different exposion sequence)
+		// then if you got a powerup (cannon or missiles)
+		if (i==0) {
+			if (s2->type < 6) {
+				// you actually hit something to kill you
+				addEffect(shipEx2,i,state, lib);
+				modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				addEffect(shipEx3,i,state, lib);
+				modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				s1->markedForDeath=1;
+			}
+			// powerups!
+			else {
+				if (s2->type == 6) {
+					// switch to missile or add ammo
+					s1->isShooter = 25;
+					s1->wpnSelect = -1;
+					s2->markedForDeath=1;
+					addEffect(ammo1,j,state, lib);
+					modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				}
+				else if (s2->type == 7) {
+					// switch to plasma cannon or add ammo
+					s1->isShooter = 15;
+					s1->wpnSelect = 1;
+					s2->markedForDeath=1;
+					addEffect(ammo1,j,state, lib);
+					modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				}
+			}
+		}
+		// not the player, then kill it like normal
+		else {
+			addEffect(shipEx1,i,state, lib);
+			modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+			s1->markedForDeath=1;
+		}
+		
+	}
+	// just checking the other guy, 6 & 7 were handled above
+	if (s2->type != 4 && s2->type != 6 && s2->type != 7) {
+//	if (s2->type < 4) {
+		addEffect(shipEx1,j,state, lib);
+		modEffect(-1, state->time, s2->xCoM, s2->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+		s2->markedForDeath=1;
+	}
+	// give the player credit if they killed a bad guy
+	if (s1->type == 1 || s2->type ==1) {
+		state->deltaKills++;
+	}	
+}
+/// ***********//
+// should probably move physics to its own header and implementation file
+
 void updatePhysics(struct gameState * state) {
 	float dt = state->time - state->timeLast;
 	struct spriteList *local = state->allSprites;
 	int i=0;
 	for (i=0; i< local->numSprites; i++) {
-
+		
 		local->spriteArr[i]->yVel += (local->spriteArr[i]->yAcc)*dt;
 		if (i==0) {
 			limitVel(local->spriteArr[i], 30);
@@ -230,55 +342,6 @@ void updatePhysics(struct gameState * state) {
 		}
 }
 
-// definitely doing too much here
-// will probably refactor - fix me still noodling
-void detectCollision(struct gameState * state, struct library * lib, struct levelData * level) {
-	int i, j;
-	float dist;
-	struct sprite * s1;
-	struct sprite * s2;
-	// only check my ship right now
-	for (i=0; i<state->allSprites->numSprites; i++) {
-		// only check everyone else if current sprite is a colliding type sprite
-		s1 = state->allSprites->spriteArr[i];
-		if (s1->type != 3 && s1->markedForDeath == 0) {
-			// cycle through everyone else
-			for (j=0; j< state->allSprites->numSprites; j++) {
-				// check for colliding-type and yourself
-				s2 = state->allSprites->spriteArr[j];
-				if (s2->type != 3 && i != j && s2->markedForDeath == 0 && s2->type != s1->type) {
-					dist = calcDistance(s1,s2);
-					// if the distance between the sprites is within one of their spheres of influence
-					// only then do a closer check for collision (expensive) (really only need the smaller sphere of influence, but this is safer)
-					if (dist < s1->radius ||
-						dist < s2->radius) {
-						if (checkOverlap(s1, s2)) {
-							//s1->xAcc += -20*(1e6)/REFRESH_RATE;
-							// oh so klugey
-							if (s1->type != 4 ) {
-								addEffect(shipEx1,i,state, lib);
-								modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-								s1->markedForDeath=1;
-							}
-							if (s2->type !=4) {
-								addEffect(shipEx1,j,state, lib);
-								modEffect(-1, state->time, s2->xCoM, s2->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-								s2->markedForDeath=1;
-							}
-							if (s1->type == 1 || s2->type ==1) {
-								state->deltaKills++;
-							}
-
-						}
-
-					}
-				}
-			}
-		}
-	}
-}
-/// ***********//
-// should probably move physics to its own header and implementation file
 // oh so pythagoras
 float calcDistance(struct sprite * s1, struct sprite * s2) {
 	float x1, x2, y1, y2;
@@ -331,7 +394,7 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc) {
 				// manually terminate your new string
 				temp[i-n] = '\0';
 				int dx = 0;
-				while (dx <= strlen(temp)) {
+				while (dx < strlen(temp)) {
 					if (temp[dx] != ' ') {
 						loc->x[loc->numChars] = (int)spriteIn->xLoc+dx;
 						loc->y[loc->numChars] = (int)spriteIn->yLoc+j;
@@ -414,47 +477,58 @@ void limitVel(struct sprite * temp, float limit) {
 
 void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib) {
 	struct sprite * pShip = state->allSprites->spriteArr[0];
+	float baseThrust = 8.0;
 
 	if (inputChar == 'q') {
 		*playFlag = 0;
 	}
 	// FOR PLAYER CONTROLS - consider:
-						// limiting total velocity
-						// increasing deltaAcc for counter thrust
+						// limiting total velocity -- Done
+						// increasing deltaAcc for counter thrust  -- NA
 						// applying counter acc at window borders -- Done
 						// limiting limits at window borders -- Done
 	else if (inputChar == KEY_UP) {
 		//allSprites.spriteArr[0]->yLoc += -1;
-		pShip->yAcc += -4*(1e6)/REFRESH_RATE;
-		state->allEffects->effectArr[2]->start = state->time;
-		state->allEffects->effectArr[3]->start = state->time;
+		pShip->yAcc += -baseThrust*(1e6)/REFRESH_RATE;
+		if (state->score < LEVEL_THREE_SCORE) {
+			state->allEffects->effectArr[2]->start = state->time;
+			state->allEffects->effectArr[3]->start = state->time;
+		}
 	}
 	else if (inputChar == KEY_LEFT) {
 		//allSprites.spriteArr[0]->xLoc += -10;
-		pShip->xAcc += -4*(1e6)/REFRESH_RATE;
-		state->allEffects->effectArr[1]->start = state->time;
+		pShip->xAcc += -baseThrust*(1e6)/REFRESH_RATE;
+		if (state->score < LEVEL_THREE_SCORE) {
+			state->allEffects->effectArr[1]->start = state->time;
 		}
+	}
 	else if (inputChar == KEY_DOWN) {
 		//allSprites.spriteArr[0]->yLoc += 1;
-		pShip->yAcc += 4*(1e6)/REFRESH_RATE;
-		state->allEffects->effectArr[4]->start = state->time;
-		state->allEffects->effectArr[5]->start = state->time;
+		pShip->yAcc += baseThrust*(1e6)/REFRESH_RATE;
+		if (state->score < LEVEL_THREE_SCORE) {
+			state->allEffects->effectArr[4]->start = state->time;
+			state->allEffects->effectArr[5]->start = state->time;
+		}
 	}
 	else if (inputChar == KEY_RIGHT) {
 		//allSprites.spriteArr[0]->xLoc += 1;
-		pShip->xAcc += 4*(1e6)/REFRESH_RATE;
-		state->allEffects->effectArr[0]->start = state->time;
+		pShip->xAcc += baseThrust*(1e6)/REFRESH_RATE;
+		if (state->score < LEVEL_THREE_SCORE) {
+			state->allEffects->effectArr[0]->start = state->time;
+		}
 	}
-	else if (inputChar == ' ') {
-		// player missle (only one at a time here for testing)
-		if (0) {
-			addSprite(missleRt, state, lib);
+	else if (inputChar == ' ' && pShip->isShooter > 0) {
+		// player missile (only one at a time here for testing)
+		if (pShip->wpnSelect==-1) {
+			pShip->isShooter -= 1;
+			addSprite(missileRt, state, lib);
 			// if you want to be real physicsy then you'd actually copy the pShip
 			// velocities to the new sprite as well
-			modSprite(-1, pShip->xLoc+ pShip->xCoM, pShip->yLoc+pShip->yCoM, 30*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc+ pShip->xCoM+5, pShip->yLoc+pShip->yCoM, 45*(1e6)/REFRESH_RATE, 0, 0, state);
 		}
 		// player laser
-		else {
+		else if (pShip->wpnSelect==1) {
+			pShip->isShooter -= 1;
 			addSprite(laser, state, lib);
 			modSprite(-1, pShip->xLoc+ pShip->xCoM, pShip->yLoc+pShip->yCoM, 150*(1e6)/REFRESH_RATE, 0, 0, state);
 			//struct sprite * laserPtr = state->allSprites->spriteArr[state->allSprites->numSprites-1];
@@ -463,7 +537,7 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 
 			}
 	}
-
+	flushinp();
 }
 
 void restrictPlaySpace(struct gameState *state) {
