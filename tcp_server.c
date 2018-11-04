@@ -42,26 +42,40 @@ int main() {
 
   /*holds client socket*/
   int client_socket;
+  int client_socket2;
+
   /*option to get the clients IP adress here, passed in NULL bc it isn't relevant in this case*/
-  client_socket = accept(server_socket, NULL, NULL);
+  while ((client_socket = accept(server_socket, NULL, NULL))) {
+    if ((client_socket2 = accept(server_socket, NULL, NULL))) {
+      
+      struct gameState *state = malloc(sizeof(struct gameState));
+      struct library *lib = malloc(sizeof(struct library));
+      struct levelData *level = malloc(sizeof(struct levelData));
 
-  struct gameState *state = malloc(sizeof(struct gameState));
-  struct library *lib = malloc(sizeof(struct library));
-  struct levelData *level = malloc(sizeof(struct levelData));
+      int input = ' ';
 
-  int input = ' ';
+      while (input != 'q') {
+        /*1st parameter is passing the socket we send data on*/
+        /*2nd parameter is passing the data we want to send*/
+        /*3rd parameter specifies the size of the message*/
+        send(client_socket, state, sizeof(struct gameState), 0);
+        send(client_socket2, state, sizeof(struct gameState), 0);
+        send(client_socket, lib, sizeof(struct library), 0);
+        send(client_socket2, lib, sizeof(struct library), 0);
+        send(client_socket, level, sizeof(struct levelData), 0);
+        send(client_socket2, level, sizeof(struct levelData), 0);
 
-  while (input != 'q') {
-    /*1st parameter is passing the socket we send data on*/
-    /*2nd parameter is passing the data we want to send*/
-    /*3rd parameter specifies the size of the message*/
-    send(client_socket, state, sizeof(struct gameState), 0);
-    send(client_socket, lib, sizeof(struct library), 0);
-    send(client_socket, level, sizeof(struct levelData), 0);
-
-    recv(client_socket, &input, sizeof(int), 0);
-    printf("input: %d\n", input);
+        recv(client_socket, &input, sizeof(int), 0);
+        printf("input: %d\n", input);
+        recv(client_socket2, &input, sizeof(int), 0);
+        printf("input: %d\n", input);
+      }
+      if (input == 'q') {
+        break;
+      }
+    }
   }
+
 
   /*finished basic server app, time to close the socket*/
   close(server_socket);
