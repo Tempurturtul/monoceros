@@ -32,6 +32,11 @@
 #define LEVEL_THREE_SCORE 60
 #define EXTENDED_SCORE 100
 
+// this is flip3
+//#define SERVER_IP_ADDR "128.193.36.41"
+#define SERVER_IP_ADDR "192.168.0.18"
+#define SERVER_IP_PORT 2997
+
 enum STYPE {
 	ship = 0, eny1, eny1a, eny2, openSpace1, openSpace2, openSpace3, openSpace4, missileRt, missileLt, laser,
 	asteroid1, asteroid2, asteroid3, sky1, sky2, gnd1, ammoM, ammoPC
@@ -123,6 +128,7 @@ struct gameState {
 	// size of all participants?
 	int maxX;
 	int maxY;
+	int titleSize;
 	int gndHeight;
 };
 
@@ -156,8 +162,8 @@ struct levelData {
 	
 	// maybe you want levels to have single char disps?
 	// that might be easier to procedurally generate
-	int numDisps;
-	struct dispPair *dispArr[MAX_LEVEL_DISPS];	
+//	int numDisps;
+//	struct dispPair *dispArr[MAX_LEVEL_DISPS];	
 	
 };
 

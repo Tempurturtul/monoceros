@@ -18,7 +18,7 @@ NOTES
 
 #include "planet.h"
 
-void planetLevel(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window) {
+void planetLevel(struct gameState * state, struct library * lib, struct levelData * level) {
 	int i, j;
 	level->spawnOK=0;
 	if (level->skyRate<2*level->skyLimit) {
@@ -44,7 +44,7 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 						// stop sprites
 						transitionPlanetBG(state, lib, level);
 						// modify for cyan sky background
-						wbkgd(window, COLOR_PAIR(15));
+						//wbkgd(window, COLOR_PAIR(15));
 						swapSkyMotif(state, lib);
 						// okay to go
 						level->spawnOK=1;

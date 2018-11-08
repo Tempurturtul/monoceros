@@ -39,7 +39,7 @@ all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o interfa
 	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o planet.o ai.o tcp_client.o $(CFLAGS)
 
 server: tcp_server.c
-	gcc -o server tcp_server.c $(CFLAGS)
+	gcc -o server tcp_server.c -g gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o $(CFLAGS)
 
 clean:
 	rm -f *.o main server

@@ -31,8 +31,11 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc);
 //void playGame(struct gameState * state, struct library * lib, struct levelData * level);
 void calcScore(struct gameState * state, struct levelData * level);
 void playGame(int network_socket);
+//void playGameSingle(int network_socket);
+void playGameSingle();
 void waitQueue();
 void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib);
 void restrictPlaySpace(struct gameState *state);
+void freeGame(struct gameState * state, struct library * lib, struct levelData * level);
 
 #endif

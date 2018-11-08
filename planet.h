@@ -19,6 +19,6 @@ void initPlanetBG(struct gameState * state, struct library * lib, struct levelDa
 void transitionPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
 void swapSkyMotif(struct gameState * state, struct library * lib);
 void genPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
-void planetLevel(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window);
+void planetLevel(struct gameState * state, struct library * lib, struct levelData * level);
 
 #endif

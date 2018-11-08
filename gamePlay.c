@@ -64,6 +64,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
+	state->titleSize = 3;
 	
 	usleep(REFRESH_RATE);
 }
@@ -75,16 +76,114 @@ void freeGame(struct gameState * state, struct library * lib, struct levelData *
 	freeSpriteList(lib->allSprites);
 	freeEffectList(lib->allEffects);
 
-	freeLevelDisps(level);
+//	freeLevelDisps(level);
 
 	free(state);
 	free(lib);
 	free(level);
 
 }
+void playGame(int network_socket) {
+	// now you're the clients
+	int inputChar;
+	// determine window size to let the server adjudicate
+	int maxX, maxY;
+	getmaxyx(stdscr, maxY, maxX);
+	
+	// make space for state, level and lib?
+	int playFlag = 1;
+	struct library * lib = malloc(sizeof(struct library));
+	struct gameState * state = malloc(sizeof(struct gameState));
+	struct levelData * level = malloc(sizeof(struct levelData));
+
+	// send screen size to server
+	//printf("x1,y1:%i,%i\n", maxX, maxY); sleep(2);
+	send_data(network_socket, &maxX, sizeof(int));
+	send_data(network_socket, &maxY, sizeof(int));
+	
+	// get the state back!
+	receive_data(network_socket, state, lib, level);
+	
+	printf("x,y:%i,%i\n", state->maxX, state->maxY); 
+	printf("numSprites: %i\n", state->allSprites->numSprites); 
+	printf("%s", state->allSprites->spriteArr[0]->dispArr[1]->disp); sleep(2);
+	
+	WINDOW *title = newwin(state->titleSize, state->maxX, 0, 0);
+	WINDOW *action = newwin(state->maxY-state->titleSize, state->maxX, state->titleSize, 0);
+	
+	// Capture arrow key input.
+	keypad(action, TRUE);
+	// sets the blocking timer for wgetch
+	wtimeout(action, 1);	
+	
+	// timing (wall clock)?
+	
+	// main play loop, will modify flag on player death or quit
+	while (playFlag) {
+//	while (0) {
+	
+		// get input
+		inputChar = wgetch(action);
+		
+		// send input
+		send_data(network_socket, &inputChar, sizeof(int));
+//		printf("sent input!\n"); sleep(1);
+		
+		// get results (state, level, lib)
+		receive_data(network_socket, state, lib, level);
+//		printf("received!\n"); sleep(1);
+
+		// display results
+		// this all could be done elsewhere i think, make a separate func
+		wclear(title);
+		wclear(action);
+		wcolor_set(action, 1, NULL);		// change this by referencing the appropriate colors in the sprites and effects themselves
+
+		// prints all sprites
+		printSprite(action, state);		
+
+		// prints all effects, very similar functions
+		printEffect(action, state);
+		/*
+		// i needed this for debugging
+		mvwprintw(title, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
+		mvwprintw(title, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
+		mvwprintw(title, 2, 1, "xMax:%i",state->maxX);
+
+		mvwprintw(title, 0, 20, "numEnemies:%i",level->numEnemies);
+		mvwprintw(title, 1, 20, "numSprites:%i",state->allSprites->numSprites);
+		//mvwprintw(title, 2, 20, "yVel:%f",state->allSprites->spriteArr[0]->xAcc);
+
+		mvwprintw(title, 0, 40, "numEffects:%i",state->allEffects->numEffects);
+		mvwprintw(title, 1, 40, "radius gnd:%f",lib->allSprites->spriteArr[gnd1]->radius);
+		mvwprintw(title, 2, 40, "xCoM gnd:%f",lib->allSprites->spriteArr[gnd1]->xCoM);
+		//mvwprintw(title, 2, 40, "numDisps eff6:%i",lib->allEffects->effectArr[6]->numDisps);
+
+		mvwprintw(title, 1, 60, "AMMO:%i",(int)state->allSprites->spriteArr[0]->isShooter);
+
+		
+		mvwprintw(title, 0, maxX - 15, "time: %.1f", round(state->time*10)/10);
+		mvwprintw(title, 1, maxX - 15, "SCORE: %i", state->score);
+		mvwprintw(title, 2, maxX - 15, "LEVEL: %i", level->currLevel);
+		*/
+		// actually print!
+		wrefresh(title);
+		wrefresh(action);
+	
+		// timing?
+		
+		//playFlag=0;
+		
+	// end main
+	}
+	
+	// free space for state, level, lib
+	
+}
 
 //void playGame(struct gameState * state, struct library * lib, struct levelData * level) {
-void playGame(int network_socket) {
+//void playGameSingle(int network_socket) {
+void playGameSingle() {
 	// Create windows.
 	int maxX, maxY;
 	int titleSize = 3;
@@ -109,13 +208,18 @@ void playGame(int network_socket) {
 	// init background (only needed for level 1, will fly into other backgrounds)
 	initOpenSpaceBG(state, lib);
 
+printf("x,y:%i,%i\n", state->maxX, state->maxY); sleep(2);
+printf("numSprites: %i\n", state->allSprites->numSprites); sleep(2);
+printf("%s", state->allSprites->spriteArr[0]->dispArr[1]->disp); sleep(2);	
+	
 	int inputChar;
 
 	// TODO: Remove
+/*
 	struct gameState *dummy_state = malloc(sizeof(struct gameState));
 	struct library *dummy_lib = malloc(sizeof(struct library));
 	struct levelData *dummy_level = malloc(sizeof(struct levelData));
-
+*/
 	// sets the blocking timer for wgetch
 	wtimeout(action, 1);
 
@@ -129,24 +233,25 @@ void playGame(int network_socket) {
 		//tstart = clock();
 
 		inputChar = wgetch(action);
-
+/*
 		// The value of network_socket acts as a flag for multiplayer / single player.
 		if (network_socket > 0) {
 			// Multiplayer.
 
 			// Receive updates from the server.
 			receive_data(network_socket, dummy_state, dummy_lib, dummy_level);
+//			receive_data(network_socket, state, lib, level);
 
 			// Send our input to the server (if invalid the server should just reject it).
 			send_data(network_socket, &inputChar, sizeof(int));
 		}
-
+*/
 		handleInput(inputChar, &playFlag, state, lib);
 
 		restrictPlaySpace(state);
 
 		// procedural level generation
-		procGen(state, lib, level, action);
+		procGen(state, lib, level);
 
 		// this updates the sprite actions (including firing)
 		updateSpriteAI(state, lib);
@@ -423,13 +528,13 @@ void calcScore(struct gameState * state, struct levelData * level) {
 		// how do you want to do this?
 		// not a switch b/c i'm nore sure if this is the only
 		// combination I want, or if I plan to use decimals for sublevels
-		if (level->currLevel == 1) {
+		if (level->currLevel < 20) {
 			state->score += (ppL1Kill*state->deltaKills);
 		}
-		else if (level->currLevel == 2) {
+		else if (level->currLevel < 30) {
 			state->score += (ppL2Kill*state->deltaKills);
 		}
-		else if (level->currLevel == 3) {
+		else  {
 			state->score += (ppL3Kill*state->deltaKills);
 		}
 		state->deltaKills = 0;
@@ -439,7 +544,9 @@ void calcScore(struct gameState * state, struct levelData * level) {
 void waitQueue() {
 	messageScreen("Now connecting...");
 
-	int network_socket = establish_connection("128.193.36.41", 2997);
+//	int network_socket = establish_connection("128.193.36.41", 2997);
+//	int network_socket = establish_connection("192.168.0.18", 2997);
+	int network_socket = establish_connection(SERVER_IP_ADDR, SERVER_IP_PORT);
 
 	if (network_socket == -1) {
 		messageScreen("There was an error connecting to the server");
@@ -484,7 +591,7 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 	}
 	// FOR PLAYER CONTROLS - consider:
 						// limiting total velocity -- Done
-						// increasing deltaAcc for counter thrust  -- NA
+						// increasing deltaAcc for counter thrust  -- NA (limited total velocity instead)
 						// applying counter acc at window borders -- Done
 						// limiting limits at window borders -- Done
 	else if (inputChar == KEY_UP) {
