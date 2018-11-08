@@ -246,6 +246,10 @@ void addEffect(int ID, int parentID, struct gameState * state, struct library * 
 void printEffect(WINDOW* window, struct gameState * state) {
 	int effectCount = 0, spriteCount=0;
 	struct spriteList * localSpriteList = state->allSprites;
+	if (state->skyReady > 0) {
+		wbkgd(window, COLOR_PAIR(15));
+	}
+	
 	for (spriteCount=0; spriteCount < localSpriteList->numSprites; spriteCount++) {
 		for (effectCount=0; effectCount < localSpriteList->spriteArr[spriteCount]->numEffects; effectCount++) {
 			struct effect * effectIn = state->allEffects->effectArr[localSpriteList->spriteArr[spriteCount]->effectIDs[effectCount]];
@@ -303,6 +307,49 @@ void printEffect(WINDOW* window, struct gameState * state) {
 		}
 	}
 }
+
+
+void printEffectServer(struct gameState * state) {
+	int effectCount = 0, spriteCount=0;
+	struct spriteList * localSpriteList = state->allSprites;
+	for (spriteCount=0; spriteCount < localSpriteList->numSprites; spriteCount++) {
+		for (effectCount=0; effectCount < localSpriteList->spriteArr[spriteCount]->numEffects; effectCount++) {
+			struct effect * effectIn = state->allEffects->effectArr[localSpriteList->spriteArr[spriteCount]->effectIDs[effectCount]];
+			char tdisp[MAX_DISP_SUBSIZE];
+			// results based on time
+			int dispIndex = 0;
+			if (effectIn->start > 0) { 
+				if  ((state->time-effectIn->start) < effectIn->ttl) {
+					dispIndex = (int)effectIn->numDisps*((state->time-effectIn->start)/effectIn->ttl);
+					//mvwprintw(window,20,20,"disp:%i, dt:%f, ttl:%f", dispIndex, time-effectIn->start, effectIn->ttl);			
+					strcpy(tdisp, effectIn->dispArr[dispIndex]->disp);
+//					wcolor_set(window, effectIn->dispArr[dispIndex]->colorPair, NULL);
+//					wattron(window, effectIn->dispArr[dispIndex]->attr);
+				}
+				// turn it off and reset it
+				else {
+					strcpy(tdisp, "");
+					effectIn->start = -1;
+					//wcolor_set(window, 1, NULL);
+					//wattroff(window, effectIn->dispArr[dispIndex]->attr);
+					// gross
+					if (localSpriteList->spriteArr[spriteCount]->markedForDeath > 0) {
+						localSpriteList->spriteArr[spriteCount]->markedForDeath=-1;
+					}
+				}
+				// decompose the display string to print through the vertical axis
+				// you can't just you /n in curses because it will start all the back at the front of the line, not
+				// where you started printing
+				int i=0, j=0, n=0;
+				//int dum=0;
+				char temp[256];
+
+//				wattroff(window, effectIn->dispArr[dispIndex]->attr);
+			}
+		}
+	}
+}
+
 
 // fix me - you need to regularly call this function and look for defunct effects
 // in order to stay under the limit (and manage your memory better)

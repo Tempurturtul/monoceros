@@ -111,7 +111,13 @@ int main() {
       int input1 = ' ';
 	  int input2;
 
-      while (input1 != 'q') {
+		// init timing function
+		struct timespec timeHold;
+		clock_gettime(CLOCK_MONOTONIC, &timeHold);
+		float tstart = timeHold.tv_sec + timeHold.tv_nsec / 1e9;
+	  
+
+      while (state->playFlag) {
         /*1st parameter is passing the socket we send data on*/
         /*2nd parameter is passing the data we want to send*/
         /*3rd parameter specifies the size of the message*/
@@ -129,12 +135,9 @@ int main() {
         printf("input1: %d\n", input1);
         recv(client_socket2, &input2, sizeof(int), 0);
         printf("input2: %d\n", input2);
-		if (input2 == 'q') {
-			input1= 'q';
-		}
 		
-		handleInput(input1, &playFlag, state, lib);
-		handleInput(input2, &playFlag, state, lib);
+		handleInput(input1, &(state->playFlag), state, lib);
+		handleInput(input2, &(state->playFlag), state, lib);
 
 		restrictPlaySpace(state);
 
@@ -152,16 +155,33 @@ int main() {
 		// calculates the current score, stores it in state
 		calcScore(state, level);
 		
+		// this is bad and you should feel bad
+		printEffectServer(state);
+		
 		// BLOCK HERE
 		printf("block!\n");
-		usleep(75000);
+//		usleep(75000);
+		clock_gettime(CLOCK_MONOTONIC, &timeHold);
+		state->timeWait = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
+		if (((1./12)-(state->timeWait-state->time))*1e6 > 0) {
+			usleep(((1./12)-(state->timeWait-state->time))*1e6);
+		}
+		else {
+			// do nothing! you're trying to catch up on frame rate!
+		}
+		// generate the output game time (and time used for physics)
+		state->timeLast=state->time;
+		clock_gettime(CLOCK_MONOTONIC, &timeHold);
+		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
+		
+		// send it!
 		send_all(client_socket, state, lib, level);
 		send_all(client_socket2, state, lib, level);
 		printf("sent!\n");
 
-//		input = 'q';
+
       }
-      if (input1 == 'q') {
+      if (!state->playFlag) {
         break;
       }
     }

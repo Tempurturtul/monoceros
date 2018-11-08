@@ -130,6 +130,8 @@ struct gameState {
 	int maxY;
 	int titleSize;
 	int gndHeight;
+	int skyReady;
+	int playFlag;
 };
 
 struct library {

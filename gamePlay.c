@@ -65,6 +65,8 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->maxX=1;
 	state->maxY=1;
 	state->titleSize = 3;
+	state->playFlag=1;
+	state->skyReady=0;
 	
 	usleep(REFRESH_RATE);
 }
@@ -119,7 +121,7 @@ void playGame(int network_socket) {
 	// timing (wall clock)?
 	
 	// main play loop, will modify flag on player death or quit
-	while (playFlag) {
+	while (state->playFlag) {
 //	while (0) {
 	
 		// get input

@@ -45,6 +45,7 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 						transitionPlanetBG(state, lib, level);
 						// modify for cyan sky background
 						//wbkgd(window, COLOR_PAIR(15));
+						state->skyReady=1;
 						swapSkyMotif(state, lib);
 						// okay to go
 						level->spawnOK=1;
