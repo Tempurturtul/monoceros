@@ -50,69 +50,99 @@ int mainMenu() {
 }
 
 void dispScores() {
-	struct highscore scores[10];
-	getScores(scores, 10, 0);
-
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
+	keypad(w, true);
 
-	int lineLength = 25; // 3 for rank + 3 for spacing, 7 for score + 2 for spacing, + 10 for name.
+	int lineLength = 26; // 5 for rank + 2 for spacing, 7 for score + 2 for spacing, + 10 for name.
 
 	WINDOW *scoresW = newwin(12, lineLength, maxY/2 - 1 - 12/2, maxX/2 - 1 - lineLength/2);
 	wattron(scoresW, A_BOLD | A_DIM);
 
-	// Header in red.
-	wattron(scoresW, COLOR_PAIR(2));
-	wprintw(scoresW, "RANK  SCORE    NAME");
-	wattroff(scoresW, COLOR_PAIR(2));
-
-	char *ranks[10] = {
-		"1ST",
-		"2ND",
-		"3RD",
-		"4TH",
-		"5TH",
-		"6TH",
-		"7TH",
-		"8TH",
-		"9TH",
-		"10TH"
-	};
 	char line[lineLength+1];
+	char rank[6];
+	char rankSuffix[3];
 
-	// First through tenth place.
+	struct highscore scores[10];
+	int offset = 0;
 	int i;
-	for (i = 0; i < 10; i++) {
-		// Don't display zero score.
-		if (scores[i].score == 0) {
+	int input;
+
+	while (1) {
+		wclear(scoresW);
+
+		// Header in red.
+		wattron(scoresW, COLOR_PAIR(2));
+		wprintw(scoresW, "RANK  SCORE    NAME");
+		wattroff(scoresW, COLOR_PAIR(2));
+
+		// Get scores.
+		getScores(scores, 10, offset);
+
+		// Display scores.
+		for (i = 0; i < 10; i++) {
+			// Don't display zero score.
+			if (scores[i].score == 0) {
+				break;
+			}
+
+			// Figure out rank.
+			switch (i+1+offset % 10) {
+				case 1:
+					strcpy(rankSuffix, "ST");
+					break;
+				case 2:
+					strcpy(rankSuffix, "ND");
+					break;
+				case 3:
+					strcpy(rankSuffix, "RD");
+					break;
+				default:
+					strcpy(rankSuffix, "TH");
+			}
+			if (i+1+offset == 11 || i+1+offset == 12 || i+1+offset == 13) {
+				strcpy(rankSuffix, "TH");
+			}
+			sprintf(rank, "%d%s", i+1+offset, rankSuffix);
+
+			// Rank space-padded to 5 characters, scores zero-padded to 7 digits, and name space-padded to 10 characters and left-aligned.
+			sprintf(line, "%5s  %07d  %-10s", rank, scores[i].score, scores[i].name);
+
+			if (i == 0 && offset == 0) {
+				// Give first place yellow font color.
+				wattron(scoresW, COLOR_PAIR(3));
+				mvwprintw(scoresW, i+2, 0, line);
+				wattroff(scoresW, COLOR_PAIR(3));
+			} else if (i < 3 && offset == 0) {
+				// Give second and third place cyan font color.
+				wattron(scoresW, COLOR_PAIR(4));
+				mvwprintw(scoresW, i+2, 0, line);
+				wattroff(scoresW, COLOR_PAIR(4));
+			} else {
+				// Remaining places get no special font color.
+				mvwprintw(scoresW, i+2, 0, line);
+			}
+		}
+
+		wrefresh(w);
+		wrefresh(scoresW);
+
+		// Wait for input.
+		input = wgetch(w);
+		if (input == KEY_LEFT) {
+			offset -= 10;
+			if (offset < 0) {
+				offset = 0;
+			}
+		} else if (input == KEY_RIGHT) {
+			if (scores[9].score > 0 && offset < 990) {
+				offset += 10;
+			}
+		} else {
 			break;
 		}
-
-		// Rank space-padded to 4 characters, scores zero-padded to 7 digits, and name space-padded to 10 characters and left-aligned.
-		sprintf(line, "%4s  %07d  %-10s", ranks[i], scores[i].score, scores[i].name);
-
-		if (i == 0) {
-			// Give first place yellow font color.
-			wattron(scoresW, COLOR_PAIR(3));
-			mvwprintw(scoresW, i+2, 0, line);
-			wattroff(scoresW, COLOR_PAIR(3));
-		} else if (i < 3) {
-			// Give second and third place cyan font color.
-			wattron(scoresW, COLOR_PAIR(4));
-			mvwprintw(scoresW, i+2, 0, line);
-			wattroff(scoresW, COLOR_PAIR(4));
-		} else {
-			// Remaining places get no special font color.
-			mvwprintw(scoresW, i+2, 0, line);
-		}
 	}
-
-	wrefresh(w);
-	wrefresh(scoresW);
-
-	// Wait for any input.
-	wgetch(w);
 
 	delwin(scoresW);
 	delwin(w);
