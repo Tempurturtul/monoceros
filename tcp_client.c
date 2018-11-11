@@ -8,6 +8,9 @@
 #include <unistd.h> // for close
 
 #include "interfaces.h"
+#include "tcp_client.h"
+#include "sprites.h"
+#include "effects.h"
 
 int establish_connection(const char *ip_address, int port) {
   int network_socket = socket(AF_INET, SOCK_STREAM, 0);
@@ -35,13 +38,56 @@ int establish_connection(const char *ip_address, int port) {
 }
 
 int receive_data(int network_socket, struct gameState *state, struct library *lib, struct levelData *level) {
-  int bytes_received = 0;
+	int bytes_received = 0;
+	//long unsigned int packageSize=0;	// debugging
+	int i,j;
 
-  bytes_received += recv(network_socket, state, sizeof(struct gameState), 0);
-  bytes_received += recv(network_socket, lib, sizeof(struct library), 0);
-  bytes_received += recv(network_socket, level, sizeof(struct levelData), 0);
+	// free what you had and start anew
+	freeSpriteList(state->allSprites);
+	freeEffectList(state->allEffects);
+	
+	
 
-  return bytes_received;
+	//bytes_received += recv(network_socket, &packageSize, sizeof(long unsigned int), 0);	// debugging
+	// receive the basic preallocated state
+	bytes_received += recv(network_socket, state, sizeof(struct gameState), 0);
+	// first get some space for the sprite list
+	state->allSprites = (struct spriteList *)malloc(sizeof(struct spriteList));
+	// get num sprites so you can build spriteList
+	bytes_received += recv(network_socket, &(state->allSprites->numSprites), sizeof(int), 0);
+	// loop through sprites, allocating memory as you go
+	for (i=0; i<state->allSprites->numSprites; i++) {
+		state->allSprites->spriteArr[i] = malloc(sizeof(struct sprite));
+		// get that sprite!
+		bytes_received = recv(network_socket, state->allSprites->spriteArr[i], sizeof(struct sprite), 0);
+		// loop through disps in each sprite, allocating memory as you go
+		for (j=0; j<state->allSprites->spriteArr[i]->numDisps; j++) {
+			state->allSprites->spriteArr[i]->dispArr[j] = malloc(sizeof(struct dispPair));
+			// get that disp!
+			bytes_received += recv(network_socket, state->allSprites->spriteArr[i]->dispArr[j], sizeof(struct dispPair), 0);
+		}
+	}
+	// same deal for effects, start with the effectList
+	state->allEffects = malloc(sizeof(struct effectList));
+	bytes_received += recv(network_socket, &(state->allEffects->numEffects), sizeof(int), 0);
+	// loop through effects allocating as you go
+	for (i=0; i<state->allEffects->numEffects; i++) {
+		state->allEffects->effectArr[i] = malloc(sizeof(struct effect));
+		// get that effect!
+		bytes_received += recv(network_socket, state->allEffects->effectArr[i], sizeof(struct effect), 0);
+		// same as above, allocate for the disps, then populate
+		for (j=0; j<state->allEffects->effectArr[i]->numDisps; j++) {
+			state->allEffects->effectArr[i]->dispArr[j] = malloc(sizeof(struct dispPair));
+			bytes_received += recv(network_socket, state->allEffects->effectArr[i]->dispArr[j], sizeof(struct dispPair), 0);
+		}
+	}
+
+//	don't have to deal with the library
+	
+	// level data is okay, no dynamic memory allocation, use as-is
+	bytes_received += recv(network_socket, level, sizeof(struct levelData), 0);
+
+	return bytes_received;
 }
 
 int send_data(int network_socket, void *payload, int payload_len) {
@@ -49,6 +95,74 @@ int send_data(int network_socket, void *payload, int payload_len) {
 
   return bytes_sent;
 }
+
+int send_all(int network_socket, struct gameState *state, struct library *lib, struct levelData *level) {
+	int bytes_sent=0;
+	//long unsigned int size = 0;	// debugging
+	//size = getSizeOfState(state);	// debugging
+	int i,j;
+	
+	// you can't just send a struct that has dynamic allocation!!
+	
+	/*1st parameter is passing the socket we send data on*/
+	/*2nd parameter is passing the data we want to send*/
+	/*3rd parameter specifies the size of the message*/
+	
+	// first send the size of the thing
+	// bytes_sent = send_data(network_socket, &size, sizeof(long unsigned int));	// debugging
+	// then send the basic struct
+	bytes_sent += send_data(network_socket,state,sizeof(struct gameState));
+	// then the sprites
+	bytes_sent += send_data(network_socket,&(state->allSprites->numSprites),sizeof(int));
+
+	for (i=0; i<state->allSprites->numSprites; i++) {
+		bytes_sent += send_data(network_socket,state->allSprites->spriteArr[i],sizeof(struct sprite));
+		for (j=0; j<state->allSprites->spriteArr[i]->numDisps; j++) {
+			bytes_sent += send_data(network_socket,state->allSprites->spriteArr[i]->dispArr[j],sizeof(struct dispPair));
+		}		
+	}
+	// then the effects
+	bytes_sent += send_data(network_socket,&(state->allEffects->numEffects),sizeof(int));
+	for (i=0; i<state->allEffects->numEffects; i++) {
+		bytes_sent += send_data(network_socket,state->allEffects->effectArr[i],sizeof(struct effect));
+		for (j=0; j<state->allEffects->effectArr[i]->numDisps; j++) {
+			bytes_sent += send_data(network_socket,state->allEffects->effectArr[i]->dispArr[j],sizeof(struct dispPair));
+		}		
+	}
+	
+	// don't send library, you should never need it
+
+	// no dynamic allocation - this is okay
+	bytes_sent += send_data(network_socket,level,sizeof(struct levelData));
+	
+	return bytes_sent;
+	
+}
+
+// these were for debugging!
+long unsigned getSizeOfState(struct gameState * state) {
+	long unsigned int size = 0;
+	size = sizeof(struct gameState);
+	int i;
+	for (i =0; i< state->allSprites->numSprites; i++) {
+		size += sizeof(struct dispPair)*state->allSprites->spriteArr[i]->numDisps;
+	}
+	return size;
+}
+
+long unsigned getSizeOfLibrary(struct library * lib) {
+	long unsigned int size = 0;
+	size = sizeof(struct library);
+	int i;
+	for (i =0; i< lib->allSprites->numSprites; i++) {
+		size += sizeof(struct dispPair)*lib->allSprites->spriteArr[i]->numDisps;
+	}
+	for (i =0; i< lib->allEffects->numEffects; i++) {
+		size += sizeof(struct dispPair)*lib->allEffects->effectArr[i]->numDisps;
+	}
+	return size;
+}
+
 
 void closing_connection(int network_socket) {
   /* close the socket */

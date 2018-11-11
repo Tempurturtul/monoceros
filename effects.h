@@ -23,6 +23,7 @@ void modEffect(int effectIndex, float start, float xLoc, float yLoc, struct game
 void addEffect(int ID, int parentID, struct gameState * state, struct library * lib);
 void delEffect(struct gameState * state, int parentIndex);
 void printEffect(WINDOW* window, struct gameState * state);
+void printEffectServer(struct gameState * state);
 void freeEffectList(struct effectList *localList);
 
 

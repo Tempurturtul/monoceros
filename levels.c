@@ -28,7 +28,7 @@ void initLevelData(struct levelData * level) {
 	level->maxNumEnemies=4;
 	level->spawnOK=1;
 	level->AIlevel=0;
-	level->numDisps=0;
+//	level->numDisps=0;
 	level->skyRate=-35;
 	level->skyLimit=20;
 	level->groundVel=15;
@@ -40,7 +40,7 @@ void initLevelData(struct levelData * level) {
 
 }
 
-void procGen(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window) {
+void procGen(struct gameState * state, struct library * lib, struct levelData * level) {
 	// level 1 open space
 	// level 2 asteroid field
 	// level 3 planet surface
@@ -88,7 +88,7 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 
 	
 	// clean up irrelevant enemies & sprites & spawn new stuff for background
-	manageSprites(state, lib, level, window);
+	manageSprites(state, lib, level);
 }
 
 void spawnEnemies(struct gameState * state, struct library * lib, struct levelData * level) {
@@ -136,11 +136,9 @@ void spawnEnemies(struct gameState * state, struct library * lib, struct levelDa
 			}
 		}
 	}
-
-
 }
 
-void manageSprites(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window) {
+void manageSprites(struct gameState * state, struct library * lib, struct levelData * level) {
 	float positionTol = 1.1;
 	int i;	
 	for (i=1; i < state->allSprites->numSprites; i++) {
@@ -183,7 +181,7 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 		}
 	}
 	if (level->currLevel > 25  && !level->groundOK) {
-		planetLevel(state, lib, level, window);
+		planetLevel(state, lib, level);
 	}
 	else if (level->groundOK) {
 		genPlanetBG(state, lib, level);
@@ -249,13 +247,15 @@ void genAsteroidBG(struct gameState * state, struct library * lib, struct levelD
 	}
 }
 
-
+// ended up not needing this based on my implementation of the levels
+/*
 void freeLevelDisps(struct levelData * level) {
 	int j;
 	for (j=0; j<level->numDisps; j++) {
 		free(level->dispArr[j]);
 	}
 }
+*/
 
 // should i live here?  this is the main place i use pct, and i
 // don't have any other reason for an interfaces.c yet
