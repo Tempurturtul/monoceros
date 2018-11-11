@@ -50,11 +50,6 @@ int mainMenu() {
 }
 
 void dispScores() {
-	struct highscore testScore;
-	testScore.score = 9999999;
-	strcpy(testScore.name, "NAGATE");
-	putScore(testScore);
-
 	struct highscore scores[10];
 	getScores(scores, 10, 0);
 

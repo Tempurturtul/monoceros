@@ -59,40 +59,76 @@ void getScores(struct highscore *scores, int n, int offset) {
 }
 
 void putScore(struct highscore score) {
-    // Create or open scores file for reading and writing.
-    FILE *highscoresFile = fopen(HIGHSCORES_FILENAME, "w+");
+    // Open highscores file.
+    FILE *highscoresFile = fopen(HIGHSCORES_FILENAME, "r");
+
     if (highscoresFile == NULL) {
-        fprintf(stderr, "Error opening or creating high scores file \"%s\".\n", HIGHSCORES_FILENAME);
+        // First score, we can just create the highscores file and write directly to it.
+        highscoresFile = fopen(HIGHSCORES_FILENAME, "w");
+        if (highscoresFile == NULL) {
+            fprintf(stderr, "Error creating file for highscores.\n");
+            exit(1);
+        }
+
+        fprintf(highscoresFile, "%d %s\n", score.score, score.name);
+
+        fclose(highscoresFile);
+        return;
+    }
+
+    // Need to copy contents of highscores file to temporary file, along with the new score inserted.
+
+    // Create temporary file.
+    FILE *tmpFile = fopen(TEMP_HIGHSCORES_FILENAME, "w");
+    if (tmpFile == NULL) {
+        fprintf(stderr, "Error creating temporary file for highscores.\n");
         exit(1);
     }
 
+    // Start by finding where in the file we need to insert the new score.
+    long insertPos = 0;
     struct highscore s;
-    long writePos = 0;
-
-    // Read through the file until we reach a score less than this one.
     while (fscanf(highscoresFile, "%d %s\n", &s.score, s.name) != EOF) {
         if (s.score <= score.score) {
             break;
         }
-        writePos = ftell(highscoresFile);
+        insertPos = ftell(highscoresFile);
     }
 
-    // Write our new score.
-    fseek(highscoresFile, writePos, SEEK_SET);
-    fprintf(highscoresFile, "%d %s\n", score.score, score.name);
+    // Copy everything before that point to the temporary file.
+    int bufSize = 1024;
+    char buf[bufSize];
+    long bytesCopied = 0;
+    int bytesToCopy;
+    int bytesRead;
+    fseek(highscoresFile, 0L, SEEK_SET);
+    while (bytesCopied < insertPos) {
+        bytesToCopy = insertPos - bytesCopied >= bufSize ? bufSize : insertPos - bytesCopied;
 
-    // Now we need to bump everything after it down a line.
+        bytesRead = fread(buf, sizeof(char), bytesToCopy, highscoresFile);
+        fwrite(buf, sizeof(char), bytesRead, tmpFile);
+
+        bytesCopied += bytesRead;
+    }
+
+    // Write the new score to the temporary file.
+    fprintf(tmpFile, "%d %s\n", score.score, score.name);
+    fseek(tmpFile, 0L, SEEK_END);
+
+    // Copy the remaining highscores.
     while (1) {
-        fprintf(highscoresFile, "%d %s\n", s.score, s.name);
-
-        fseek(highscoresFile, 0L, SEEK_CUR); // Synchronize file position for reads and writes (see FOPEN(3) man page).
-
-        if (fscanf(highscoresFile, "%d %s\n", &s.score, s.name) == EOF) {
+        bytesRead = fread(buf, sizeof(char), bufSize, highscoresFile);
+        if (bytesRead == 0) {
             break;
-        };
+        }
+        fwrite(buf, sizeof(char), bytesRead, tmpFile);
 
-        fseek(highscoresFile, 0L, SEEK_CUR); // Synchronize file position for reads and writes (see FOPEN(3) man page).
+        bytesCopied += bytesRead;
     }
 
     fclose(highscoresFile);
+    fclose(tmpFile);
+
+    remove(HIGHSCORES_FILENAME);
+    rename(TEMP_HIGHSCORES_FILENAME, HIGHSCORES_FILENAME);
 }

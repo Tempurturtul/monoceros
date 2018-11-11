@@ -45,4 +45,4 @@ server: tcp_server.c
 	gcc -o server tcp_server.c $(CFLAGS)
 
 clean:
-	rm -f *.o main server
+	rm -f *.o main server highscores.txt

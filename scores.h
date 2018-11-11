@@ -10,6 +10,7 @@
 #define SCORES_H
 
 #define HIGHSCORES_FILENAME "highscores.txt"
+#define TEMP_HIGHSCORES_FILENAME "highscores.tmp"
 
 struct highscore {
 	int score;
