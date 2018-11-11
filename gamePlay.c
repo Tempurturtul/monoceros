@@ -26,6 +26,7 @@ NOTES
 #include "levels.h"
 #include "ai.h"
 #include "tcp_client.h"
+#include "scores.h"
 
 void initGame(struct gameState * state, struct library * lib, struct levelData * level) {
 	// init your library
@@ -212,7 +213,10 @@ void playGame(int network_socket) {
 
 		}
 
-
+	struct highscore newHighscore;
+	newHighscore.score = state->score;
+	deathScreen(newHighscore.score, newHighscore.name);
+	putScore(newHighscore);
 
 	// clean up - do a better job of this!
 	freeGame(state, lib, level);
