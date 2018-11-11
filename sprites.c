@@ -278,7 +278,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	// ID=12
 	struct sprite * sk1 = malloc(sizeof(struct sprite));
 	initSprite(sk1, 3,0,0);
-	initDispPairSprite(sk1, 10, A_DIM, "o");
+	initDispPairSprite(sk1, 10, 0, "o");
 	calcCoM(sk1);
 	localList->spriteArr[localList->numSprites] = sk1;
 	localList->numSprites++;
@@ -286,7 +286,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	// ID=13
 	struct sprite * sk2 = malloc(sizeof(struct sprite));
 	initSprite(sk2, 3,0,0);
-	initDispPairSprite(sk2, 11, A_DIM, "o");
+	initDispPairSprite(sk2, 11, 0, "o");
 	calcCoM(sk2);
 	localList->spriteArr[localList->numSprites] = sk2;
 	localList->numSprites++;
@@ -294,7 +294,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	// ID=14
 	struct sprite * gnd1 = malloc(sizeof(struct sprite));
 	initSprite(gnd1, 5,0,0);
-	initDispPairSprite(gnd1, 12, A_DIM, "-\n");
+	initDispPairSprite(gnd1, 12, 0, "-\n");
 	calcCoM(gnd1);
 	localList->spriteArr[localList->numSprites] = gnd1;
 	localList->numSprites++;

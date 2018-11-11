@@ -6,10 +6,13 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <time.h>
+
 #include "interfaces.h"
 #include "gamePlay.h"
 #include "tcp_client.h"
 #include "levels.h"
+#include "effects.h"
 #include "ai.h"
 
 
@@ -57,7 +60,6 @@ int main() {
   
 	// BEGIN GAME INIT
 	int maxX, maxY, maxX2, maxY2;
-	int playFlag =1; // FIXME i think you probably want this to live in state
 	
 	struct gameState *state = malloc(sizeof(struct gameState));
 	struct library *lib = malloc(sizeof(struct library));
@@ -90,26 +92,23 @@ int main() {
 			printf("x2,y2:%i,%i\n", maxX2, maxY2);
 			printf("x,y:%i,%i\n", state->maxX, state->maxY);
 			
-			state->maxY -= state->titleSize;
-			state->gndHeight = maxY;
+			state->gndHeight = state->maxY;
+			state->maxY = state->maxY - state->titleSize;
+			
 			// init background (only needed for level 1, will fly into other backgrounds)
 			initOpenSpaceBG(state, lib);
 			
 			// state initialzied, now send that state back to the clients
-			printf("size of state struct: %lu\n", sizeof(struct gameState));
-			printf("size of state: %lu\n", sizeof(*state));
-			long unsigned int sizer;
-			sizer = getSizeOfState(state);
-			printf("size of state (calc): %lu\n", sizer);
-			printf("num sprites: %i\n", state->allSprites->numSprites);
+			printf("send init\n");
+			printf("float(%lu), int(%lu), dispArrAddr(%lu), sprite(%lu), char(%lu), dispPair(%lu)\n", sizeof(float), sizeof(int), sizeof(struct dispPair *), sizeof(struct sprite), sizeof(char), sizeof(struct dispPair));
 			send_all(client_socket, state, lib, level);
 			send_all(client_socket2, state, lib, level);
+			printf("done init\n");
 
 		}
 	
 
-      int input1 = ' ';
-	  int input2;
+      int input1, input2;
 
 		// init timing function
 		struct timespec timeHold;
@@ -118,23 +117,13 @@ int main() {
 	  
 
       while (state->playFlag) {
-        /*1st parameter is passing the socket we send data on*/
-        /*2nd parameter is passing the data we want to send*/
-        /*3rd parameter specifies the size of the message*/
-		/*
-        send(client_socket, state, sizeof(struct gameState), 0);
-        send(client_socket2, state, sizeof(struct gameState), 0);
-        send(client_socket, lib, sizeof(struct library), 0);
-        send(client_socket2, lib, sizeof(struct library), 0);
-        send(client_socket, level, sizeof(struct levelData), 0);
-        send(client_socket2, level, sizeof(struct levelData), 0);
-		*/
 
-		// FIXME modify this so that both inputs can be valid
+
+		// make sure both inputs are valid
         recv(client_socket, &input1, sizeof(int), 0);
-        printf("input1: %d\n", input1);
+        //printf("input1: %d\n", input1);
         recv(client_socket2, &input2, sizeof(int), 0);
-        printf("input2: %d\n", input2);
+        //printf("input2: %d\n", input2);
 		
 		handleInput(input1, &(state->playFlag), state, lib);
 		handleInput(input2, &(state->playFlag), state, lib);
@@ -159,7 +148,6 @@ int main() {
 		printEffectServer(state);
 		
 		// BLOCK HERE
-		printf("block!\n");
 //		usleep(75000);
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->timeWait = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
@@ -168,6 +156,7 @@ int main() {
 		}
 		else {
 			// do nothing! you're trying to catch up on frame rate!
+			printf("not keeping up\n");
 		}
 		// generate the output game time (and time used for physics)
 		state->timeLast=state->time;
@@ -175,11 +164,10 @@ int main() {
 		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
 		
 		// send it!
+//		printf("sending!\n");
 		send_all(client_socket, state, lib, level);
 		send_all(client_socket2, state, lib, level);
-		printf("sent!\n");
-
-
+//		printf("sent\n");
       }
       if (!state->playFlag) {
         break;

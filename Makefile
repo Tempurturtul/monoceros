@@ -7,14 +7,14 @@
 #########################################################
 
 #CFLAGS = -Wall -fpic -coverage -lm -std=c99 -D_XOPEN_SOURCE_EXTENDED
-CFLAGS = -lncursesw -lm -Wall 
+CFLAGS = -lncursesw -lm -Wall -std=gnu99
 
 default: all
 
 menu.o: menu.c menu.h
 	gcc -c menu.c -g $(CFLAGS)
 
-tcp_client.o: tcp_client.h
+tcp_client.o: tcp_client.h tcp_client.c
 	gcc -c tcp_client.c -g $(CFLAGS)
 
 gamePlay.o: gamePlay.c gamePlay.h interfaces.h
@@ -35,10 +35,11 @@ planet.o: levels.o planet.h planet.c interfaces.h
 ai.o: ai.c ai.h interfaces.h
 	gcc -c ai.c -g $(CFLAGS)
 
-all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o interfaces.h tcp_client.o tcp_client.h
+all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o interfaces.h tcp_client.o tcp_client.h tcp_server.c
 	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o planet.o ai.o tcp_client.o $(CFLAGS)
+	gcc -o server tcp_server.c -g gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o $(CFLAGS)
 
-server: tcp_server.c
+server: tcp_server.c gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o
 	gcc -o server tcp_server.c -g gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o $(CFLAGS)
 
 clean:
