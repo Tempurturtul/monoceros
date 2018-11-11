@@ -60,7 +60,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->timeWait = -REFRESH_RATE/1e6;
 	state->timeLast=-REFRESH_RATE/1e6;
 	state->time = 0;
-	state->score = 55; //55;  // debugging! gets you to planet level (stage 3)
+	state->score = 0; //55;  // debugging! gets you to planet level (stage 3)
 	state->scoreTimeLast =0;
 	state->maxX=1;
 	state->maxY=1;
@@ -88,6 +88,7 @@ void freeGame(struct gameState * state, struct library * lib, struct levelData *
 void playGame(int network_socket) {
 	// now you're the clients
 	int inputChar;
+	int vertCtrl=-1;
 	// determine window size to let the server adjudicate
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
@@ -105,25 +106,21 @@ void playGame(int network_socket) {
 	send_data(network_socket, &maxY, sizeof(int));
 	
 	// get the state back!
-	printf("init sprites? num: %i\n", state->allSprites->numSprites);
-				printf("float(%lu), int(%lu), dispArrAddr(%lu), sprite(%lu), char(%lu), dispPair(%lu)\n", sizeof(float), sizeof(int), sizeof(struct dispPair *), sizeof(struct sprite), sizeof(char), sizeof(struct dispPair));
-
+//	printf("init sprites? num: %i\n", state->allSprites->numSprites);
+//	printf("float(%lu), int(%lu), dispArrAddr(%lu), sprite(%lu), char(%lu), dispPair(%lu)\n", sizeof(float), sizeof(int), sizeof(struct dispPair *), sizeof(struct sprite), sizeof(char), sizeof(struct dispPair));
 	receive_data(network_socket, state, lib, level);
-
-printf("here 3\n");sleep(1);	
-
+	
+	recv(network_socket, &vertCtrl, sizeof(int), 0);
 	
 	WINDOW *title = newwin(state->titleSize, state->maxX, 0, 0);
 	WINDOW *action = newwin(state->maxY-state->titleSize, state->maxX, state->titleSize, 0);
 	
-///////
+// 	no long need this razzmatazz with how you are now handling wbkgd()
 //	WINDOW *title = newwin(state->titleSize, maxX, 0, 0);
 //	WINDOW *action = newwin(maxY-state->titleSize, maxX, state->titleSize, 0);
 	// assume this is the largest window - if it's not your're allready covered and this will ERR
 //	WINDOW *dum1 = newwin(maxY,maxX,0,state->maxX);
 //	WINDOW *dum2 = newwin(maxY,maxX,state->maxY,0);
-
-
 
 	//createDummyWindows(state,maxX, maxY, dum1, dum2);
 
@@ -139,13 +136,13 @@ printf("here 3\n");sleep(1);
 	
 		// get input
 		inputChar = wgetch(action);
+		scrubInput(vertCtrl, &inputChar);
 		
 		// send input
 		send_data(network_socket, &inputChar, sizeof(int));
 		
 		// get results (state, level, lib)
 		receive_data(network_socket, state, lib, level);
-//		printf("got it!\n");sleep(2);
 
 		// display results
 		// this all could be done elsewhere i think, make a separate func
@@ -153,7 +150,7 @@ printf("here 3\n");sleep(1);
 		wclear(action);
 		wcolor_set(action, 1, NULL);		// change this by referencing the appropriate colors in the sprites and effects themselves
 		
-/*
+/*		// see above
 		wclear(dum1);
 		wclear(dum2);	
 		wcolor_set(dum1, 1, NULL);
@@ -189,7 +186,7 @@ printf("here 3\n");sleep(1);
 		// actually print!
 		wrefresh(title);
 		wrefresh(action);
-		
+		// see above
 //		wrefresh(dum1);
 //		wrefresh(dum2);	
 		
@@ -199,7 +196,7 @@ printf("here 3\n");sleep(1);
 	}
 	
 	// free space for state, level, lib
-//	freeGame(state, lib, level);	// FIXME - need to do this
+	freeGame(state, lib, level);	// FIXME - need to do this
 
 	delwin(title);
 	delwin(action);	
@@ -233,12 +230,6 @@ void playGameSingle() {
 	
 	int inputChar;
 
-	// TODO: Remove
-/*
-	struct gameState *dummy_state = malloc(sizeof(struct gameState));
-	struct library *dummy_lib = malloc(sizeof(struct library));
-	struct levelData *dummy_level = malloc(sizeof(struct levelData));
-*/
 	// sets the blocking timer for wgetch
 	wtimeout(action, 1);
 
@@ -252,19 +243,7 @@ void playGameSingle() {
 		//tstart = clock();
 
 		inputChar = wgetch(action);
-/*
-		// The value of network_socket acts as a flag for multiplayer / single player.
-		if (network_socket > 0) {
-			// Multiplayer.
 
-			// Receive updates from the server.
-			receive_data(network_socket, dummy_state, dummy_lib, dummy_level);
-//			receive_data(network_socket, state, lib, level);
-
-			// Send our input to the server (if invalid the server should just reject it).
-			send_data(network_socket, &inputChar, sizeof(int));
-		}
-*/
 		handleInput(inputChar, &(state->playFlag), state, lib);
 
 		restrictPlaySpace(state);
@@ -759,3 +738,12 @@ void createDummyWindows(struct gameState * state, int maxX, int maxY, WINDOW * d
 	
 }
 	
+void scrubInput(int vertCtrl, int * inputChar) {
+	if (vertCtrl && (*inputChar == KEY_LEFT || *inputChar == KEY_RIGHT)) {
+		*inputChar = -1;
+	}
+	else if (!vertCtrl && (*inputChar == KEY_UP || *inputChar == KEY_DOWN)) {
+		*inputChar = -1;
+	}
+	
+}

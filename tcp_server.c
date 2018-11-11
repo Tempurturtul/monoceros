@@ -60,6 +60,8 @@ int main() {
   
 	// BEGIN GAME INIT
 	int maxX, maxY, maxX2, maxY2;
+	int vertCtrl = 1;
+//	int count=0;
 	
 	struct gameState *state = malloc(sizeof(struct gameState));
 	struct library *lib = malloc(sizeof(struct library));
@@ -88,9 +90,6 @@ int main() {
 			if (maxY2 < maxY) {
 				state->maxY = maxY2;
 			}
-			printf("x1,y1:%i,%i\n", maxX, maxY);
-			printf("x2,y2:%i,%i\n", maxX2, maxY2);
-			printf("x,y:%i,%i\n", state->maxX, state->maxY);
 			
 			state->gndHeight = state->maxY;
 			state->maxY = state->maxY - state->titleSize;
@@ -99,11 +98,20 @@ int main() {
 			initOpenSpaceBG(state, lib);
 			
 			// state initialzied, now send that state back to the clients
-			printf("send init\n");
-			printf("float(%lu), int(%lu), dispArrAddr(%lu), sprite(%lu), char(%lu), dispPair(%lu)\n", sizeof(float), sizeof(int), sizeof(struct dispPair *), sizeof(struct sprite), sizeof(char), sizeof(struct dispPair));
+//			printf("float(%lu), int(%lu), dispArrAddr(%lu), sprite(%lu), char(%lu), dispPair(%lu)\n", sizeof(float), sizeof(int), sizeof(struct dispPair *), sizeof(struct sprite), sizeof(char), sizeof(struct dispPair));
 			send_all(client_socket, state, lib, level);
 			send_all(client_socket2, state, lib, level);
-			printf("done init\n");
+			
+			if (getRand(1,100)<50) {
+				send_data(client_socket, &vertCtrl, sizeof(int));
+				vertCtrl=0;
+				send_data(client_socket2, &vertCtrl, sizeof(int));
+			}
+			else {
+				send_data(client_socket2, &vertCtrl, sizeof(int));
+				vertCtrl=0;
+				send_data(client_socket, &vertCtrl, sizeof(int));				
+			}
 
 		}
 	
@@ -156,7 +164,8 @@ int main() {
 		}
 		else {
 			// do nothing! you're trying to catch up on frame rate!
-			printf("not keeping up\n");
+			//printf("not keeping up %i\n", count);		/debugging!
+			//count++;
 		}
 		// generate the output game time (and time used for physics)
 		state->timeLast=state->time;

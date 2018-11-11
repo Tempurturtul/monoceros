@@ -38,5 +38,6 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 void restrictPlaySpace(struct gameState *state);
 void freeGame(struct gameState * state, struct library * lib, struct levelData * level);
 void createDummyWindows(struct gameState * state, int maxX, int maxY, WINDOW*, WINDOW*);
+void scrubInput(int vertCtrl, int * inputChar);
 
 #endif
