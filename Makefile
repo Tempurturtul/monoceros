@@ -35,8 +35,11 @@ planet.o: levels.o planet.h planet.c interfaces.h
 ai.o: ai.c ai.h interfaces.h
 	gcc -c ai.c -g $(CFLAGS)
 
-all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o interfaces.h tcp_client.o tcp_client.h
-	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o planet.o ai.o tcp_client.o $(CFLAGS)
+scores.o: scores.c scores.h
+	gcc -c scores.c -g $(CFLAGS)
+
+all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o interfaces.h tcp_client.o tcp_client.h scores.o
+	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o planet.o ai.o tcp_client.o scores.o $(CFLAGS)
 
 server: tcp_server.c
 	gcc -o server tcp_server.c $(CFLAGS)

@@ -24,10 +24,6 @@ int main(int argc, char *argv[]) {
 	startCurses();
 	srand(time(0));
 
-	// TODO: Remove when we have real scores to pass to dispScores().
-	int scores[10] = { 9999999, 9999999, 9999999, 9999999, 9999999, 6718703, 103580, 0, 0, 0 };
-	char names[10][11] = { "NAGATE", "NAGATE", "NAGATE", "NAGATE", "NAGATE", "HOSHIJIRO", "IZANA", "", "", "" };
-
 	// TODO: Remove when the death screen is moved somewhere else.
 	char playerName[11]; // Filled with the player's name via the death screen.
 
@@ -42,8 +38,7 @@ int main(int argc, char *argv[]) {
 				waitQueue();
 				break;
 			case 3:
-				// TODO: Read scores and names from high scores file.
-				dispScores(scores, names);
+				dispScores();
 				break;
 			case 5:
 				// TODO: Remove when we have the death screen used somewhere.

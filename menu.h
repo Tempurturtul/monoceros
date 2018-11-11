@@ -10,11 +10,13 @@
 #include <ncurses.h>
 #include <arpa/inet.h>
 
+#include "interfaces.h"
+
 // Displays main menu options and returns player number selection.
 int mainMenu();
 
-// Displays up to 10 scores and names, with names being no more than 10 characters in length.
-void dispScores(int scores[10], char names[10][11]);
+// Displays up to 10 scores and names.
+void dispScores();
 
 // Displays the given text centered on stdscr.
 void messageScreen(const char *text);

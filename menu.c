@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "menu.h"
+#include "scores.h"
 
 int mainMenu() {
 	int maxX, maxY;
@@ -48,14 +49,20 @@ int mainMenu() {
 	return (input-48);
 }
 
-// Arguments must be sorted by score descending and properly aligned with one another.
-// For example, scores[0] and names[0] must be the highest score and corresponding player's name.
-void dispScores(int scores[10], char names[10][11]) {
+void dispScores() {
+	struct highscore testScore;
+	testScore.score = 9999999;
+	strcpy(testScore.name, "NAGATE");
+	putScore(testScore);
+
+	struct highscore scores[10];
+	getScores(scores, 10, 0);
+
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
 
-	int lineLength = 25; // 3 for rank + 3 for spacing, 7 for score + 2 for spacing, 10 for name.
+	int lineLength = 25; // 3 for rank + 3 for spacing, 7 for score + 2 for spacing, + 10 for name.
 
 	WINDOW *scoresW = newwin(12, lineLength, maxY/2 - 1 - 12/2, maxX/2 - 1 - lineLength/2);
 	wattron(scoresW, A_BOLD | A_DIM);
@@ -83,12 +90,12 @@ void dispScores(int scores[10], char names[10][11]) {
 	int i;
 	for (i = 0; i < 10; i++) {
 		// Don't display zero score.
-		if (scores[i] == 0) {
+		if (scores[i].score == 0) {
 			break;
 		}
 
 		// Rank space-padded to 4 characters, scores zero-padded to 7 digits, and name space-padded to 10 characters and left-aligned.
-		sprintf(line, "%4s  %07d  %-10s", ranks[i], scores[i], names[i]);
+		sprintf(line, "%4s  %07d  %-10s", ranks[i], scores[i].score, scores[i].name);
 
 		if (i == 0) {
 			// Give first place yellow font color.
