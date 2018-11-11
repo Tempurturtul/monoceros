@@ -11,6 +11,8 @@
 #include "menu.h"
 #include "scores.h"
 
+#define MAX_SCORES_OFFSET 990
+
 int mainMenu() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
@@ -50,6 +52,20 @@ int mainMenu() {
 }
 
 void dispScores() {
+	// Uncomment to generate scores for debugging:
+	/*
+	struct highscore s;
+	s.score = 9999999;
+	strcpy(s.name, "NAGATE");
+	putScore(s);
+	s.score = 2805998;
+	strcpy(s.name, "HOSHIJIRO");
+	putScore(s);
+	s.score = 835573;
+	strcpy(s.name, "IZANA");
+	putScore(s);
+	*/
+
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
@@ -70,6 +86,7 @@ void dispScores() {
 	int input;
 
 	while (1) {
+		wclear(w);
 		wclear(scoresW);
 
 		// Header in red.
@@ -125,6 +142,14 @@ void dispScores() {
 			}
 		}
 
+		// Display navigation hints.
+		if (offset > 0) {
+			mvwprintw(w, maxY-2, 2, "<--");
+		}
+		if (scores[9].score > 0 && offset < MAX_SCORES_OFFSET) {
+			mvwprintw(w, maxY-2, maxX-5, "-->");
+		}
+
 		wrefresh(w);
 		wrefresh(scoresW);
 
@@ -136,7 +161,7 @@ void dispScores() {
 				offset = 0;
 			}
 		} else if (input == KEY_RIGHT) {
-			if (scores[9].score > 0 && offset < 990) {
+			if (scores[9].score > 0 && offset < MAX_SCORES_OFFSET) {
 				offset += 10;
 			}
 		} else {
