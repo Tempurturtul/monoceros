@@ -101,6 +101,9 @@ void dispScores() {
 		for (i = 0; i < 10; i++) {
 			// Don't display zero score.
 			if (scores[i].score == 0) {
+				if (i == 0) {
+					mvwprintw(scoresW, 2, 0, "(nothing here)");
+				}
 				break;
 			}
 
