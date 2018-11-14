@@ -18,7 +18,7 @@ NOTES
 
 #include "planet.h"
 
-void planetLevel(struct gameState * state, struct library * lib, struct levelData * level, WINDOW * window) {
+void planetLevel(struct gameState * state, struct library * lib, struct levelData * level) {
 	int i, j;
 	level->spawnOK=0;
 	if (level->skyRate<2*level->skyLimit) {
@@ -44,7 +44,8 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 						// stop sprites
 						transitionPlanetBG(state, lib, level);
 						// modify for cyan sky background
-						wbkgd(window, COLOR_PAIR(15));
+						//wbkgd(window, COLOR_PAIR(15));
+						state->skyReady=1;
 						swapSkyMotif(state, lib);
 						// okay to go
 						level->spawnOK=1;
@@ -58,7 +59,7 @@ void planetLevel(struct gameState * state, struct library * lib, struct levelDat
 void swapSkyMotif(struct gameState * state, struct library * lib) {
 	int j;
 	// fix player ship colors
-	state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 16;
+	// state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 16;
 	state->allSprites->spriteArr[0]->dispArr[1]->colorPair = 17;
 	//fix laser colors
 	lib->allEffects->effectArr[laserEffect]->dispArr[0]->colorPair = 15;

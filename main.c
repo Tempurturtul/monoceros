@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 		switch (menuChoice) {
 			case 1:
 				//playGame(state, lib, level);
-				playGame(0);
+				playGameSingle();
 				break;
 			case 2:
 				waitQueue();
@@ -85,9 +85,9 @@ void startCurses() {
 	init_pair(7, COLOR_BLACK, COLOR_BLACK);
 	init_pair(8, COLOR_GREEN, COLOR_BLACK);
 	init_pair(9, COLOR_YELLOW, COLOR_WHITE);
-	init_pair(10, COLOR_YELLOW, COLOR_YELLOW);
-	init_pair(11, COLOR_RED, COLOR_RED);
-	init_pair(12, COLOR_GREEN, COLOR_GREEN);
+	init_pair(10, COLOR_RED, COLOR_YELLOW);
+	init_pair(11, COLOR_YELLOW, COLOR_RED);
+	init_pair(12, COLOR_BLACK, COLOR_GREEN);
 	init_pair(13, COLOR_BLUE, COLOR_GREEN);
 	init_pair(14, COLOR_RED, COLOR_WHITE);
 	// sky  motif

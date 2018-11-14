@@ -246,6 +246,11 @@ void addEffect(int ID, int parentID, struct gameState * state, struct library * 
 void printEffect(WINDOW* window, struct gameState * state) {
 	int effectCount = 0, spriteCount=0;
 	struct spriteList * localSpriteList = state->allSprites;
+	if (state->skyReady && state->skyReady <3) {
+		wbkgd(window, COLOR_PAIR(15));
+		state->skyReady ++;
+	}
+	
 	for (spriteCount=0; spriteCount < localSpriteList->numSprites; spriteCount++) {
 		for (effectCount=0; effectCount < localSpriteList->spriteArr[spriteCount]->numEffects; effectCount++) {
 			struct effect * effectIn = state->allEffects->effectArr[localSpriteList->spriteArr[spriteCount]->effectIDs[effectCount]];
@@ -303,6 +308,39 @@ void printEffect(WINDOW* window, struct gameState * state) {
 		}
 	}
 }
+
+
+void printEffectServer(struct gameState * state) {
+	int effectCount = 0, spriteCount=0;
+	struct spriteList * localSpriteList = state->allSprites;
+	if (state->skyReady && state->skyReady <3) {
+		state->skyReady ++;
+	}
+	for (spriteCount=0; spriteCount < localSpriteList->numSprites; spriteCount++) {
+		for (effectCount=0; effectCount < localSpriteList->spriteArr[spriteCount]->numEffects; effectCount++) {
+			struct effect * effectIn = state->allEffects->effectArr[localSpriteList->spriteArr[spriteCount]->effectIDs[effectCount]];
+			char tdisp[MAX_DISP_SUBSIZE];
+			// results based on time
+			int dispIndex = 0;
+			if (effectIn->start > 0) { 
+				if  ((state->time-effectIn->start) < effectIn->ttl) {
+					dispIndex = (int)effectIn->numDisps*((state->time-effectIn->start)/effectIn->ttl);
+					strcpy(tdisp, effectIn->dispArr[dispIndex]->disp);
+				}
+				// turn it off and reset it
+				else {
+					strcpy(tdisp, "");
+					effectIn->start = -1;
+					// gross
+					if (localSpriteList->spriteArr[spriteCount]->markedForDeath > 0) {
+						localSpriteList->spriteArr[spriteCount]->markedForDeath=-1;
+					}
+				}
+			}
+		}
+	}
+}
+
 
 // fix me - you need to regularly call this function and look for defunct effects
 // in order to stay under the limit (and manage your memory better)
