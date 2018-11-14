@@ -11,6 +11,7 @@
 
 #define HIGHSCORES_FILENAME "highscores.txt"
 #define TEMP_HIGHSCORES_FILENAME "highscores.tmp"
+#define MULTIPLAYER_HIGHSCORES_FILENAME "multiplayer-highscores.txt"
 
 struct highscore {
 	int score;

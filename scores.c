@@ -15,7 +15,7 @@
 void getScores(struct highscore *scores, int n, int offset) {
     int i;
 
-    // Open file for reading.
+    // Open files for reading.
     FILE *highscoresFile = fopen(HIGHSCORES_FILENAME, "r");
     if (highscoresFile == NULL) {
         // No scores.
@@ -26,13 +26,66 @@ void getScores(struct highscore *scores, int n, int offset) {
         return;
     }
 
+    // Multiplayer scores (no error check because we're okay with not having any).
+    FILE *mpHighscoresFile = fopen(MULTIPLAYER_HIGHSCORES_FILENAME, "r");
+
     // Read file and collect desired entries.
-    struct highscore s;
+    struct highscore s;  // Next score to operate on.
+    struct highscore sp; // Singleplayer score.
+    struct highscore mp; // Multiplayer score.
     int realizedOffset = 0;
     int numStored = 0;
+    // Flags indicating scores remain to be read.
+    int outOfSPScores = 0;
+    int outOfMPScores = mpHighscoresFile == NULL ? 1 : 0;
+    // Flags indicating we should skip reading a score from a file.
+    int skipSPScore = 0;
+    int skipMPScore = 0;
 
-    // For every score in the file...
-    while (fscanf(highscoresFile, "%d %s\n", &s.score, s.name) != EOF) {
+    // For every score in the files...
+    while (1) {
+        // Read next score from files.
+        if (!skipSPScore && !outOfSPScores) {
+            if (fscanf(highscoresFile, "%d %s\n", &sp.score, sp.name) == EOF) {
+                // No more singleplayer scores.
+                outOfSPScores = 1;
+            }
+        }
+
+        if (!skipMPScore && !outOfMPScores) {
+            if (fscanf(mpHighscoresFile, "%d %s\n", &mp.score, mp.name) == EOF) {
+                // No more multiplayer scores.
+                outOfMPScores = 1;
+            }
+        }
+
+        // Make sure a new score was read.
+        if (outOfSPScores && outOfMPScores) {
+            break;
+        }
+
+        // Reset skip flags.
+        skipSPScore = 0;
+        skipMPScore = 0;
+
+        // Set the next score to operate on, and set a skip flag if necessary.
+        if (!outOfSPScores && !outOfMPScores) {
+            // Have to pick the higher of the two scores to use (we'll say sp score wins ties).
+            s.score = sp.score >= mp.score ? sp.score : mp.score;
+            strcpy(s.name, (sp.score >= mp.score ? sp.name : mp.name));
+            // Now we have to skip lower score and reconsider it on the next loop.
+            skipSPScore = sp.score >= mp.score ? 0 : 1;
+            skipMPScore = !skipSPScore;
+        } else if (outOfMPScores) {
+            // Have to use sp score.
+            s.score = sp.score;
+            strcpy(s.name, sp.name);
+        } else {
+            // Have to use mp score.
+            s.score = mp.score;
+            strcpy(s.name, mp.name);
+        }
+
         // Skip scores until we've reached the offset.
         if (realizedOffset < offset) {
             realizedOffset++;
@@ -55,7 +108,11 @@ void getScores(struct highscore *scores, int n, int offset) {
         strcpy(scores[i].name, "");
     }
 
+    // Clean up.
     fclose(highscoresFile);
+    if (mpHighscoresFile != NULL) {
+        fclose(mpHighscoresFile);
+    }
 }
 
 void putScore(struct highscore score) {
