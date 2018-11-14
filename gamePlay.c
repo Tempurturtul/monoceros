@@ -587,17 +587,11 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 	if (inputChar == 'q') {
 		*playFlag = 0;
 	}
-	// FOR PLAYER CONTROLS - consider:
-						// limiting total velocity -- Done
-						// increasing deltaAcc for counter thrust  -- NA (limited total velocity instead)
-						// applying counter acc at window borders -- Done
-						// limiting limits at window borders -- Done
 	else if (inputChar == KEY_UP) {
 		//allSprites.spriteArr[0]->yLoc += -1;
 		pShip->yAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[2]->start = state->time;
-			state->allEffects->effectArr[3]->start = state->time;
 		}
 	}
 	else if (inputChar == KEY_LEFT) {
@@ -605,6 +599,7 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 		pShip->xAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[1]->start = state->time;
+			state->allEffects->effectArr[3]->start = state->time;
 		}
 	}
 	else if (inputChar == KEY_DOWN) {
@@ -612,7 +607,6 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 		pShip->yAcc += baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[4]->start = state->time;
-			state->allEffects->effectArr[5]->start = state->time;
 		}
 	}
 	else if (inputChar == KEY_RIGHT) {
@@ -649,8 +643,8 @@ void restrictPlaySpace(struct gameState *state) {
 	struct sprite *player = state->allSprites->spriteArr[0];
 
 	// TODO: Determine this based on CoM and radius?
-	int playerHeight = 4;
-	int playerWidth = 24;
+	int playerHeight = 3;
+	int playerWidth = 4;
 
 	if (player->xLoc <= 0) {
 		// Left border.

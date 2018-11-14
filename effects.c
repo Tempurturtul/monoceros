@@ -71,10 +71,9 @@ void setEffectSize(struct effect * effectIn, int x, int y) {
 void initEffectLibrary(struct effectList *localList) {
 	localList->numEffects =0;
 	
-	// generate right thrust effect to test with
+	// right thrust
 	struct effect * rtThrust = malloc(sizeof(struct effect));
-	//initEffect(rtThrust, 0, 0.5, 0,2,"  o"," O ",")  ",2, 3, 1);
-	initEffect(rtThrust, 0, 0.5, 0, 2);
+	initEffect(rtThrust, 0, 0.5, -3, 1);
 	rtThrust->parentID = 0;
 	initDispPair(rtThrust, 2, 0, "  o");
 	initDispPair(rtThrust, 3, 0, " O ");
@@ -82,51 +81,50 @@ void initEffectLibrary(struct effectList *localList) {
 	initDispPair(rtThrust, 1, A_DIM, "|  ");
 	localList->effectArr[localList->numEffects] = rtThrust;
 	localList->numEffects++;
-	
 
-	// left thrust
-	struct effect * ltThrust = malloc(sizeof(struct effect));
-	//initEffect(ltThrust, 0, 0.5, 13,2,"o  "," O ","  (",2, 3, 1);
-	initEffect(ltThrust, 0, 0.5, 13,2);
-	ltThrust->parentID = 0;
-	initDispPair(ltThrust, 2, 0, "o  ");
-	initDispPair(ltThrust, 3, 0, " O ");
-	initDispPair(ltThrust, 1, 0, "  (");
-	localList->effectArr[localList->numEffects] = ltThrust;
+	// left thrust 1
+	struct effect * ltThrust1 = malloc(sizeof(struct effect));
+	initEffect(ltThrust1, 0, 0.5, 2, 2);
+	ltThrust1->parentID = 0;
+	initDispPair(ltThrust1, 2, 0, "o  ");
+	initDispPair(ltThrust1, 3, 0, " O ");
+	initDispPair(ltThrust1, 1, 0, "  (");
+	localList->effectArr[localList->numEffects] = ltThrust1;
 	localList->numEffects++;
 
 	// up thrust 1
 	struct effect * upThrust1 = malloc(sizeof(struct effect));
 	//initEffect(upThrust1, 0, 0.5, 0,1,"o","\nO","\n\n_",2, 3, 1);
-	initEffect(upThrust1, 0, 0.5, 0,1);
+	initEffect(upThrust1, 0, 0.5, 0, 3);
 	upThrust1->parentID = 0;
 	initDispPair(upThrust1, 2, 0, "o");
 	initDispPair(upThrust1, 3, 0, "\nO ");
 	initDispPair(upThrust1, 1, 0, "\n\n_");
 	localList->effectArr[localList->numEffects] = upThrust1;
 	localList->numEffects++;
-	// up thrust 2
-	struct effect * upThrust2 = malloc(sizeof(struct effect));
-	//initEffect(upThrust2, 0, 0.5, 23,1,"o","\nO","\n\n_",2, 3, 1);
-	initEffect(upThrust2, 0, 0.5, 23,1);
-	upThrust2->parentID = 0;
-	initDispPair(upThrust2, 2, 0, "o");
-	initDispPair(upThrust2, 3, 0, "\nO ");
-	initDispPair(upThrust2, 1, 0, "\n\n_");
-	localList->effectArr[localList->numEffects] = upThrust2;
+
+	// left thrust 2
+	struct effect * ltThrust2 = malloc(sizeof(struct effect));
+	initEffect(ltThrust2, 0, 0.5, 2, 0);
+	ltThrust2->parentID = 0;
+	initDispPair(ltThrust2, 2, 0, "o  ");
+	initDispPair(ltThrust2, 3, 0, " O ");
+	initDispPair(ltThrust2, 1, 0, "  (");
+	localList->effectArr[localList->numEffects] = ltThrust2;
 	localList->numEffects++;
 
 	//down thrust 1
 	struct effect * dwThrust1 = malloc(sizeof(struct effect));
 	//initEffect(dwThrust1, 0, 0.5, 0,-3,"\n\no","\nO","-\n\n",2, 3, 1);
-	initEffect(dwThrust1, 0, 0.5, 0,-3);
+	initEffect(dwThrust1, 0, 0.5, 0, -3);
 	dwThrust1->parentID = 0;
 	initDispPair(dwThrust1, 2, 0, "\n\no");
 	initDispPair(dwThrust1, 3, 0, "\nO ");
 	initDispPair(dwThrust1, 1, 0, "-\n\n");
 	localList->effectArr[localList->numEffects] = dwThrust1;
 	localList->numEffects++;
-	// down thrust 2
+
+	// down thrust 2 (unused)
 	struct effect * dwThrust2 = malloc(sizeof(struct effect));
 	//initEffect(dwThrust2, 0, 0.5, 23,-3,"\n\no","\nO","-\n\n",2, 3, 1);
 	initEffect(dwThrust2, 0, 0.5, 23,-3);
