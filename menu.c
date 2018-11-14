@@ -35,9 +35,6 @@ int mainMenu() {
 	wattroff(menuW, COLOR_PAIR(5));
 
 	mvwprintw(menuW, 2, 0, menuStr);
-	
-	// TODO: Remove when option 5 is removed.
-	mvwprintw(menuW, 9, 0, "(5) preview death screen");
 
 	wrefresh(w);
 	wrefresh(menuW);

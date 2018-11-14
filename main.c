@@ -24,9 +24,6 @@ int main(int argc, char *argv[]) {
 	startCurses();
 	srand(time(0));
 
-	// TODO: Remove when the death screen is moved somewhere else.
-	char playerName[11]; // Filled with the player's name via the death screen.
-
 	int menuChoice = 0;
 	while (menuChoice != 4) {
 		switch (menuChoice) {
@@ -39,11 +36,6 @@ int main(int argc, char *argv[]) {
 				break;
 			case 3:
 				dispScores();
-				break;
-			case 5:
-				// TODO: Remove when we have the death screen used somewhere.
-				deathScreen(34230, playerName);
-				// TODO: Save score and name to high scores file.
 				break;
 		}
 
