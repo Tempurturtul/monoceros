@@ -60,7 +60,7 @@ void swapSkyMotif(struct gameState * state, struct library * lib) {
 	int j;
 	// fix player ship colors
 	// state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 16;
-	state->allSprites->spriteArr[0]->dispArr[1]->colorPair = 17;
+	state->allSprites->spriteArr[0]->dispArr[0]->colorPair = 17;
 	//fix laser colors
 	lib->allEffects->effectArr[laserEffect]->dispArr[0]->colorPair = 15;
 	lib->allEffects->effectArr[laserEffect]->dispArr[1]->colorPair = 15;
