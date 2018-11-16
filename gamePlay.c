@@ -623,13 +623,13 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 			addSprite(missileRt, state, lib);
 			// if you want to be real physicsy then you'd actually copy the pShip
 			// velocities to the new sprite as well
-			modSprite(-1, pShip->xLoc + pShip->xCoM/2, pShip->yLoc+pShip->yCoM, 45*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc - 1, pShip->yLoc + 1, 45*(1e6)/REFRESH_RATE, 0, 0, state);
 		}
 		// player laser
 		else if (pShip->wpnSelect==1) {
 			pShip->isShooter -= 1;
 			addSprite(laser, state, lib);
-			modSprite(-1, pShip->xLoc + pShip->xCoM, pShip->yLoc+pShip->yCoM, 150*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc - 17, pShip->yLoc + 1, 150*(1e6)/REFRESH_RATE, 0, 0, state);
 			//struct sprite * laserPtr = state->allSprites->spriteArr[state->allSprites->numSprites-1];
 			addEffect(laserEffect,state->allSprites->numSprites-1,state, lib);
 			modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
