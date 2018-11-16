@@ -141,16 +141,25 @@ void initSpriteLibrary(struct spriteList *localList) {
 
 	localList->numSprites =0;
 
-	// generate 1 sprite to test with
+	// Player ship.
+	/*
+		
+		|[
+		}=->
+		|[
+
+	*/
 	struct sprite * ship = malloc(sizeof(struct sprite));
 	// initSprite(sprite, type, x, y)
 	initSprite(ship, 0, 50,20);
 	// by convention,  start a newline with \n, don't terminate the previous one
-	initDispPairSprite(ship, 14, 0, "-----      -------------");
-	initDispPairSprite(ship, 1, 0, "\n    \\      /\n   /-------/\\\n   \\--------/");//\n      |\n      |");
+	// initDispPairSprite(ship, 14, 0, "-----      -------------");
+	// initDispPairSprite(ship, 1, 0, "\n    \\      /\n   /-------/\\\n   \\--------/");//\n      |\n      |");
+	initDispPairSprite(ship, 1, 0, "|[\n}=->\n|[");
 	calcCoM(ship);
 	localList->spriteArr[localList->numSprites] = ship;
 	localList->numSprites++;
+
 	// ID=1
 	struct sprite * eny1 = malloc(sizeof(struct sprite));
 	initSprite(eny1, 1,100,20);
