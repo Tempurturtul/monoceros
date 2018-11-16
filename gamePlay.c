@@ -376,9 +376,9 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 			if (s2->type < 6) {
 				// you actually hit something to kill you
 				addEffect(shipEx2,i,state, lib);
-				modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				modEffect(-1, state->time, -6, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				addEffect(shipEx3,i,state, lib);
-				modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				modEffect(-1, state->time, -6, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				s1->markedForDeath=1;
 			}
 			// powerups!
@@ -591,17 +591,11 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 	if (inputChar == 'q') {
 		*playFlag = 0;
 	}
-	// FOR PLAYER CONTROLS - consider:
-						// limiting total velocity -- Done
-						// increasing deltaAcc for counter thrust  -- NA (limited total velocity instead)
-						// applying counter acc at window borders -- Done
-						// limiting limits at window borders -- Done
 	else if (inputChar == KEY_UP) {
 		//allSprites.spriteArr[0]->yLoc += -1;
 		pShip->yAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[2]->start = state->time;
-			state->allEffects->effectArr[3]->start = state->time;
 		}
 	}
 	else if (inputChar == KEY_LEFT) {
@@ -609,6 +603,7 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 		pShip->xAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[1]->start = state->time;
+			state->allEffects->effectArr[3]->start = state->time;
 		}
 	}
 	else if (inputChar == KEY_DOWN) {
@@ -616,7 +611,6 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 		pShip->yAcc += baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[4]->start = state->time;
-			state->allEffects->effectArr[5]->start = state->time;
 		}
 	}
 	else if (inputChar == KEY_RIGHT) {
@@ -633,18 +627,17 @@ void handleInput(int inputChar, int *playFlag, struct gameState *state, struct l
 			addSprite(missileRt, state, lib);
 			// if you want to be real physicsy then you'd actually copy the pShip
 			// velocities to the new sprite as well
-			modSprite(-1, pShip->xLoc+ pShip->xCoM+5, pShip->yLoc+pShip->yCoM, 45*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc - 1, pShip->yLoc + 1, 45*(1e6)/REFRESH_RATE, 0, 0, state);
 		}
 		// player laser
 		else if (pShip->wpnSelect==1) {
 			pShip->isShooter -= 1;
 			addSprite(laser, state, lib);
-			modSprite(-1, pShip->xLoc+ pShip->xCoM, pShip->yLoc+pShip->yCoM, 150*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc - 17, pShip->yLoc + 1, 150*(1e6)/REFRESH_RATE, 0, 0, state);
 			//struct sprite * laserPtr = state->allSprites->spriteArr[state->allSprites->numSprites-1];
 			addEffect(laserEffect,state->allSprites->numSprites-1,state, lib);
 			modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
-
-			}
+		}
 	}
 	flushinp();
 }
@@ -653,8 +646,8 @@ void restrictPlaySpace(struct gameState *state) {
 	struct sprite *player = state->allSprites->spriteArr[0];
 
 	// TODO: Determine this based on CoM and radius?
-	int playerHeight = 4;
-	int playerWidth = 24;
+	int playerHeight = 3;
+	int playerWidth = 4;
 
 	if (player->xLoc <= 0) {
 		// Left border.
