@@ -34,7 +34,7 @@ void playGame(int network_socket);
 //void playGameSingle(int network_socket);
 void playGameSingle();
 void waitQueue();
-void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib);
+void handleInput(int inputChar, struct gameState *state, struct library * lib);
 void restrictPlaySpace(struct gameState *state);
 void freeGame(struct gameState * state, struct library * lib, struct levelData * level);
 void createDummyWindows(struct gameState * state, int maxX, int maxY, WINDOW*, WINDOW*);

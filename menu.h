@@ -21,7 +21,13 @@ void dispScores();
 // Displays the given text centered on stdscr.
 void messageScreen(const char *text);
 
-// Displays the player's final score and populates `nameBuffer` with the player's input for their name (max of 10 characters).
-void deathScreen(int score, char nameBuffer[11]);
+// Displays the player's final score and name (max of 7 digits and 10 characters + null terminator).
+// The window returned from the function should be passed back in as the first argument on subsequent calls. As long as the
+// first argument isn't NULL no new windows will be created (the first argument will be returned instead). The final score
+// should not change on subsequent calls where the first argument is not NULL.
+WINDOW *deathScreen(WINDOW *w, int finalScore, char name[11]);
+
+// Returns false when done handling input (enter pressed with valid name).
+bool handleDeathScreenInput(int input, char name[11]);
 
 #endif

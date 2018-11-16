@@ -185,80 +185,72 @@ void messageScreen(const char *text) {
 	wattroff(stdscr, A_BOLD | A_DIM);
 }
 
-void deathScreen(int finalScore, char nameBuffer[11]) {
-	int maxX, maxY;
-	getmaxyx(stdscr, maxY, maxX);
-	WINDOW *w = newwin(maxY, maxX, 0, 0);
-
-	char scoreMsg[13+7+1]; // 13 character prefix including space, 7 digit score, null-terminator.
-	sprintf(scoreMsg, "Final Score: %07d", finalScore);
-
-	WINDOW *msgW = newwin(5, strlen(scoreMsg), maxY/2 - 1 - 5/2, maxX/2 - 1 - strlen(scoreMsg)/2);
-	wattron(msgW, A_BOLD | A_DIM);
-
-	// Print death message.
+WINDOW *deathScreen(WINDOW *w, int finalScore, char name[11]) {
 	const char *deathMsg = "YOU DIED x_x";
-	wattron(msgW, COLOR_PAIR(2)); // Red font.
-	mvwprintw(msgW, 0, strlen(scoreMsg)/2 - 1 - strlen(deathMsg)/2, deathMsg); // Note score message must be wider than death message.
-	wattroff(msgW, COLOR_PAIR(2));
+	const char *scorePrefix = "Final Score: ";
+	const char *namePrompt = "Name: ";
+	int deathMsgLen = strlen(deathMsg);
+	int scoreMsgLen = strlen(scorePrefix) + 7; // 7 digit scores
+	int namePromptLen = strlen(namePrompt);
+	int nameMsgLen = namePromptLen + 10; // 10 character names.
 
-	// Print final score.
-	mvwprintw(msgW, 2, 0, scoreMsg);
+	if (w == NULL) {
+		// Need to initialize window.
+		int maxX, maxY;
+		getmaxyx(stdscr, maxY, maxX);
 
-	wrefresh(w);
-	wrefresh(msgW);
+		char scoreMsg[scoreMsgLen+1];
+		sprintf(scoreMsg, "%s%07d", scorePrefix, finalScore);
 
-	// Prepare name prompt.
-	char namePrompt[6+10+1]; // "Name: " (6) + input (10) + null terminator (1).
-	// Make sure name buffer contains an empty string.
-	nameBuffer[0] = '\0';
+		w = newwin(5, scoreMsgLen, maxY/2 - 1 - 5/2, maxX/2 - 1 - scoreMsgLen/2);
+		wattron(w, A_BOLD | A_DIM);
 
-	// Print initial name prompt.
-	sprintf(namePrompt, "Name: %s", nameBuffer);
-	wattron(msgW, A_BLINK);
-	mvwprintw(msgW, 4, strlen(scoreMsg)/2 - 1 - 16/2, namePrompt);
-	wattroff(msgW, A_BLINK);
-	wrefresh(msgW);
+		// Print death message.
+		wattron(w, COLOR_PAIR(2)); // Red font.
+		mvwprintw(w, 0, scoreMsgLen/2 - 1 - deathMsgLen/2, deathMsg); // Note score message must be wider than death message.
+		wattroff(w, COLOR_PAIR(2));
 
-	// Wait half a second in case the user is spamming input post-death.
-	sleep(0.5);
+		// Print final score.
+		mvwprintw(w, 2, 0, scoreMsg);
 
-	keypad(w, TRUE);
-	int input;
-	int chars = 0;
-	bool collectInput = true;
-	while (collectInput) {
-		input = wgetch(w);
+		// Print name prompt.
+		mvwprintw(w, 4, scoreMsgLen/2 - 1 - nameMsgLen/2, namePrompt);
 
-		if (input == '\n' || input == '\r') {
-			// Enter key.
-			if (chars > 0) {
-				collectInput = false;
-			}
-		} else if (input == KEY_BACKSPACE) {
-			// Backspace key.
-			if (chars > 0) {
-				nameBuffer[chars-1] = ' ';
-				chars--;
-			}
-		} else if ((input >= 65 && input <= 90) || (input >= 97 && input <= 122)) {
-			// A-Z or a-z.
-			if (chars < 10) {
-				// Convert lowercase to uppercase.
-				if (input > 90) {
-					input -= 32;
-				}
-				nameBuffer[chars] = input;
-				nameBuffer[chars+1] = '\0';
-				chars++;
-			}
-		}
-
-		sprintf(namePrompt, "Name: %s", nameBuffer);
-		mvwprintw(msgW, 4, strlen(scoreMsg)/2 - 1 - 16/2, namePrompt);
-		wrefresh(msgW);
+		wrefresh(w);
 	}
 
-	delwin(msgW);
-	delwin(w);
+	// Update displayed name only.
+	mvwprintw(w, 4, scoreMsgLen/2 - 1 - nameMsgLen/2 + namePromptLen, "%-10s", name);
+
+	return w;
+}
+
+bool handleDeathScreenInput(int input, char name[11]) {
+	int chars = strlen(name);
+
+	if (input == '\n' || input == '\r') {
+		// Enter key.
+		if (chars > 0) {
+			// All done.
+			return false;
+		}
+	} else if (input == KEY_BACKSPACE) {
+		// Backspace key.
+		if (chars > 0) {
+			name[chars-1] = '\0';
+		}
+	} else if ((input >= 65 && input <= 90) || (input >= 97 && input <= 122)) {
+		// A-Z or a-z.
+		if (chars < 10) {
+			// Convert lowercase to uppercase.
+			if (input > 90) {
+				input -= 32;
+			}
+			name[chars] = input;
+			name[chars+1] = '\0';
+		}
+	}
+
+	// Need more input.
+	return true;
 }

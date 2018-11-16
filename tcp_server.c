@@ -133,8 +133,8 @@ int main() {
         recv(client_socket2, &input2, sizeof(int), 0);
         //printf("input2: %d\n", input2);
 		
-		handleInput(input1, &(state->playFlag), state, lib);
-		handleInput(input2, &(state->playFlag), state, lib);
+		handleInput(input1, state, lib);
+		handleInput(input2, state, lib);
 
 		restrictPlaySpace(state);
 

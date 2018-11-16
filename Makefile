@@ -43,4 +43,4 @@ all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o scores.
 	gcc -o server tcp_server.c -g gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o scores.o $(CFLAGS)
 
 clean:
-	rm -f *.o main server
+	rm -f *.o *.tmp main server
