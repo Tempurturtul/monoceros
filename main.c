@@ -1,5 +1,5 @@
 /*******************************************************************************************
-** Authors: Chris Spravka, Matthew Feidt
+** Authors: Chris Spravka, Matthew Feidt, Chad Erdwins
 ** Date:  13 OCT 2018
 ** Description: main program file for Monoceros CS467 project
 
@@ -36,6 +36,7 @@ int main(int argc, char *argv[]) {
 		switch (menuChoice) {
 			case 1:
 				//playGame(state, lib, level);
+				single_player_instructions();
 				playGameSingle();
 				break;
 			case 2:
