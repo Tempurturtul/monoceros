@@ -1,5 +1,5 @@
 /*******************************************************************************************
-** Authors: Chris Spravka, Matthew Feidt
+** Authors: Chris Spravka, Matthew Feidt, Chad Erdwins
 ** Date:  13 OCT 2018
 ** Description: gameplay header file
 *******************************************************************************************/
@@ -34,6 +34,7 @@ void playGame(int network_socket);
 //void playGameSingle(int network_socket);
 void playGameSingle();
 void waitQueue();
+void single_player_instructions();
 void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib);
 void restrictPlaySpace(struct gameState *state);
 void freeGame(struct gameState * state, struct library * lib, struct levelData * level);
