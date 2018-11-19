@@ -177,7 +177,6 @@ int send_file(int network_socket, const char *fileName) {
 	}
 
 	close(fd);
-	
 	return 0;
 }
 
@@ -185,27 +184,31 @@ int recv_file(int network_socket, const char *fileName, int fileSize) {
 	// Open the file for writing, creating or truncate it and granting read and write permissions to the user.
 	int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, 0600);
 	char buf[256];
-	int bytesReceived = 0;
+	int totalBytesReceived = 0;
+	int bytesReceived;
 	int bytesToReceive;
 	int bytesWritten;
 	char *bufP;
 
 	while (1) {
-		if (bytesReceived >= fileSize) {
+		if (totalBytesReceived >= fileSize) {
 			// All done.
 			break;
 		}
 
 		// Receive file data from the network socket.
 		bytesToReceive = fileSize > sizeof(buf) ? sizeof(buf) : fileSize;
-		int bytesReceived = recv(network_socket, buf, bytesToReceive, 0);
+		bytesReceived = recv(network_socket, buf, bytesToReceive, 0);
 
 		// Check for receive errors.
 		if (bytesReceived <= 0) {
 			return -1;
 		}
 
+		totalBytesReceived += bytesReceived;
+
 		// Write received data to the file.
+		bytesWritten = 0;
 		bufP = buf;
 		while (bytesReceived > 0) {
 			bytesWritten = write(fd, buf, bytesReceived);

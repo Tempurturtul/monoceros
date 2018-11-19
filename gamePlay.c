@@ -210,6 +210,7 @@ void playGame(int network_socket) {
 	if (state->deathScreen) {
 		WINDOW *deathW = deathScreen(NULL, state->score, state->playerName);
 		keypad(deathW, true);
+		wtimeout(deathW, 1);
 		while (state->deathScreen) {
 			inputChar = wgetch(deathW);
 			send_data(network_socket, &inputChar, sizeof(int));
@@ -218,15 +219,15 @@ void playGame(int network_socket) {
 			deathW = deathScreen(deathW, state->score, state->playerName);
 		}
 		delwin(deathW);
+
+		// Receive multiplayer highscores file size.
+		off_t mpScoresFileSize;
+		recv(network_socket, &mpScoresFileSize, sizeof(off_t), 0);
+
+		// Receive multiplayer highscores file.
+		recv_file(network_socket, MULTIPLAYER_HIGHSCORES_FILENAME, mpScoresFileSize);
 	}
 	
-	// Receive multiplayer highscores file size.
-	off_t mpScoresFileSize;
-	recv(network_socket, &mpScoresFileSize, sizeof(off_t), 0);
-
-	// Receive multiplayer highscores file.
-	recv_file(network_socket, MULTIPLAYER_HIGHSCORES_FILENAME, mpScoresFileSize);
-
 	// free space for state, level, lib
 	freeGame(state, lib, level);	// FIXME - need to do this
 }
