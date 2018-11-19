@@ -225,6 +225,8 @@ WINDOW *deathScreen(WINDOW *w, int finalScore, char name[11]) {
 		int maxX, maxY;
 		getmaxyx(stdscr, maxY, maxX);
 
+		wclear(stdscr);
+
 		char scoreMsg[scoreMsgLen+1];
 		sprintf(scoreMsg, "%s%07d", scorePrefix, finalScore);
 
@@ -242,6 +244,7 @@ WINDOW *deathScreen(WINDOW *w, int finalScore, char name[11]) {
 		// Print name prompt.
 		mvwprintw(w, 4, scoreMsgLen/2 - 1 - nameMsgLen/2, namePrompt);
 
+		wrefresh(stdscr);
 		wrefresh(w);
 	}
 
