@@ -139,6 +139,92 @@ int send_all(int network_socket, struct gameState *state, struct library *lib, s
 	
 }
 
+int send_file(int network_socket, const char *fileName) {
+	int fd = open(fileName, O_RDONLY);
+	char buf[256];
+	int bytesRead;
+	int bytesWritten;
+	char *bufP;
+
+	while (1) {
+		// Fill the buffer.
+		bytesRead = read(fd, buf, sizeof(buf));
+
+		// Check if we read nothing into the buffer, meaning we're done.
+		if (bytesRead == 0) {
+			break;
+		}
+
+		// Check for read errors.
+		if (bytesRead < 0) {
+			return -1;
+		}
+
+		// Write (send) until we've sent everything currently in the buffer.
+		bufP = buf;
+		while (bytesRead > 0) {
+			bytesWritten = write(network_socket, bufP, bytesRead);
+			
+			// Check for write errors.
+			if (bytesWritten <= 0) {
+				return -2;
+			}
+
+			// Figure out where in the buffer we are so we can continue writing if necessary.
+			bytesRead -= bytesWritten;
+			bufP += bytesWritten;
+		}
+	}
+
+	close(fd);
+	
+	return 0;
+}
+
+int recv_file(int network_socket, const char *fileName, int fileSize) {
+	// Open the file for writing, creating or truncate it and granting read and write permissions to the user.
+	int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+	char buf[256];
+	int bytesReceived = 0;
+	int bytesToReceive;
+	int bytesWritten;
+	char *bufP;
+
+	while (1) {
+		if (bytesReceived >= fileSize) {
+			// All done.
+			break;
+		}
+
+		// Receive file data from the network socket.
+		bytesToReceive = fileSize > sizeof(buf) ? sizeof(buf) : fileSize;
+		int bytesReceived = recv(network_socket, buf, bytesToReceive, 0);
+
+		// Check for receive errors.
+		if (bytesReceived <= 0) {
+			return -1;
+		}
+
+		// Write received data to the file.
+		bufP = buf;
+		while (bytesReceived > 0) {
+			bytesWritten = write(fd, buf, bytesReceived);
+
+			// Check for write errors.
+			if (bytesWritten <= 0) {
+				return -2;
+			}
+
+			bytesReceived -= bytesWritten;
+			bufP += bytesWritten;
+		}
+	}
+	
+	close(fd);
+
+	return 0;
+}
+
 // these were for debugging!
 long unsigned getSizeOfState(struct gameState * state) {
 	long unsigned int size = 0;
