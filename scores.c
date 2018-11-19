@@ -17,16 +17,6 @@ void getScores(struct highscore *scores, int n, int offset) {
 
     // Open files for reading.
     FILE *highscoresFile = fopen(HIGHSCORES_FILENAME, "r");
-    if (highscoresFile == NULL) {
-        // No scores.
-        for (i = 0; i < n; i++) {
-            scores[i].score = 0;
-            strcpy(scores[i].name, "");
-        }
-        return;
-    }
-
-    // Multiplayer scores (no error check because we're okay with not having any).
     FILE *mpHighscoresFile = fopen(MULTIPLAYER_HIGHSCORES_FILENAME, "r");
 
     // Read file and collect desired entries.
@@ -36,7 +26,7 @@ void getScores(struct highscore *scores, int n, int offset) {
     int realizedOffset = 0;
     int numStored = 0;
     // Flags indicating scores remain to be read.
-    int outOfSPScores = 0;
+    int outOfSPScores = highscoresFile == NULL ? 1 : 0;
     int outOfMPScores = mpHighscoresFile == NULL ? 1 : 0;
     // Flags indicating we should skip reading a score from a file.
     int skipSPScore = 0;
@@ -109,7 +99,9 @@ void getScores(struct highscore *scores, int n, int offset) {
     }
 
     // Clean up.
-    fclose(highscoresFile);
+    if (highscoresFile != NULL) {
+        fclose(highscoresFile);
+    }
     if (mpHighscoresFile != NULL) {
         fclose(mpHighscoresFile);
     }
