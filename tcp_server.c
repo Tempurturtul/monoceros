@@ -213,7 +213,8 @@ int main() {
 
 			// Send highscore file size.
 			struct stat st;
-			off_t highscoreFileSize = stat(HIGHSCORES_FILENAME, &st);
+			stat(HIGHSCORES_FILENAME, &st);
+			off_t highscoreFileSize = st.st_size;
 			send_data(client_socket, &highscoreFileSize, sizeof(off_t));
 			send_data(client_socket2, &highscoreFileSize, sizeof(off_t));
 
