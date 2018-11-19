@@ -133,6 +133,8 @@ struct gameState {
 	int skyReady;
 	int playFlag;
 	int vertCtrl;
+	int deathScreen;
+	char playerName[11];
 };
 
 struct library {

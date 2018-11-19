@@ -26,6 +26,7 @@ NOTES
 #include "levels.h"
 #include "ai.h"
 #include "tcp_client.h"
+#include "scores.h"
 
 void initGame(struct gameState * state, struct library * lib, struct levelData * level) {
 	// init your library
@@ -67,7 +68,9 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->titleSize = 3;
 	state->playFlag=1;
 	state->skyReady=0;
-
+	state->deathScreen=0;
+	state->playerName[0]='\0';
+	
 	usleep(REFRESH_RATE);
 }
 
@@ -195,11 +198,38 @@ void playGame(int network_socket) {
 	// end main
 	}
 
-	// free space for state, level, lib
-	freeGame(state, lib, level);	// FIXME - need to do this
+	wclear(title);
+	wclear(action);
+
+	wrefresh(title);
+	wrefresh(action);
 
 	delwin(title);
 	delwin(action);
+
+	if (state->deathScreen) {
+		WINDOW *deathW = deathScreen(NULL, state->score, state->playerName);
+		keypad(deathW, true);
+		wtimeout(deathW, 1);
+		while (state->deathScreen) {
+			inputChar = wgetch(deathW);
+			send_data(network_socket, &inputChar, sizeof(int));
+			recv(network_socket, state->playerName, sizeof(state->playerName), 0);
+			recv(network_socket, &state->deathScreen, sizeof(state->deathScreen), 0);
+			deathW = deathScreen(deathW, state->score, state->playerName);
+		}
+		delwin(deathW);
+
+		// Receive multiplayer highscores file size.
+		off_t mpScoresFileSize;
+		recv(network_socket, &mpScoresFileSize, sizeof(off_t), 0);
+
+		// Receive multiplayer highscores file.
+		recv_file(network_socket, MULTIPLAYER_HIGHSCORES_FILENAME, mpScoresFileSize);
+	}
+	
+	// free space for state, level, lib
+	freeGame(state, lib, level);	// FIXME - need to do this
 }
 
 //void playGame(struct gameState * state, struct library * lib, struct levelData * level) {
@@ -244,7 +274,7 @@ void playGameSingle() {
 
 		inputChar = wgetch(action);
 
-		handleInput(inputChar, &(state->playFlag), state, lib);
+		handleInput(inputChar, state, lib);
 
 		restrictPlaySpace(state);
 
@@ -312,16 +342,39 @@ void playGameSingle() {
 		state->timeLast=state->time;
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
+	}
 
-		}
+	wclear(title);
+	wclear(action);
 
-
-
-	// clean up - do a better job of this!
-	freeGame(state, lib, level);
+	wrefresh(title);
+	wrefresh(action);
 
 	delwin(title);
 	delwin(action);
+
+	if (state->deathScreen) {
+		WINDOW *deathW = deathScreen(NULL, state->score, state->playerName);
+		keypad(deathW, true);
+		while (state->deathScreen) {
+			inputChar = wgetch(deathW);
+
+			if (!handleDeathScreenInput(inputChar, state->playerName)) {
+				// All done.
+				state->deathScreen = false;
+			}
+			deathW = deathScreen(deathW, state->score, state->playerName);
+		}
+		delwin(deathW);
+	}
+
+	struct highscore newHighscore;
+	newHighscore.score = state->score;
+	strcpy(newHighscore.name, state->playerName);
+	putScore(newHighscore);
+
+	// clean up - do a better job of this!
+	freeGame(state, lib, level);
 }
 
 
@@ -600,12 +653,13 @@ void limitVel(struct sprite * temp, float limit) {
 	}
 }
 
-void handleInput(int inputChar, int *playFlag, struct gameState *state, struct library * lib) {
+void handleInput(int inputChar, struct gameState *state, struct library * lib) {
 	struct sprite * pShip = state->allSprites->spriteArr[0];
 	float baseThrust = 8.0;
 
 	if (inputChar == 'q') {
-		*playFlag = 0;
+		state->playFlag = 0;
+		state->deathScreen = 1;
 	}
 	else if (inputChar == KEY_UP) {
 		//allSprites.spriteArr[0]->yLoc += -1;

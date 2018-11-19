@@ -35,12 +35,12 @@ planet.o: levels.o planet.h planet.c interfaces.h
 ai.o: ai.c ai.h interfaces.h
 	gcc -c ai.c -g $(CFLAGS)
 
-all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o interfaces.h tcp_client.o tcp_client.h tcp_server.c
-	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o planet.o ai.o tcp_client.o $(CFLAGS)
-	gcc -o server tcp_server.c -g gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o $(CFLAGS)
+scores.o: scores.c scores.h
+	gcc -c scores.c -g $(CFLAGS)
 
-server: tcp_server.c gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o
-	gcc -o server tcp_server.c -g gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o $(CFLAGS)
+all: menu.o sprites.o gamePlay.o effects.o main.c levels.o planet.o ai.o scores.o interfaces.h tcp_client.o tcp_client.h tcp_server.c
+	gcc -o main main.c -g menu.o sprites.o gamePlay.o effects.o levels.o planet.o ai.o scores.o tcp_client.o $(CFLAGS)
+	gcc -o server tcp_server.c -g gamePlay.o tcp_client.o effects.o sprites.o levels.o menu.o planet.o ai.o scores.o $(CFLAGS)
 
 clean:
-	rm -f *.o main server
+	rm -f *.o *.tmp main server

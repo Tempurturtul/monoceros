@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-
+#include <sys/stat.h>
 #include <time.h>
 
 #include "interfaces.h"
@@ -20,7 +20,8 @@
 #include "levels.h"
 #include "effects.h"
 #include "ai.h"
-
+#include "menu.h"
+#include "scores.h"
 
 
 int main() {
@@ -138,9 +139,9 @@ int main() {
         //printf("input1: %d\n", input1);
         recv(client_socket2, &input2, sizeof(int), 0);
         //printf("input2: %d\n", input2);
-
-		handleInput(input1, &(state->playFlag), state, lib);
-		handleInput(input2, &(state->playFlag), state, lib);
+		
+		handleInput(input1, state, lib);
+		handleInput(input2, state, lib);
 
 		restrictPlaySpace(state);
 
@@ -184,9 +185,44 @@ int main() {
 		send_all(client_socket2, state, lib, level);
 //		printf("sent\n");
       }
-      if (!state->playFlag) {
-        break;
-      }
+
+		if (state->deathScreen) {
+			while (state->deathScreen) {
+				// Receive death screen inputs.
+				recv(client_socket, &input1, sizeof(int), 0);
+				recv(client_socket2, &input2, sizeof(int), 0);
+
+				// Handle inputs.
+				if (!handleDeathScreenInput(input1, state->playerName) || !handleDeathScreenInput(input2, state->playerName)) {
+					// All done.
+					state->deathScreen = false;
+				}
+
+				// Send updated player name and deathScreen flag.
+				send_data(client_socket, state->playerName, sizeof(state->playerName));
+				send_data(client_socket2, state->playerName, sizeof(state->playerName));
+				send_data(client_socket, &state->deathScreen, sizeof(state->deathScreen));
+				send_data(client_socket2, &state->deathScreen, sizeof(state->deathScreen));
+			}
+
+			// Record new highscore.
+			struct highscore newHighscore;
+			newHighscore.score = state->score;
+			strcpy(newHighscore.name, state->playerName);
+			putScore(newHighscore);
+
+			// Send highscore file size.
+			struct stat st;
+			stat(HIGHSCORES_FILENAME, &st);
+			off_t highscoreFileSize = st.st_size;
+			send_data(client_socket, &highscoreFileSize, sizeof(off_t));
+			send_data(client_socket2, &highscoreFileSize, sizeof(off_t));
+
+			// Send highscore file.
+			send_file(client_socket, HIGHSCORES_FILENAME);
+			send_file(client_socket2, HIGHSCORES_FILENAME);
+		}
+
     }
   }
 
