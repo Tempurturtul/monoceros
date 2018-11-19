@@ -1,5 +1,5 @@
 /*******************************************************************************************
-** Authors: Chris Spravka, Matthew Feidt
+** Authors: Chris Spravka, Matthew Feidt, Chad Erdwins
 ** Date:  13 OCT 2018
 ** Description: gamePlay implementation file
 
@@ -95,7 +95,7 @@ void playGame(int network_socket) {
 	// determine window size to let the server adjudicate
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
-	
+
 	// make space for state, level and lib?
 	struct library * lib = malloc(sizeof(struct library));
 	struct gameState * state = malloc(sizeof(struct gameState));
@@ -107,17 +107,17 @@ void playGame(int network_socket) {
 	//printf("x1,y1:%i,%i\n", maxX, maxY); sleep(2);
 	send_data(network_socket, &maxX, sizeof(int));
 	send_data(network_socket, &maxY, sizeof(int));
-	
+
 	// get the state back!
 //	printf("init sprites? num: %i\n", state->allSprites->numSprites);
 //	printf("float(%lu), int(%lu), dispArrAddr(%lu), sprite(%lu), char(%lu), dispPair(%lu)\n", sizeof(float), sizeof(int), sizeof(struct dispPair *), sizeof(struct sprite), sizeof(char), sizeof(struct dispPair));
 	receive_data(network_socket, state, lib, level);
-	
+
 	recv(network_socket, &vertCtrl, sizeof(int), 0);
-	
+
 	WINDOW *title = newwin(state->titleSize, state->maxX, 0, 0);
 	WINDOW *action = newwin(state->maxY-state->titleSize, state->maxX, state->titleSize, 0);
-	
+
 // 	no long need this razzmatazz with how you are now handling wbkgd()
 //	WINDOW *title = newwin(state->titleSize, maxX, 0, 0);
 //	WINDOW *action = newwin(maxY-state->titleSize, maxX, state->titleSize, 0);
@@ -130,20 +130,20 @@ void playGame(int network_socket) {
 	// Capture arrow key input.
 	keypad(action, TRUE);
 	// sets the blocking timer for wgetch
-	wtimeout(action, 1);	
-	
+	wtimeout(action, 1);
+
 	// timing (wall clock)?
-	
+
 	// main play loop, will modify flag on player death or quit
 	while (state->playFlag) {
-	
+
 		// get input
 		inputChar = wgetch(action);
 		scrubInput(vertCtrl, &inputChar);
-		
+
 		// send input
 		send_data(network_socket, &inputChar, sizeof(int));
-		
+
 		// get results (state, level, lib)
 		receive_data(network_socket, state, lib, level);
 
@@ -152,19 +152,19 @@ void playGame(int network_socket) {
 		wclear(title);
 		wclear(action);
 		wcolor_set(action, 1, NULL);		// change this by referencing the appropriate colors in the sprites and effects themselves
-		
+
 /*		// see above
 		wclear(dum1);
-		wclear(dum2);	
+		wclear(dum2);
 		wcolor_set(dum1, 1, NULL);
 		wcolor_set(dum2, 1, NULL);
 */
 		// prints all sprites
-		printSprite(action, state);		
+		printSprite(action, state);
 
 		// prints all effects, very similar functions
 		printEffect(action, state);
-		
+
 		// i needed this for debugging
 		mvwprintw(title, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
 		mvwprintw(title, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
@@ -181,20 +181,20 @@ void playGame(int network_socket) {
 
 		mvwprintw(title, 1, 60, "AMMO:%i",(int)state->allSprites->spriteArr[0]->isShooter);
 
-		
+
 		mvwprintw(title, 0, state->maxX - 15, "time: %.1f", round(state->time*10)/10);
 		mvwprintw(title, 1, state->maxX - 15, "SCORE: %i", state->score);
 		mvwprintw(title, 2, state->maxX - 15, "LEVEL: %i", level->currLevel);
-		
+
 		// actually print!
 		wrefresh(title);
 		wrefresh(action);
 		// see above
 //		wrefresh(dum1);
-//		wrefresh(dum2);	
-		
+//		wrefresh(dum2);
+
 		// timing - no? handle at server - client will just 'keep up'
-		
+
 	// end main
 	}
 
@@ -251,7 +251,7 @@ void playGameSingle() {
 
 	// init background (only needed for level 1, will fly into other backgrounds)
 	initOpenSpaceBG(state, lib);
-	
+
 	int inputChar;
 
 	// sets the blocking timer for wgetch
@@ -292,12 +292,12 @@ void playGameSingle() {
 		wclear(title);
 		wclear(action);
 		wcolor_set(action, 1, NULL);		// change this by referencing the appropriate colors in the sprites and effects themselves
-		
+
 		// prints all sprites
 		printSprite(action, state);
 		// prints all effects, very similar functions
 		printEffect(action, state);
-		
+
 		// i needed this for debugging
 		mvwprintw(title, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
 		mvwprintw(title, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
@@ -314,7 +314,7 @@ void playGameSingle() {
 
 		mvwprintw(title, 1, 60, "AMMO:%i",(int)state->allSprites->spriteArr[0]->isShooter);
 
-		
+
 		mvwprintw(title, 0, maxX - 15, "time: %.1f", round(state->time*10)/10);
 		mvwprintw(title, 1, maxX - 15, "SCORE: %i", state->score);
 		mvwprintw(title, 2, maxX - 15, "LEVEL: %i", level->currLevel);
@@ -411,7 +411,7 @@ void detectCollision(struct gameState * state, struct library * lib) {
 void manageCollision(int i, int j,struct gameState * state, struct library * lib) {
 	struct sprite * s1 = state->allSprites->spriteArr[i];
 	struct sprite * s2 = state->allSprites->spriteArr[j];
-	// 4 is indestructible, so don't bother 
+	// 4 is indestructible, so don't bother
 	if (s1->type != 4 ) {
 		// 0 is the player, this is checking first if you died (different exposion sequence)
 		// then if you got a powerup (cannon or missiles)
@@ -450,7 +450,7 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 			modEffect(-1, state->time, s1->xCoM, s1->yCoM, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 			s1->markedForDeath=1;
 		}
-		
+
 	}
 	// just checking the other guy, 6 & 7 were handled above
 	if (s2->type != 4 && s2->type != 6 && s2->type != 7) {
@@ -462,7 +462,7 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 	// give the player credit if they killed a bad guy
 	if (s1->type == 1 || s2->type ==1) {
 		state->deltaKills++;
-	}	
+	}
 }
 /// ***********//
 // should probably move physics to its own header and implementation file
@@ -472,7 +472,7 @@ void updatePhysics(struct gameState * state) {
 	struct spriteList *local = state->allSprites;
 	int i=0;
 	for (i=0; i< local->numSprites; i++) {
-		
+
 		local->spriteArr[i]->yVel += (local->spriteArr[i]->yAcc)*dt;
 		if (i==0) {
 			limitVel(local->spriteArr[i], 30);
@@ -599,17 +599,37 @@ void waitQueue() {
 		return;
 	}
 
-	messageScreen("Starting game in 3...");
-	sleep(1);
-	messageScreen("Starting game in 2...");
-	sleep(1);
-	messageScreen("Starting game in 1...");
-	sleep(1);
+	sleep(5);
+	messageScreen("You are now connected to the game server.");
+	sleep(5);
+	messageScreen("Player one can control horizontal movement with the left and right arrow keys.");
+	sleep(5);
+	messageScreen("Player two can control vertical movement with the up and down arrow keys.");
+	sleep(5);
+	messageScreen("Both players can use the spacebar to shoot missles when ammo is available.");
+	sleep(5);
+	messageScreen("Press 'q' at any time to exit the game.");
+	sleep(5);
+	messageScreen("The game will start when another player connects!");
+	sleep(5);
 
 	playGame(network_socket);
 
 	closing_connection(network_socket);
 	return;
+}
+
+void single_player_instructions() {
+	messageScreen("Use the left and right arrow keys to control horizontal movement.");
+	sleep(5);
+	messageScreen("The up and down arrow keys can be used to control vertical movement.");
+	sleep(5);
+	messageScreen("Use the spacebar to launch missles when ammo is available.");
+	sleep(5);
+	messageScreen("Press 'q' at any time to exit the game.");
+	sleep(5);
+	messageScreen("The game will start soon!");
+	sleep(5);
 }
 
 void limitVel(struct sprite * temp, float limit) {
@@ -756,7 +776,7 @@ void createDummyWindows(struct gameState * state, int maxX, int maxY, WINDOW * d
 //		dum1 = newwin(maxY, localMax, 0, maxX);
 		wresize(dum1, maxY-0, maxX-state->maxX);
 		mvwin(dum1, 0, state->maxX);
-		if (state->maxY < maxY) {		
+		if (state->maxY < maxY) {
 //			dum2 = newwin(maxY, state->maxX,state->maxY, 0);
 			wresize(dum2, maxY-state->maxY, state->maxX-0);
 			mvwin(dum2, state->maxY, 0);
@@ -766,7 +786,7 @@ void createDummyWindows(struct gameState * state, int maxX, int maxY, WINDOW * d
 		}
 	}
 	else {
-		if (state->maxY < maxY) {		
+		if (state->maxY < maxY) {
 //			dum1 = newwin(maxY, state->maxX,state->maxY, 0);
 			wresize(dum1, maxY-state->maxY, state->maxX-0);
 			mvwin(dum1, state->maxY, 0);
@@ -776,9 +796,9 @@ void createDummyWindows(struct gameState * state, int maxX, int maxY, WINDOW * d
 		}
 		//dum2 = newwin(-2,-2,-1,-1);
 	}
-	
+
 }
-	
+
 void scrubInput(int vertCtrl, int * inputChar) {
 	if (vertCtrl && (*inputChar == KEY_LEFT || *inputChar == KEY_RIGHT)) {
 		*inputChar = -1;
@@ -786,5 +806,5 @@ void scrubInput(int vertCtrl, int * inputChar) {
 	else if (!vertCtrl && (*inputChar == KEY_UP || *inputChar == KEY_DOWN)) {
 		*inputChar = -1;
 	}
-	
+
 }

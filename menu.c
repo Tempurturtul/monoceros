@@ -1,5 +1,5 @@
 /*******************************************************************************************
-** Authors: Chris Spravka, Matthew Feidt
+** Authors: Chris Spravka, Matthew Feidt, Chad Erdwins
 ** Date:  13 OCT 2018
 ** Description: menu implementation file
 *******************************************************************************************/
@@ -17,10 +17,19 @@ int mainMenu() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
 	WINDOW *w = newwin(maxY, maxX, 0, 0);
-	WINDOW *menuW = newwin(maxY - 4, 27, 4, maxX/2 - 1 - 27/2);
+	WINDOW *menuW = newwin(maxY - 4, 27, 18, maxX/2 - 1 - 27/2);
 	wattron(menuW, A_BOLD | A_DIM);
 
-	const char *menuTitle = "=== MONOCEROS ===";
+	printf("%d\n", maxX);
+	const char *menuTitle1 = "  __    __     _____     __   __     _____     _____    _____  __ __     _____   ______  \n";
+	const char *menuTitle2 = " /_/\\  /\\_\\   ) ___ (   /_/\\ /\\_\\   ) ___ (   /\\ __/\\ /\\_____\\/_/\\__/\\  ) ___ ( / ____/\\ \n";
+	const char *menuTitle3 = " ) ) \\/ ( (  / /\\_/\\ \\  ) ) \\ ( (  / /\\_/\\ \\  ) )__\\/( (_____/) ) ) ) )/ /\\_/\\ \\) ) __\\/ \n";
+	const char *menuTitle4 = "/_/ \\  / \\_\\/ /_/ (_\\ \\/_/   \\ \\_\\/ /_/ (_\\ \\/ / /    \\ \\__\\ /_/ /_/_// /_/ (_\\ \\\\ \\ \\   \n";
+	const char *menuTitle5 = "\\ \\ \\\\// / /\\ \\ )_/ / /\\ \\ \\   / /\\ \\ )_/ / /\\ \\ \\_   / /__/_\\ \\ \\ \\ \\\\ \\ )_/ / /_\\ \\ \\  \n";
+	const char *menuTitle6 = " )_) )( (_(  \\ \\/_\\/ /  )_) \\ (_(  \\ \\/_\\/ /  ) )__/\\( (_____\\)_) ) \\ \\\\ \\/_\\/ /)____) ) \n";
+	const char *menuTitle7 = " \\_\\/  \\/_/   )_____(   \\_\\/ \\/_/   )_____(   \\/___\\/ \\/_____/\\_\\/ \\_\\/ )_____( \\____\\/  \n";
+
+
 	const char *menuStr = ""
 		"Press number for selection:\n"
 		"(1) single player\n"
@@ -28,13 +37,30 @@ int mainMenu() {
 		"(3) high scores\n"
 		"(4) exit";
 
-	wattron(menuW, COLOR_PAIR(5));
+	wattron(menuW, COLOR_PAIR(4));
 	wattroff(menuW, A_DIM);
-	mvwprintw(menuW, 0, 27/2 + 1 - strlen(menuTitle)/2, menuTitle);
-	wattron(menuW, A_DIM);
-	wattroff(menuW, COLOR_PAIR(5));
+	if (maxX > 89) {
+		wattron(w, COLOR_PAIR(4));
+		mvwprintw(w, 8, maxX/2 + 1 - 89/2, menuTitle1);
+		mvwprintw(w, 9, maxX/2 + 1 - 89/2, menuTitle2);
+		mvwprintw(w, 10, maxX/2 + 1 - 89/2, menuTitle3);
+		mvwprintw(w, 11, maxX/2 + 1 - 89/2, menuTitle4);
+		mvwprintw(w, 12, maxX/2 + 1 - 89/2, menuTitle5);
+		mvwprintw(w, 13, maxX/2 + 1 - 89/2, menuTitle6);
+		mvwprintw(w, 14, maxX/2 + 1 - 89/2, menuTitle7);
+	} else {
+		mvwprintw(menuW, 2, 27/2 + 1 - 16/2, "=== Monoceros ===");
+	}
 
-	mvwprintw(menuW, 2, 0, menuStr);
+	if (maxY < 8) {
+		/* code */
+	}
+
+	wattron(menuW, A_DIM);
+	wattroff(menuW, COLOR_PAIR(4));
+
+	mvwprintw(menuW, 3, 0, menuStr);
+
 
 	wrefresh(w);
 	wrefresh(menuW);

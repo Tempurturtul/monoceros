@@ -1,3 +1,9 @@
+/*******************************************************************************************
+** Authors: Chad Erdwins
+** Date:  12 OCT 2018
+** Description: the game server
+*******************************************************************************************/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -49,59 +55,59 @@ int main() {
 
   /*use the listen function to start listening to connections*/
   /*number corresponds to how many connections we want to have*/
-  printf("listening on port %d\n", port);
+  RENEW:printf("listening on port %d\n", port);
   listen(server_socket, 2);
 
   /*holds client socket*/
   int client_socket;
   int client_socket2;
-  
+
   // END NET INIT
-  
+
 	// BEGIN GAME INIT
 	int maxX, maxY, maxX2, maxY2;
 	int vertCtrl = 1;
 //	int count=0;
-	
+
 	struct gameState *state = malloc(sizeof(struct gameState));
 	struct library *lib = malloc(sizeof(struct library));
-	struct levelData *level = malloc(sizeof(struct levelData));  
- 
+	struct levelData *level = malloc(sizeof(struct levelData));
+
 	initGame(state, lib, level);
 
- 
+
   /*option to get the clients IP adress here, passed in NULL bc it isn't relevant in this case*/
   while ((client_socket = accept(server_socket, NULL, NULL))) {
     if ((client_socket2 = accept(server_socket, NULL, NULL))) {
-    
+
 		// only do this once, maxX inits to 1 (so will only occur on first run through)
 		if (state->maxX ==1) {
 			recv(client_socket, &maxX, sizeof(int), 0);
 			recv(client_socket, &maxY, sizeof(int), 0);
 			recv(client_socket2, &maxX2, sizeof(int), 0);
 			recv(client_socket2, &maxY2, sizeof(int), 0);
-			
+
 			state->maxX = maxX;
 			state->maxY = maxY;
-			
+
 			if (maxX2 < maxX) {
 				state->maxX = maxX2;
 			}
 			if (maxY2 < maxY) {
 				state->maxY = maxY2;
 			}
-			
+
 			state->gndHeight = state->maxY;
 			state->maxY = state->maxY - state->titleSize;
-			
+
 			// init background (only needed for level 1, will fly into other backgrounds)
 			initOpenSpaceBG(state, lib);
-			
+
 			// state initialzied, now send that state back to the clients
 //			printf("float(%lu), int(%lu), dispArrAddr(%lu), sprite(%lu), char(%lu), dispPair(%lu)\n", sizeof(float), sizeof(int), sizeof(struct dispPair *), sizeof(struct sprite), sizeof(char), sizeof(struct dispPair));
 			send_all(client_socket, state, lib, level);
 			send_all(client_socket2, state, lib, level);
-			
+
 			if (getRand(1,100)<50) {
 				send_data(client_socket, &vertCtrl, sizeof(int));
 				vertCtrl=0;
@@ -110,11 +116,11 @@ int main() {
 			else {
 				send_data(client_socket2, &vertCtrl, sizeof(int));
 				vertCtrl=0;
-				send_data(client_socket, &vertCtrl, sizeof(int));				
+				send_data(client_socket, &vertCtrl, sizeof(int));
 			}
 
 		}
-	
+
 
       int input1, input2;
 
@@ -122,7 +128,7 @@ int main() {
 		struct timespec timeHold;
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		float tstart = timeHold.tv_sec + timeHold.tv_nsec / 1e9;
-	  
+
 
       while (state->playFlag) {
 
@@ -151,10 +157,10 @@ int main() {
 
 		// calculates the current score, stores it in state
 		calcScore(state, level);
-		
+
 		// this is bad and you should feel bad
 		printEffectServer(state);
-		
+
 		// BLOCK HERE
 //		usleep(75000);
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
@@ -171,7 +177,7 @@ int main() {
 		state->timeLast=state->time;
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
-		
+
 		// send it!
 //		printf("sending!\n");
 		send_all(client_socket, state, lib, level);
@@ -183,14 +189,14 @@ int main() {
       }
     }
   }
-	
+
 	// clean up
 	freeGame(state, lib, level);
+
+  goto RENEW;
 
   /*finished basic server app, time to close the socket*/
   close(server_socket);
 
   return 0;
 }
-
-
