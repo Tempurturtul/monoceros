@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <ncurses.h>
 #include <string.h>
+#include <math.h>
 
 #include "menu.h"
 #include "scores.h"
@@ -282,4 +283,49 @@ bool handleDeathScreenInput(int input, char name[11]) {
 
 	// Need more input.
 	return true;
+}
+
+WINDOW *gameHeader(WINDOW *w, struct gameState *state, struct levelData *level) {
+	if (w == NULL) {
+		// Need to initialize window.
+		w = newwin(state->titleSize, state->maxX, 0, 0);
+	}
+
+	wclear(w);
+	box(w, 0, 0);
+
+	bool debugging = false; // Change for debugging info (requires titleSize >= 3).
+
+	if (debugging) {
+		mvwprintw(w, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
+		mvwprintw(w, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
+		mvwprintw(w, 2, 1, "xMax:%i",state->maxX);
+
+		mvwprintw(w, 0, 20, "numEnemies:%i",level->numEnemies);
+		mvwprintw(w, 1, 20, "numSprites:%i",state->allSprites->numSprites);
+		//mvwprintw(w, 2, 20, "yVel:%f",state->allSprites->spriteArr[0]->xAcc);
+
+		mvwprintw(w, 0, 40, "numEffects:%i",state->allEffects->numEffects);
+		// mvwprintw(w, 1, 40, "radius gnd:%f",lib->allSprites->spriteArr[gnd1]->radius);
+		// mvwprintw(w, 2, 40, "xCoM gnd:%f",lib->allSprites->spriteArr[gnd1]->xCoM);
+		//mvwprintw(w, 2, 40, "numDisps eff6:%i",lib->allEffects->effectArr[6]->numDisps);
+
+		mvwprintw(w, 1, 60, "AMMO:%i",(int)state->allSprites->spriteArr[0]->isShooter);
+
+
+		mvwprintw(w, 0, state->maxX - 15, "time: %.1f", round(state->time*10)/10);
+		mvwprintw(w, 1, state->maxX - 15, "SCORE: %i", state->score);
+		mvwprintw(w, 2, state->maxX - 15, "LEVEL: %i", level->currLevel);
+	} else {
+		// Level
+		mvwprintw(w, 1, 2, "LEVEL %i", level->currLevel);
+		// Ammo
+		mvwprintw(w, 1, state->maxX / 2 - 1 - 8, "AMMO: %i", (int)state->allSprites->spriteArr[0]->isShooter);
+		// Score
+		mvwprintw(w, 1, state->maxX - 12, "SCORE: %i", state->score);
+	}
+
+	wrefresh(w);
+
+	return w;
 }

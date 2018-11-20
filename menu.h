@@ -30,4 +30,8 @@ WINDOW *deathScreen(WINDOW *w, int finalScore, char name[11]);
 // Returns false when done handling input (enter pressed with valid name).
 bool handleDeathScreenInput(int input, char name[11]);
 
+// Displays information during game play.
+// If w is NULL, a window is created and returned. The returned window should be passed as w on subsequent calls.
+WINDOW *gameHeader(WINDOW *w, struct gameState *state, struct levelData *level);
+
 #endif
