@@ -139,7 +139,7 @@ int main() {
         //printf("input1: %d\n", input1);
         recv(client_socket2, &input2, sizeof(int), 0);
         //printf("input2: %d\n", input2);
-		
+
 		handleInput(input1, state, lib);
 		handleInput(input2, state, lib);
 
@@ -221,13 +221,18 @@ int main() {
 			// Send highscore file.
 			send_file(client_socket, HIGHSCORES_FILENAME);
 			send_file(client_socket2, HIGHSCORES_FILENAME);
+      break;
 		}
 
     }
   }
 
+  //debug
+  //printf("Is this printing?");
+  printf("\nRestarting server...\n");
 	// clean up
 	freeGame(state, lib, level);
+
 
   goto RENEW;
 
