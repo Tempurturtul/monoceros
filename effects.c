@@ -84,7 +84,7 @@ void initEffectLibrary(struct effectList *localList) {
 
 	// left thrust 1
 	struct effect * ltThrust1 = malloc(sizeof(struct effect));
-	initEffect(ltThrust1, 0, 0.5, 2, 2);
+	initEffect(ltThrust1, 0, 0.5, 4, 2);
 	ltThrust1->parentID = 0;
 	initDispPair(ltThrust1, 2, 0, "o  ");
 	initDispPair(ltThrust1, 3, 0, " O ");
@@ -95,7 +95,7 @@ void initEffectLibrary(struct effectList *localList) {
 	// up thrust 1
 	struct effect * upThrust1 = malloc(sizeof(struct effect));
 	//initEffect(upThrust1, 0, 0.5, 0,1,"o","\nO","\n\n_",2, 3, 1);
-	initEffect(upThrust1, 0, 0.5, 0, 3);
+	initEffect(upThrust1, 0, 0.5, 2, 3);
 	upThrust1->parentID = 0;
 	initDispPair(upThrust1, 2, 0, "o");
 	initDispPair(upThrust1, 3, 0, "\nO ");
@@ -105,7 +105,7 @@ void initEffectLibrary(struct effectList *localList) {
 
 	// left thrust 2
 	struct effect * ltThrust2 = malloc(sizeof(struct effect));
-	initEffect(ltThrust2, 0, 0.5, 2, 0);
+	initEffect(ltThrust2, 0, 0.5, 4, 0);
 	ltThrust2->parentID = 0;
 	initDispPair(ltThrust2, 2, 0, "o  ");
 	initDispPair(ltThrust2, 3, 0, " O ");
@@ -116,7 +116,7 @@ void initEffectLibrary(struct effectList *localList) {
 	//down thrust 1
 	struct effect * dwThrust1 = malloc(sizeof(struct effect));
 	//initEffect(dwThrust1, 0, 0.5, 0,-3,"\n\no","\nO","-\n\n",2, 3, 1);
-	initEffect(dwThrust1, 0, 0.5, 0, -3);
+	initEffect(dwThrust1, 0, 0.5, 2, -3);
 	dwThrust1->parentID = 0;
 	initDispPair(dwThrust1, 2, 0, "\n\no");
 	initDispPair(dwThrust1, 3, 0, "\nO ");
@@ -146,7 +146,7 @@ void initEffectLibrary(struct effectList *localList) {
 	setEffectSize(shipEx1, 7, 8);
 	localList->effectArr[localList->numEffects] = shipEx1;
 	localList->numEffects++;
-
+/*
 	//ship explosion 2
 	struct effect * shipEx2 = malloc(sizeof(struct effect));
 	shipEx1->parentID = 0;
@@ -157,10 +157,26 @@ void initEffectLibrary(struct effectList *localList) {
 	initDispPair(shipEx2, 14, 0,  "\n\n        O");		// effect, colorPair, attr, char *
 	initDispPair(shipEx2, 3, A_BOLD,          "\n       \\|/\n       = =\n       /|\\");		// effect, colorPair, attr, char *
 	initDispPair(shipEx2, 3, A_BOLD,    "     \\ || /\n         \n    -- ** --\n         \n     / || \\");		// effect, colorPair, attr, char *
-
 	//setEffectSize(shipEx2, 7, 8);
 	localList->effectArr[localList->numEffects] = shipEx2;
 	localList->numEffects++;
+*/
+	//ship explosion 2
+	struct effect * shipEx2 = malloc(sizeof(struct effect));
+	shipEx1->parentID = 0;
+	// correct length is 3!!
+	initEffect(shipEx2, 0, 3, 0,0);					// effect, ID (not used), ttl, x, y
+	initDispPair(shipEx2, 4, 0,     "\n     [\n     =->\n     [");		// effect, colorPair, attr, char *
+	initDispPair(shipEx2, 1, A_DIM, "\n     *\n     ***\n     *");		// effect, colorPair, attr, char *
+	initDispPair(shipEx2, 1, A_DIM, "\n     *\n     ***\n     *");		// effect, colorPair, attr, char *
+	initDispPair(shipEx2, 14, 0,  "\n\n    O");		// effect, colorPair, attr, char *
+	initDispPair(shipEx2, 3, A_BOLD,          "\n   \\|/\n   = =\n   /|\\");		// effect, colorPair, attr, char *
+	initDispPair(shipEx2, 3, A_BOLD,    "  \\ || /\n      \n -- ** --\n      \n  / || \\");		// effect, colorPair, attr, char *
+//	initDispPairSprite(ship, 1, 0, " |-[\n}===->\n |-[");
+	//setEffectSize(shipEx2, 7, 8);
+	localList->effectArr[localList->numEffects] = shipEx2;
+	localList->numEffects++;
+
 
 	//ship explosion 3
 	struct effect * shipEx3 = malloc(sizeof(struct effect));

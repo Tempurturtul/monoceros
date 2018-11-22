@@ -386,7 +386,7 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 			if (s2->type < 6) {
 				// you actually hit something to kill you
 				addEffect(shipEx2,i,state, lib);
-				modEffect(-1, state->time, -6, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				modEffect(-1, state->time, -2, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				addEffect(shipEx3,i,state, lib);
 				modEffect(-1, state->time, -6, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				s1->markedForDeath=1;
@@ -511,7 +511,7 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc) {
 				// manually terminate your new string
 				temp[i-n] = '\0';
 				int dx = 0;
-				while (dx < strlen(temp)) {
+				while (dx <= strlen(temp)) {
 					if (temp[dx] != ' ') {
 						loc->x[loc->numChars] = (int)spriteIn->xLoc+dx;
 						loc->y[loc->numChars] = (int)spriteIn->yLoc+j;
@@ -566,19 +566,19 @@ void waitQueue() {
 		return;
 	}
 
-	sleep(5);
+	sleep(1);
 	messageScreen("You are now connected to the game server.");
-	sleep(5);
+	sleep(2);
 	messageScreen("Player one can control horizontal movement with the left and right arrow keys.");
-	sleep(5);
+	sleep(2);
 	messageScreen("Player two can control vertical movement with the up and down arrow keys.");
-	sleep(5);
+	sleep(2);
 	messageScreen("Both players can use the spacebar to shoot missles when ammo is available.");
-	sleep(5);
+	sleep(2);
 	messageScreen("Press 'q' at any time to exit the game.");
-	sleep(5);
+	sleep(2);
 	messageScreen("The game will start when another player connects!");
-	sleep(5);
+	sleep(2);
 
 	playGame(network_socket);
 
@@ -588,15 +588,15 @@ void waitQueue() {
 
 void single_player_instructions() {
 	messageScreen("Use the left and right arrow keys to control horizontal movement.");
-	sleep(3);
+	sleep(2);
 	messageScreen("The up and down arrow keys can be used to control vertical movement.");
-	sleep(3);
+	sleep(2);
 	messageScreen("Use the spacebar to launch missles when ammo is available.");
-	sleep(3);
+	sleep(2);
 	messageScreen("Press 'q' at any time to exit the game.");
-	sleep(3);
+	sleep(2);
 	messageScreen("The game will start soon!");
-	sleep(3);
+	sleep(2);
 }
 
 void limitVel(struct sprite * temp, float limit) {
