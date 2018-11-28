@@ -118,9 +118,6 @@ void playGame(int network_socket) {
 	WINDOW *title = gameHeader(NULL, state, level);
 	WINDOW *action = newwin(state->maxY-state->titleSize, state->maxX, state->titleSize, 0);
 	
-	// set the level max height now that you have your limits
-	setMaxHeight(level, state);
-
 // 	no long need this razzmatazz with how you are now handling wbkgd()
 //	WINDOW *title = newwin(state->titleSize, maxX, 0, 0);
 //	WINDOW *action = newwin(maxY-state->titleSize, maxX, state->titleSize, 0);
@@ -262,6 +259,7 @@ void playGameSingle() {
 
 		handleInput(inputChar, state, lib);
 
+		
 		restrictPlaySpace(state);
 
 		// procedural level generation
@@ -293,6 +291,9 @@ void playGameSingle() {
 		// prints all effects, very similar functions
 		printEffect(action, state);
 
+		// ding dong the player's dead!
+		killPlayer(state);
+		
 		// actually print!
 		wrefresh(action);
 
@@ -345,6 +346,13 @@ void playGameSingle() {
 	freeGame(state, lib, level);
 }
 
+
+void killPlayer(struct gameState * state) {
+	if (state->allSprites->spriteArr[0]->markedForDeath == -1) {
+		state->playFlag = 0;
+		state->deathScreen = 1;
+	}
+}
 
 void detectCollision(struct gameState * state, struct library * lib) {
 	int i, j;

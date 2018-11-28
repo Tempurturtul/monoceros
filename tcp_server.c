@@ -100,6 +100,9 @@ int main() {
 
 			state->gndHeight = state->maxY;
 			state->maxY = state->maxY - state->titleSize;
+			
+			// set the level max height now that you have your limits
+			setMaxHeight(level, state);
 
 			// init background (only needed for level 1, will fly into other backgrounds)
 			initOpenSpaceBG(state, lib);
@@ -161,6 +164,9 @@ int main() {
 
 		// this is bad and you should feel bad
 		printEffectServer(state);
+		
+		// ding dong the player's dead!
+		killPlayer(state);
 
 		// BLOCK HERE
 //		usleep(75000);
