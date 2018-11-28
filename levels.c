@@ -40,6 +40,12 @@ void initLevelData(struct levelData * level) {
 
 }
 
+
+void setMaxHeight(struct levelData * level, struct gameState * state) {
+	// the -7 is just to ensure that the player will always have some amount of space toascii
+	// fly through
+	level->maxHeight = state->maxY - state->titleSize - 7; 
+}
 void procGen(struct gameState * state, struct library * lib, struct levelData * level) {
 	// level 1 open space
 	// level 2 asteroid field
@@ -53,12 +59,12 @@ void procGen(struct gameState * state, struct library * lib, struct levelData * 
 		level->AIlevel = 1;	
 		level->maxNumEnemies = 6;
 	}
-	if (state->score > 30 && state->score < 45) {
+	if (state->score > 30 && state->score < 55) {
 		level->currLevel = 20;
 		level->AIlevel = 0;
 		level->maxNumEnemies = 3;
 	}
-	if (state->score > 45 && state->score < 60) {
+	if (state->score > 55 && state->score < LEVEL_THREE_SCORE) {
 		level->currLevel = 25;
 		level->AIlevel = 1;
 		level->maxNumEnemies = 5;
@@ -176,7 +182,9 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 			}
 			// fix me do this!
 			// delEffect(state, i);
-			delSprite(state, i);
+			if (temp->type !=0) {
+				delSprite(state, i);
+			}
 			level->spawnOK = -9;   // caution this is dependent on REFRESH_RATE
 		}
 	}

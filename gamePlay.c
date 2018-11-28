@@ -70,6 +70,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->skyReady=0;
 	state->deathScreen=0;
 	state->playerName[0]='\0';
+	state->timeKilled = 999999;
 	
 	usleep(REFRESH_RATE);
 }
@@ -117,7 +118,7 @@ void playGame(int network_socket) {
 
 	WINDOW *title = gameHeader(NULL, state, level);
 	WINDOW *action = newwin(state->maxY-state->titleSize, state->maxX, state->titleSize, 0);
-
+	
 // 	no long need this razzmatazz with how you are now handling wbkgd()
 //	WINDOW *title = newwin(state->titleSize, maxX, 0, 0);
 //	WINDOW *action = newwin(maxY-state->titleSize, maxX, state->titleSize, 0);
@@ -220,6 +221,7 @@ void playGameSingle() {
 	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
 	WINDOW *title = NULL; // Need state to be initialized before we create this window.
 
+
 	// Capture arrow key input.
 	keypad(action, TRUE);
 
@@ -233,6 +235,9 @@ void playGameSingle() {
 	state->gndHeight = maxY;
 
 	title = gameHeader(title, state, level);
+	
+	// set the level max height now that you have your limits
+	setMaxHeight(level, state);
 
 	// init background (only needed for level 1, will fly into other backgrounds)
 	initOpenSpaceBG(state, lib);
@@ -255,6 +260,7 @@ void playGameSingle() {
 
 		handleInput(inputChar, state, lib);
 
+		
 		restrictPlaySpace(state);
 
 		// procedural level generation
@@ -285,7 +291,7 @@ void playGameSingle() {
 		printSprite(action, state);
 		// prints all effects, very similar functions
 		printEffect(action, state);
-
+		
 		// actually print!
 		wrefresh(action);
 
@@ -303,6 +309,10 @@ void playGameSingle() {
 		state->timeLast=state->time;
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
+		
+		// ding dong the player's dead!
+		killPlayer(state);		
+		
 	}
 
 	wclear(title);
@@ -338,6 +348,14 @@ void playGameSingle() {
 	freeGame(state, lib, level);
 }
 
+
+void killPlayer(struct gameState * state) {
+	if (state->allSprites->spriteArr[0]->markedForDeath == -1 && 
+		state->time - state->timeKilled > 3.0) {
+		state->playFlag = 0;
+		state->deathScreen = 1;
+	}
+}
 
 void detectCollision(struct gameState * state, struct library * lib) {
 	int i, j;
@@ -386,10 +404,11 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 			if (s2->type < 6) {
 				// you actually hit something to kill you
 				addEffect(shipEx2,i,state, lib);
-				modEffect(-1, state->time, -6, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
+				modEffect(-1, state->time, -2, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				addEffect(shipEx3,i,state, lib);
 				modEffect(-1, state->time, -6, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				s1->markedForDeath=1;
+				state->timeKilled = state->time;
 			}
 			// powerups!
 			else {
@@ -511,7 +530,7 @@ void calcAbsLoc(struct sprite * spriteIn, struct absLoc * loc) {
 				// manually terminate your new string
 				temp[i-n] = '\0';
 				int dx = 0;
-				while (dx < strlen(temp)) {
+				while (dx <= strlen(temp)) {
 					if (temp[dx] != ' ') {
 						loc->x[loc->numChars] = (int)spriteIn->xLoc+dx;
 						loc->y[loc->numChars] = (int)spriteIn->yLoc+j;
@@ -566,19 +585,19 @@ void waitQueue() {
 		return;
 	}
 
-	sleep(5);
+	sleep(1);
 	messageScreen("You are now connected to the game server.");
-	sleep(5);
+	sleep(2);
 	messageScreen("Player one can control horizontal movement with the left and right arrow keys.");
-	sleep(5);
+	sleep(2);
 	messageScreen("Player two can control vertical movement with the up and down arrow keys.");
-	sleep(5);
+	sleep(2);
 	messageScreen("Both players can use the spacebar to shoot missles when ammo is available.");
-	sleep(5);
+	sleep(2);
 	messageScreen("Press 'q' at any time to exit the game.");
-	sleep(5);
+	sleep(2);
 	messageScreen("The game will start when another player connects!");
-	sleep(5);
+	sleep(2);
 
 	playGame(network_socket);
 
@@ -588,15 +607,15 @@ void waitQueue() {
 
 void single_player_instructions() {
 	messageScreen("Use the left and right arrow keys to control horizontal movement.");
-	sleep(3);
+	sleep(2);
 	messageScreen("The up and down arrow keys can be used to control vertical movement.");
-	sleep(3);
+	sleep(2);
 	messageScreen("Use the spacebar to launch missles when ammo is available.");
-	sleep(3);
+	sleep(2);
 	messageScreen("Press 'q' at any time to exit the game.");
-	sleep(3);
+	sleep(2);
 	messageScreen("The game will start soon!");
-	sleep(3);
+	sleep(2);
 }
 
 void limitVel(struct sprite * temp, float limit) {
@@ -622,14 +641,14 @@ void handleInput(int inputChar, struct gameState *state, struct library * lib) {
 		state->playFlag = 0;
 		state->deathScreen = 1;
 	}
-	else if (inputChar == KEY_UP) {
+	else if (inputChar == KEY_UP || inputChar == 'w') {
 		//allSprites.spriteArr[0]->yLoc += -1;
 		pShip->yAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[2]->start = state->time;
 		}
 	}
-	else if (inputChar == KEY_LEFT) {
+	else if (inputChar == KEY_LEFT || inputChar == 'a') {
 		//allSprites.spriteArr[0]->xLoc += -10;
 		pShip->xAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
@@ -637,14 +656,14 @@ void handleInput(int inputChar, struct gameState *state, struct library * lib) {
 			state->allEffects->effectArr[3]->start = state->time;
 		}
 	}
-	else if (inputChar == KEY_DOWN) {
+	else if (inputChar == KEY_DOWN || inputChar == 's') {
 		//allSprites.spriteArr[0]->yLoc += 1;
 		pShip->yAcc += baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[4]->start = state->time;
 		}
 	}
-	else if (inputChar == KEY_RIGHT) {
+	else if (inputChar == KEY_RIGHT || inputChar == 'd') {
 		//allSprites.spriteArr[0]->xLoc += 1;
 		pShip->xAcc += baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
@@ -767,10 +786,10 @@ void createDummyWindows(struct gameState * state, int maxX, int maxY, WINDOW * d
 }
 
 void scrubInput(int vertCtrl, int * inputChar) {
-	if (vertCtrl && (*inputChar == KEY_LEFT || *inputChar == KEY_RIGHT)) {
+	if (vertCtrl && (*inputChar == KEY_LEFT || *inputChar == KEY_RIGHT || *inputChar == 'a' || *inputChar == 'd')) {
 		*inputChar = -1;
 	}
-	else if (!vertCtrl && (*inputChar == KEY_UP || *inputChar == KEY_DOWN)) {
+	else if (!vertCtrl && (*inputChar == KEY_UP || *inputChar == KEY_DOWN || *inputChar == 'w' || *inputChar == 's')) {
 		*inputChar = -1;
 	}
 

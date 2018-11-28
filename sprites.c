@@ -155,7 +155,7 @@ void initSpriteLibrary(struct spriteList *localList) {
 	// by convention,  start a newline with \n, don't terminate the previous one
 	// initDispPairSprite(ship, 14, 0, "-----      -------------");
 	// initDispPairSprite(ship, 1, 0, "\n    \\      /\n   /-------/\\\n   \\--------/");//\n      |\n      |");
-	initDispPairSprite(ship, 1, 0, "|[\n}=->\n|[");
+	initDispPairSprite(ship, 1, 0, " |-[\n}===->\n |-[");
 	calcCoM(ship);
 	localList->spriteArr[localList->numSprites] = ship;
 	localList->numSprites++;
