@@ -33,8 +33,8 @@
 #define EXTENDED_SCORE 110
 
 // this is flip3
-//#define SERVER_IP_ADDR "128.193.36.41"
-#define SERVER_IP_ADDR "192.168.0.18"
+#define SERVER_IP_ADDR "128.193.36.41"
+//#define SERVER_IP_ADDR "192.168.0.18"
 #define SERVER_IP_PORT 2999
 
 enum STYPE {
