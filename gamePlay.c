@@ -117,6 +117,9 @@ void playGame(int network_socket) {
 
 	WINDOW *title = gameHeader(NULL, state, level);
 	WINDOW *action = newwin(state->maxY-state->titleSize, state->maxX, state->titleSize, 0);
+	
+	// set the level max height now that you have your limits
+	setMaxHeight(level, state);
 
 // 	no long need this razzmatazz with how you are now handling wbkgd()
 //	WINDOW *title = newwin(state->titleSize, maxX, 0, 0);
@@ -220,6 +223,7 @@ void playGameSingle() {
 	WINDOW *action = newwin(maxY-titleSize, maxX, titleSize, 0);
 	WINDOW *title = NULL; // Need state to be initialized before we create this window.
 
+
 	// Capture arrow key input.
 	keypad(action, TRUE);
 
@@ -233,6 +237,9 @@ void playGameSingle() {
 	state->gndHeight = maxY;
 
 	title = gameHeader(title, state, level);
+	
+	// set the level max height now that you have your limits
+	setMaxHeight(level, state);
 
 	// init background (only needed for level 1, will fly into other backgrounds)
 	initOpenSpaceBG(state, lib);

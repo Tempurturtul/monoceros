@@ -20,5 +20,6 @@ void transitionPlanetBG(struct gameState * state, struct library * lib, struct l
 void swapSkyMotif(struct gameState * state, struct library * lib);
 void genPlanetBG(struct gameState * state, struct library * lib, struct levelData * level);
 void planetLevel(struct gameState * state, struct library * lib, struct levelData * level);
+void setMaxHeight(struct levelData * level, struct gameState * state) ;
 
 #endif
