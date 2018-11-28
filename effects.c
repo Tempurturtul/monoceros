@@ -181,7 +181,7 @@ void initEffectLibrary(struct effectList *localList) {
 	//ship explosion 3
 	struct effect * shipEx3 = malloc(sizeof(struct effect));
 	shipEx1->parentID = 0;
-	initEffect(shipEx3, 0, 3, 0,0);					// effect, ID (not used), ttl, x, y
+	initEffect(shipEx3, 0, 3.1, 0,0);					// effect, ID (not used), ttl, x, y
 	initDispPair(shipEx3, 2, 0, "\n\n        -");		// effect, colorPair, attr, char *
 	initDispPair(shipEx3, 2, 0, "\n\n        \\");		// effect, colorPair, attr, char *
 	initDispPair(shipEx3, 2, 0, "\n\n        |");		// effect, colorPair, attr, char *
@@ -337,7 +337,7 @@ void printEffectServer(struct gameState * state) {
 			// results based on time
 			int dispIndex = 0;
 			if (effectIn->start > 0) { 
-				if  ((state->time-effectIn->start) < effectIn->ttl) {
+				if  (  !((state->time-effectIn->start) > effectIn->ttl)  ) {
 					dispIndex = (int)effectIn->numDisps*((state->time-effectIn->start)/effectIn->ttl);
 					strcpy(tdisp, effectIn->dispArr[dispIndex]->disp);
 				}

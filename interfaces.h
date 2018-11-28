@@ -20,10 +20,10 @@
 #define REFRESH_RATE 75000 
 
 // this is only so high because you aren't cleaning them out as you go
-#define MAX_EFFECTS 4096
+#define MAX_EFFECTS 1024
 #define MAX_EFFECT_DISPS 16
 
-#define MAX_SPRITES 8192
+#define MAX_SPRITES 4096
 #define MAX_SPRITE_DISPS 16
 #define MAX_SPRITE_EFFECTS 16
 
@@ -33,8 +33,8 @@
 #define EXTENDED_SCORE 110
 
 // this is flip3
-#define SERVER_IP_ADDR "128.193.36.41"
-//#define SERVER_IP_ADDR "192.168.0.18"
+//#define SERVER_IP_ADDR "128.193.36.41"
+#define SERVER_IP_ADDR "192.168.0.18"
 #define SERVER_IP_PORT 2999
 
 enum STYPE {
@@ -121,6 +121,7 @@ struct gameState {
 	float time;
 	float timeLast;
 	float timeWait;
+
 	int score;
 	int deltaKills;
 	float scoreTimeLast;
@@ -135,6 +136,7 @@ struct gameState {
 	int vertCtrl;
 	int deathScreen;
 	char playerName[11];
+	float timeKilled;
 };
 
 struct library {

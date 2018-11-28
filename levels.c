@@ -182,7 +182,9 @@ void manageSprites(struct gameState * state, struct library * lib, struct levelD
 			}
 			// fix me do this!
 			// delEffect(state, i);
-			delSprite(state, i);
+			if (temp->type !=0) {
+				delSprite(state, i);
+			}
 			level->spawnOK = -9;   // caution this is dependent on REFRESH_RATE
 		}
 	}

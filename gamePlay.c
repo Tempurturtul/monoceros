@@ -70,6 +70,7 @@ void initGame(struct gameState * state, struct library * lib, struct levelData *
 	state->skyReady=0;
 	state->deathScreen=0;
 	state->playerName[0]='\0';
+	state->timeKilled = 999999;
 	
 	usleep(REFRESH_RATE);
 }
@@ -290,9 +291,6 @@ void playGameSingle() {
 		printSprite(action, state);
 		// prints all effects, very similar functions
 		printEffect(action, state);
-
-		// ding dong the player's dead!
-		killPlayer(state);
 		
 		// actually print!
 		wrefresh(action);
@@ -311,6 +309,10 @@ void playGameSingle() {
 		state->timeLast=state->time;
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->time = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
+		
+		// ding dong the player's dead!
+		killPlayer(state);		
+		
 	}
 
 	wclear(title);
@@ -348,7 +350,8 @@ void playGameSingle() {
 
 
 void killPlayer(struct gameState * state) {
-	if (state->allSprites->spriteArr[0]->markedForDeath == -1) {
+	if (state->allSprites->spriteArr[0]->markedForDeath == -1 && 
+		state->time - state->timeKilled > 3.0) {
 		state->playFlag = 0;
 		state->deathScreen = 1;
 	}
@@ -405,6 +408,7 @@ void manageCollision(int i, int j,struct gameState * state, struct library * lib
 				addEffect(shipEx3,i,state, lib);
 				modEffect(-1, state->time, -6, -1, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
 				s1->markedForDeath=1;
+				state->timeKilled = state->time;
 			}
 			// powerups!
 			else {
@@ -637,14 +641,14 @@ void handleInput(int inputChar, struct gameState *state, struct library * lib) {
 		state->playFlag = 0;
 		state->deathScreen = 1;
 	}
-	else if (inputChar == KEY_UP) {
+	else if (inputChar == KEY_UP || inputChar == 'w') {
 		//allSprites.spriteArr[0]->yLoc += -1;
 		pShip->yAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[2]->start = state->time;
 		}
 	}
-	else if (inputChar == KEY_LEFT) {
+	else if (inputChar == KEY_LEFT || inputChar == 'a') {
 		//allSprites.spriteArr[0]->xLoc += -10;
 		pShip->xAcc += -baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
@@ -652,14 +656,14 @@ void handleInput(int inputChar, struct gameState *state, struct library * lib) {
 			state->allEffects->effectArr[3]->start = state->time;
 		}
 	}
-	else if (inputChar == KEY_DOWN) {
+	else if (inputChar == KEY_DOWN || inputChar == 's') {
 		//allSprites.spriteArr[0]->yLoc += 1;
 		pShip->yAcc += baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
 			state->allEffects->effectArr[4]->start = state->time;
 		}
 	}
-	else if (inputChar == KEY_RIGHT) {
+	else if (inputChar == KEY_RIGHT || inputChar == 'd') {
 		//allSprites.spriteArr[0]->xLoc += 1;
 		pShip->xAcc += baseThrust*(1e6)/REFRESH_RATE;
 		if (state->score < LEVEL_THREE_SCORE) {
@@ -782,10 +786,10 @@ void createDummyWindows(struct gameState * state, int maxX, int maxY, WINDOW * d
 }
 
 void scrubInput(int vertCtrl, int * inputChar) {
-	if (vertCtrl && (*inputChar == KEY_LEFT || *inputChar == KEY_RIGHT)) {
+	if (vertCtrl && (*inputChar == KEY_LEFT || *inputChar == KEY_RIGHT || *inputChar == 'a' || *inputChar == 'd')) {
 		*inputChar = -1;
 	}
-	else if (!vertCtrl && (*inputChar == KEY_UP || *inputChar == KEY_DOWN)) {
+	else if (!vertCtrl && (*inputChar == KEY_UP || *inputChar == KEY_DOWN || *inputChar == 'w' || *inputChar == 's')) {
 		*inputChar = -1;
 	}
 
