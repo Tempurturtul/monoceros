@@ -34,7 +34,7 @@
 #define MAX_LEVEL_DISPS 256
 // oh gross
 #define LEVEL_THREE_SCORE 70
-#define EXTENDED_SCORE 110
+#define EXTENDED_SCORE 160
 
 // this is flip3
 #define SERVER_IP_ADDR "128.193.36.41"
