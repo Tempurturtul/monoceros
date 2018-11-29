@@ -596,7 +596,7 @@ void waitQueue() {
 	sleep(2);
 	messageScreen("Player two can control vertical movement with the up and down arrow keys.");
 	sleep(2);
-	messageScreen("Both players can use the spacebar to shoot missles when ammo is available.");
+	messageScreen("Both players can use the spacebar to shoot missiles or plasma cannon when ammo is available.");
 	sleep(2);
 	messageScreen("Press 'q' at any time to exit the game.");
 	sleep(2);
@@ -614,7 +614,7 @@ void single_player_instructions() {
 	sleep(2);
 	messageScreen("The up and down arrow keys can be used to control vertical movement.");
 	sleep(2);
-	messageScreen("Use the spacebar to launch missles when ammo is available.");
+	messageScreen("Use the spacebar to launch missiles or plasma cannon when ammo is available.");
 	sleep(2);
 	messageScreen("Press 'q' at any time to exit the game.");
 	sleep(2);
@@ -687,7 +687,7 @@ void handleInput(int inputChar, struct gameState *state, struct library * lib) {
 		else if (pShip->wpnSelect==1) {
 			pShip->isShooter -= 1;
 			addSprite(laser, state, lib);
-			modSprite(-1, pShip->xLoc + 2, pShip->yLoc + 1, 150*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc -2, pShip->yLoc + 1, 150*(1e6)/REFRESH_RATE, 0, 0, state);
 			//struct sprite * laserPtr = state->allSprites->spriteArr[state->allSprites->numSprites-1];
 			addEffect(laserEffect,state->allSprites->numSprites-1,state, lib);
 			modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y

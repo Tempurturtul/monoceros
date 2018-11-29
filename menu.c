@@ -295,7 +295,7 @@ WINDOW *gameHeader(WINDOW *w, struct gameState *state, struct levelData *level) 
 	werase(w);
 	box(w, 0, 0);
 
-	bool debugging = true; // Change for debugging info (requires titleSize >= 3).
+	bool debugging = false; // Change for debugging info (requires titleSize >= 3).
 
 	if (debugging) {
 		//mvwprintw(w, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
