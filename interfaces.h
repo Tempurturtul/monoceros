@@ -16,14 +16,18 @@
 #define MAX_DISP_SUBSIZE 64
 // reworking this 
 //#define REFRESH_RATE 50000
-//#define REFRESH_RATE 100000
+//#define REFRESH_RATE 225000
 #define REFRESH_RATE 75000 
+// this provides good playability through putty
+#define FRAME_RATE 12
+// this is better suited to cygwin/linux
+//#define FRAME_RATE 5
 
 // this is only so high because you aren't cleaning them out as you go
 #define MAX_EFFECTS 1024
 #define MAX_EFFECT_DISPS 16
 
-#define MAX_SPRITES 4096
+#define MAX_SPRITES 10240
 #define MAX_SPRITE_DISPS 16
 #define MAX_SPRITE_EFFECTS 16
 
