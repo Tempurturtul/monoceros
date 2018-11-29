@@ -172,8 +172,8 @@ int main() {
 //		usleep(75000);
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->timeWait = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
-		if (((1./12)-(state->timeWait-state->time))*1e6 > 0) {
-			usleep(((1./12)-(state->timeWait-state->time))*1e6);
+		if (((1./FRAME_RATE)-(state->timeWait-state->time))*1e6 > 0) {
+			usleep(((1./FRAME_RATE)-(state->timeWait-state->time))*1e6);
 		}
 		else {
 			// do nothing! you're trying to catch up on frame rate!

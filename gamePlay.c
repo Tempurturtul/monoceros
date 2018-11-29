@@ -284,7 +284,8 @@ void playGameSingle() {
 		// Update game header.
 		title = gameHeader(title, state, level);
 
-		wclear(action);
+		//wclear(action);
+		werase(action);
 		wcolor_set(action, 1, NULL);		// change this by referencing the appropriate colors in the sprites and effects themselves
 
 		// prints all sprites
@@ -293,14 +294,17 @@ void playGameSingle() {
 		printEffect(action, state);
 		
 		// actually print!
-		wrefresh(action);
-
+		//wrefresh(action);
+		wnoutrefresh(action);
+		doupdate();
+		
+		
 		// timing for gameplay, could make this a f(sprites) for
 		// smoother behavior - nvmd: normalizing to frames per second is pretty effective
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->timeWait = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
-		if (((1./12)-(state->timeWait-state->time))*1e6 > 0) {
-			usleep(((1./12)-(state->timeWait-state->time))*1e6);
+		if (((1./FRAME_RATE)-(state->timeWait-state->time))*1e6 > 0) {
+			usleep(((1./FRAME_RATE)-(state->timeWait-state->time))*1e6);
 		}
 		else {
 			// do nothing! you're trying to catch up on frame rate!
@@ -592,7 +596,7 @@ void waitQueue() {
 	sleep(2);
 	messageScreen("Player two can control vertical movement with the up and down arrow keys.");
 	sleep(2);
-	messageScreen("Both players can use the spacebar to shoot missles when ammo is available.");
+	messageScreen("Both players can use the spacebar to shoot missiles or plasma cannon when ammo is available.");
 	sleep(2);
 	messageScreen("Press 'q' at any time to exit the game.");
 	sleep(2);
@@ -610,7 +614,7 @@ void single_player_instructions() {
 	sleep(2);
 	messageScreen("The up and down arrow keys can be used to control vertical movement.");
 	sleep(2);
-	messageScreen("Use the spacebar to launch missles when ammo is available.");
+	messageScreen("Use the spacebar to launch missiles or plasma cannon when ammo is available.");
 	sleep(2);
 	messageScreen("Press 'q' at any time to exit the game.");
 	sleep(2);
@@ -677,13 +681,13 @@ void handleInput(int inputChar, struct gameState *state, struct library * lib) {
 			addSprite(missileRt, state, lib);
 			// if you want to be real physicsy then you'd actually copy the pShip
 			// velocities to the new sprite as well
-			modSprite(-1, pShip->xLoc - 1, pShip->yLoc + 1, 45*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc + 2, pShip->yLoc + 1, 45*(1e6)/REFRESH_RATE, 0, 0, state);
 		}
 		// player laser
 		else if (pShip->wpnSelect==1) {
 			pShip->isShooter -= 1;
 			addSprite(laser, state, lib);
-			modSprite(-1, pShip->xLoc - 17, pShip->yLoc + 1, 150*(1e6)/REFRESH_RATE, 0, 0, state);
+			modSprite(-1, pShip->xLoc -2, pShip->yLoc + 1, 150*(1e6)/REFRESH_RATE, 0, 0, state);
 			//struct sprite * laserPtr = state->allSprites->spriteArr[state->allSprites->numSprites-1];
 			addEffect(laserEffect,state->allSprites->numSprites-1,state, lib);
 			modEffect(-1, state->time, 0, 0, state);	// this is effectIndex, start, x, y, state. use -999 to keep current x/y
