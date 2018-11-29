@@ -100,6 +100,9 @@ int main() {
 
 			state->gndHeight = state->maxY;
 			state->maxY = state->maxY - state->titleSize;
+			
+			// set the level max height now that you have your limits
+			setMaxHeight(level, state);
 
 			// init background (only needed for level 1, will fly into other backgrounds)
 			initOpenSpaceBG(state, lib);
@@ -139,7 +142,7 @@ int main() {
         //printf("input1: %d\n", input1);
         recv(client_socket2, &input2, sizeof(int), 0);
         //printf("input2: %d\n", input2);
-		
+
 		handleInput(input1, state, lib);
 		handleInput(input2, state, lib);
 
@@ -161,13 +164,16 @@ int main() {
 
 		// this is bad and you should feel bad
 		printEffectServer(state);
+		
+		// ding dong the player's dead!
+		killPlayer(state);
 
 		// BLOCK HERE
 //		usleep(75000);
 		clock_gettime(CLOCK_MONOTONIC, &timeHold);
 		state->timeWait = timeHold.tv_sec + timeHold.tv_nsec / 1e9 - tstart;
-		if (((1./12)-(state->timeWait-state->time))*1e6 > 0) {
-			usleep(((1./12)-(state->timeWait-state->time))*1e6);
+		if (((1./FRAME_RATE)-(state->timeWait-state->time))*1e6 > 0) {
+			usleep(((1./FRAME_RATE)-(state->timeWait-state->time))*1e6);
 		}
 		else {
 			// do nothing! you're trying to catch up on frame rate!
@@ -221,13 +227,18 @@ int main() {
 			// Send highscore file.
 			send_file(client_socket, HIGHSCORES_FILENAME);
 			send_file(client_socket2, HIGHSCORES_FILENAME);
+      break;
 		}
 
     }
   }
 
+  //debug
+  //printf("Is this printing?");
+  printf("\nRestarting server...\n");
 	// clean up
 	freeGame(state, lib, level);
+
 
   goto RENEW;
 

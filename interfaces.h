@@ -16,21 +16,25 @@
 #define MAX_DISP_SUBSIZE 64
 // reworking this 
 //#define REFRESH_RATE 50000
-//#define REFRESH_RATE 100000
+//#define REFRESH_RATE 225000
 #define REFRESH_RATE 75000 
+// this provides good playability through putty
+#define FRAME_RATE 12
+// this is better suited to cygwin/linux
+//#define FRAME_RATE 5
 
 // this is only so high because you aren't cleaning them out as you go
 #define MAX_EFFECTS 1024
 #define MAX_EFFECT_DISPS 16
 
-#define MAX_SPRITES 8192
+#define MAX_SPRITES 10240
 #define MAX_SPRITE_DISPS 16
 #define MAX_SPRITE_EFFECTS 16
 
 #define MAX_LEVEL_DISPS 256
 // oh gross
-#define LEVEL_THREE_SCORE 60
-#define EXTENDED_SCORE 100
+#define LEVEL_THREE_SCORE 70
+#define EXTENDED_SCORE 160
 
 // this is flip3
 #define SERVER_IP_ADDR "128.193.36.41"
@@ -121,6 +125,7 @@ struct gameState {
 	float time;
 	float timeLast;
 	float timeWait;
+
 	int score;
 	int deltaKills;
 	float scoreTimeLast;
@@ -135,6 +140,7 @@ struct gameState {
 	int vertCtrl;
 	int deathScreen;
 	char playerName[11];
+	float timeKilled;
 };
 
 struct library {

@@ -293,21 +293,22 @@ WINDOW *gameHeader(WINDOW *w, struct gameState *state, struct levelData *level) 
 		w = newwin(state->titleSize, state->maxX, 0, 0);
 	}
 
-	wclear(w);
+	//wclear(w);
+	werase(w);
 	box(w, 0, 0);
 
 	bool debugging = false; // Change for debugging info (requires titleSize >= 3).
 
 	if (debugging) {
-		mvwprintw(w, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
-		mvwprintw(w, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
-		mvwprintw(w, 2, 1, "xMax:%i",state->maxX);
+		//mvwprintw(w, 0, 1, "xLoc:%f",state->allSprites->spriteArr[0]->xLoc);
+		//mvwprintw(w, 1, 1, "xVel:%f",state->allSprites->spriteArr[0]->xVel);
+		//mvwprintw(w, 2, 1, "xMax:%i",state->maxX);
 
-		mvwprintw(w, 0, 20, "numEnemies:%i",level->numEnemies);
-		mvwprintw(w, 1, 20, "numSprites:%i",state->allSprites->numSprites);
+		//mvwprintw(w, 0, 20, "numEnemies:%i",level->numEnemies);
+		mvwprintw(w, 1, 0, "numSprites:%i",state->allSprites->numSprites);
 		//mvwprintw(w, 2, 20, "yVel:%f",state->allSprites->spriteArr[0]->xAcc);
 
-		mvwprintw(w, 0, 40, "numEffects:%i",state->allEffects->numEffects);
+		mvwprintw(w, 1, 20, "numEffects:%i",state->allEffects->numEffects);
 		// mvwprintw(w, 1, 40, "radius gnd:%f",lib->allSprites->spriteArr[gnd1]->radius);
 		// mvwprintw(w, 2, 40, "xCoM gnd:%f",lib->allSprites->spriteArr[gnd1]->xCoM);
 		//mvwprintw(w, 2, 40, "numDisps eff6:%i",lib->allEffects->effectArr[6]->numDisps);
@@ -327,7 +328,8 @@ WINDOW *gameHeader(WINDOW *w, struct gameState *state, struct levelData *level) 
 		mvwprintw(w, 1, state->maxX - 12, "SCORE: %i", state->score);
 	}
 
-	wrefresh(w);
+	//wrefresh(w);
+	wnoutrefresh(w);
 
 	return w;
 }
