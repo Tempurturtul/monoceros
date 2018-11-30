@@ -17,11 +17,11 @@
 int mainMenu() {
 	int maxX, maxY;
 	getmaxyx(stdscr, maxY, maxX);
-	WINDOW *w = newwin(maxY, maxX, 0, 0);
-	WINDOW *menuW = newwin(maxY - 4, 27, 18, maxX/2 - 1 - 27/2);
-	wattron(menuW, A_BOLD | A_DIM);
+	int centerX = maxX/2 + 1;
+	int menuStartY = 4;
 
-	printf("%d\n", maxX);
+	WINDOW *w = newwin(maxY, maxX, 0, 0);
+
 	const char *menuTitle1 = "  __    __     _____     __   __     _____     _____    _____  __ __     _____   ______  \n";
 	const char *menuTitle2 = " /_/\\  /\\_\\   ) ___ (   /_/\\ /\\_\\   ) ___ (   /\\ __/\\ /\\_____\\/_/\\__/\\  ) ___ ( / ____/\\ \n";
 	const char *menuTitle3 = " ) ) \\/ ( (  / /\\_/\\ \\  ) ) \\ ( (  / /\\_/\\ \\  ) )__\\/( (_____/) ) ) ) )/ /\\_/\\ \\) ) __\\/ \n";
@@ -30,45 +30,47 @@ int mainMenu() {
 	const char *menuTitle6 = " )_) )( (_(  \\ \\/_\\/ /  )_) \\ (_(  \\ \\/_\\/ /  ) )__/\\( (_____\\)_) ) \\ \\\\ \\/_\\/ /)____) ) \n";
 	const char *menuTitle7 = " \\_\\/  \\/_/   )_____(   \\_\\/ \\/_/   )_____(   \\/___\\/ \\/_____/\\_\\/ \\_\\/ )_____( \\____\\/  \n";
 
+	const char *menuStr1 = "Press number for selection:";
+	const char *menuStr2 = "(1) single player";
+	const char *menuStr3 = "(2) multiplayer";
+	const char *menuStr4 = "(3) high scores";
+	const char *menuStr5 = "(4) exit";
 
-	const char *menuStr = ""
-		"Press number for selection:\n"
-		"(1) single player\n"
-		"(2) multiplayer\n"
-		"(3) high scores\n"
-		"(4) exit";
+	if (maxX > 89 && maxY > 20) {
+		// Big enough for ASCII art title.
+		menuStartY = 14;
 
-	wattron(menuW, COLOR_PAIR(4));
-	wattroff(menuW, A_DIM);
-	if (maxX > 89) {
 		wattron(w, COLOR_PAIR(4));
-		mvwprintw(w, 8, maxX/2 + 1 - 89/2, menuTitle1);
-		mvwprintw(w, 9, maxX/2 + 1 - 89/2, menuTitle2);
-		mvwprintw(w, 10, maxX/2 + 1 - 89/2, menuTitle3);
-		mvwprintw(w, 11, maxX/2 + 1 - 89/2, menuTitle4);
-		mvwprintw(w, 12, maxX/2 + 1 - 89/2, menuTitle5);
-		mvwprintw(w, 13, maxX/2 + 1 - 89/2, menuTitle6);
-		mvwprintw(w, 14, maxX/2 + 1 - 89/2, menuTitle7);
+
+		mvwprintw(w, 4, centerX - 89/2, menuTitle1);
+		mvwprintw(w, 5, centerX - 89/2, menuTitle2);
+		mvwprintw(w, 6, centerX - 89/2, menuTitle3);
+		mvwprintw(w, 7, centerX - 89/2, menuTitle4);
+		mvwprintw(w, 8, centerX - 89/2, menuTitle5);
+		mvwprintw(w, 9, centerX - 89/2, menuTitle6);
+		mvwprintw(w, 10, centerX - 89/2, menuTitle7);
+
+		wattroff(w, COLOR_PAIR(4));
 	} else {
-		mvwprintw(menuW, 2, 27/2 + 1 - 16/2, "=== Monoceros ===");
+		// Only room for small title.
+		wattron(w, COLOR_PAIR(4) | A_BOLD);
+
+		mvwprintw(w, 2, centerX - 16/2, "=== Monoceros ===");
+
+		wattroff(w, COLOR_PAIR(4) | A_BOLD);
 	}
 
-	if (maxY < 8) {
-		/* code */
-	}
-
-	wattron(menuW, A_DIM);
-	wattroff(menuW, COLOR_PAIR(4));
-
-	mvwprintw(menuW, 3, 0, menuStr);
-
+	wattron(w, A_BOLD | A_DIM);
+	mvwprintw(w, menuStartY, centerX - 27/2, menuStr1);
+	mvwprintw(w, menuStartY+1, centerX - 27/2, menuStr2);
+	mvwprintw(w, menuStartY+2, centerX - 27/2, menuStr3);
+	mvwprintw(w, menuStartY+3, centerX - 27/2, menuStr4);
+	mvwprintw(w, menuStartY+4, centerX - 27/2, menuStr5);
 
 	wrefresh(w);
-	wrefresh(menuW);
 
-	int input = wgetch(menuW);
+	int input = wgetch(w);
 
-	delwin(menuW);
 	delwin(w);
 
 	// 48 is the ASCII value for 0.
