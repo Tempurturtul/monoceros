@@ -1,8 +1,22 @@
 # Monoceros
 
+- [Compilation Instructions](#compilation-instructions)
 - [Resources](#resources)
-  - [Essential Git Commands](#essential-git-commands)
-  - [NCURSES](#ncurses)  
+    - [Essential Git Commands](#essential-git-commands)
+    - [NCURSES](#ncurses)
+
+## Compilation Instructions
+
+```sh
+# Compile
+make
+
+# Run game
+./main
+
+# Run server (flip3 only)
+./server
+```
 
 ## Resources
 
