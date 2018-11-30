@@ -134,7 +134,7 @@ void spawnEnemies(struct gameState * state, struct library * lib, struct levelDa
 		// goodies!
 		// careful this ends up being REFRESH_RATE dependent
 		if (getRand(1,1000) < level->pctAmmo) {
-			if (getRand(1,100) < 50 ) {
+			if (getRand(1,100) < 35 ) {
 				addEnemy(state, lib, ammoPC, 0);
 			}
 			else {
