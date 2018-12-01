@@ -39,7 +39,7 @@
 // this is flip3
 #define SERVER_IP_ADDR "128.193.36.41"
 //#define SERVER_IP_ADDR "192.168.0.18"
-#define SERVER_IP_PORT 2999
+#define SERVER_IP_PORT 57439
 
 enum STYPE {
 	ship = 0, eny1, eny1a, eny2, openSpace1, openSpace2, openSpace3, openSpace4, missileRt, missileLt, laser,
